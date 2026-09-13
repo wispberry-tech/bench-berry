@@ -1,0 +1,265 @@
+/* ============================================================
+   BerryBench shell — Tailwind v4 theme layer (replaces tokens.css).
+   Semantic tokens adopt shadcn names; values are the approved
+   warm-paper hexes from the dark-mode overhaul (tokens.css:8-125).
+   Data-theme/data-accent live on <html>, applied by lib/theme.ts.
+   ============================================================ */
+@import "tailwindcss";
+
+/* OS theme via the existing data-theme attribute (not .dark class). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  /* light theme — warm paper */
+  --background: #f4f2ec;
+  --foreground: #262419;
+  --card: #fcfbf7;
+  --card-foreground: #262419;
+  --popover: #fcfbf7;
+  --popover-foreground: #262419;
+  --primary: #7c5cf0;
+  --primary-foreground: #ffffff;
+  --primary-300: #ab94f7;
+  --primary-400: #8d72f2;
+  --secondary: #f7f5ee;
+  --secondary-foreground: #6d675a;
+  --muted: #f7f5ee;
+  --muted-foreground: #6d675a;
+  --accent-soft: rgba(60, 54, 38, 0.05);
+  --accent-soft-foreground: #262419;
+  --destructive: #c23d3d;
+  --destructive-foreground: #ffffff;
+  --border: #e3dfd3;
+  --input: #d2cdbd;
+  --ring: #7c5cf0;
+  --radius: 0.625rem;
+
+  /* status triplets (badges, tables) */
+  --success: #35855c;
+  --success-bg: #ecf6ee;
+  --success-border: #cde5d4;
+  --warning: #a16207;
+  --warning-bg: #faf3e2;
+  --warning-border: #ecdcb4;
+  --info: #2f6d9e;
+  --info-bg: #ecf3f8;
+  --info-border: #c8e0ef;
+
+  /* layout + type */
+  --topbar-h: 52px;
+  --font: "Inter", "Inter Variable", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Code", "JetBrains Mono", Menlo,
+    Consolas, monospace;
+  color-scheme: light;
+}
+
+/* Dark theme tokens: plain attribute selector — the @variant dark wrapper
+   compiles to a :scope … :root descendant selector that never matches the
+   root element itself. */
+:root[data-theme="dark"] {
+  --background: #1b1a17;
+    --foreground: #ece9df;
+    --card: #23221e;
+    --card-foreground: #ece9df;
+    --popover: #23221e;
+    --popover-foreground: #ece9df;
+    --secondary: #282621;
+    --secondary-foreground: #b3ada0;
+    --muted: #282621;
+    --muted-foreground: #b3ada0;
+    --accent-soft: rgba(255, 250, 235, 0.06);
+    --accent-soft-foreground: #ece9df;
+    --destructive: #e07a72;
+    --destructive-foreground: #ffffff;
+    --border: #37342c;
+    --input: #474337;
+
+    --success: #6cc08b;
+    --success-bg: #1d2e22;
+    --success-border: #2e4a36;
+    --warning: #d9a45c;
+    --warning-bg: #2f2513;
+    --warning-border: #4d3d1f;
+    --info: #7ab3d6;
+    --info-bg: #17262f;
+    --info-border: #27424f;
+    color-scheme: dark;
+}
+
+/* Fonts are theme-invariant; the color tokens must stay inline so the dark
+   variant re-resolves them (the old tokens.css --shadow / --r-* vars are
+   gone; use Tailwind shadow-* and rounded-* utilities instead). */
+@theme {
+  --font-sans: var(--font);
+  --font-mono: var(--mono);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-foreground: var(--accent-soft-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-success-border: var(--success-border);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-border: var(--warning-border);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+  --color-info-border: var(--info-border);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+/* Accent system: the four html[data-accent=…] blocks (ported from
+   tokens.css:126-190) now drive --primary/--ring + the hljs ramp vars. */
+html[data-accent="blue"] {
+  --primary: #2970e6;
+  --primary-foreground: #ffffff;
+  --ring: #2970e6;
+  --primary-300: #85acf5;
+  --primary-400: #4f8aee;
+}
+html[data-accent="green"] {
+  --primary: #0f9d6e;
+  --primary-foreground: #ffffff;
+  --ring: #0f9d6e;
+  --primary-300: #72caa4;
+  --primary-400: #3ab183;
+}
+html[data-accent="rose"] {
+  --primary: #e5386b;
+  --primary-foreground: #ffffff;
+  --ring: #e5386b;
+  --primary-300: #f18fae;
+  --primary-400: #eb5f8c;
+}
+html[data-accent="violet"] {
+  --primary: #7c5cf0;
+  --primary-foreground: #ffffff;
+  --ring: #7c5cf0;
+  --primary-300: #ab94f7;
+  --primary-400: #8d72f2;
+}
+
+@layer base {
+  body {
+    @apply bg-background font-sans text-sm text-foreground antialiased;
+    line-height: 1.5;
+    overflow: hidden;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--ring) 12%, transparent);
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--input);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 1px;
+    border-radius: 4px;
+  }
+  a {
+    color: var(--primary);
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+}
+
+/* ---------- tiny helper utilities (used by components and markup.ts strings) ---------- */
+@utility kbd {
+  @apply inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-input border-b-2 bg-card px-1 font-mono text-[10.5px] leading-none text-muted-foreground;
+}
+
+@utility codeblock {
+  @apply m-0 max-w-[760px] overflow-auto whitespace-pre rounded-lg border border-border bg-secondary p-3 font-mono text-xs leading-[1.55] text-foreground;
+}
+
+/* ---------- syntax highlighting (runtime classes from highlight.js) ---------- */
+.hljs-comment {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+.hljs-keyword {
+  color: var(--primary);
+}
+.hljs-string {
+  color: var(--success);
+}
+.hljs-number {
+  color: var(--warning);
+}
+.hljs-attr,
+.hljs-attribute {
+  color: var(--info);
+}
+.hljs-literal {
+  color: var(--primary);
+}
+.hljs-tag {
+  color: var(--primary);
+}
+.hljs-name {
+  color: var(--primary);
+}
+.hljs-punctuation {
+  color: var(--muted-foreground);
+}
+html[data-theme="dark"] .hljs-comment {
+  color: var(--muted-foreground);
+}
+html[data-theme="dark"] .hljs-keyword {
+  color: var(--primary-400);
+}
+html[data-theme="dark"] .hljs-string {
+  color: var(--success);
+}
+html[data-theme="dark"] .hljs-number {
+  color: var(--warning);
+}
+html[data-theme="dark"] .hljs-attr,
+html[data-theme="dark"] .hljs-attribute {
+  color: var(--info);
+}
+html[data-theme="dark"] .hljs-literal {
+  color: var(--primary-300);
+}
+html[data-theme="dark"] .hljs-tag {
+  color: var(--primary-400);
+}
+html[data-theme="dark"] .hljs-name {
+  color: var(--primary-400);
+}
+html[data-theme="dark"] .hljs-punctuation {
+  color: var(--muted-foreground);
+}

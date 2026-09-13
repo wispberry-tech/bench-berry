@@ -2,7 +2,7 @@
 // Entry point: mount the shell app and pull in the shared stylesheet.
 import { mount } from "svelte";
 import App from "./App.svelte";
-import "./lib/tokens.css";
+import "./lib/app.css";
 
 const target = document.getElementById("app");
 if (target) {
