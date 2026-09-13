@@ -1,0 +1,18 @@
+<!--
+  packages/preview/index.html
+  Entry page of the live component preview iframe app (the Canvas, §4.6).
+  The shell embeds this page in an <iframe sandbox="allow-scripts"> and the
+  story id travels as the `story` query parameter; the app mounts into
+  #preview-root (falling back to document.body when absent).
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>BerryBench Preview</title>
+  </head>
+  <body>
+    <div id="preview-root"></div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

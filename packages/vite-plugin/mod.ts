@@ -3,6 +3,7 @@
 //   virtual:berrybench-config            -> .berrybench/resolved-config.json
 //   virtual:berrybench-snapshots         -> aggregate: one key per ENABLED workspace
 //   virtual:berrybench-snapshots/<id>    -> .berrybench/snapshots/<id>.json
+//   virtual:berrybench-env               -> { dev, preview: { base } } (dev vs build)
 // Missing or unparseable files degrade to a safe module instead of failing the
 // build (load failures are warnings, never build errors — see §5 of the plan).
 import type { IncomingMessage, ServerResponse } from 'node:http';
@@ -14,10 +15,13 @@ import type { WorkspaceId } from '../core/workspace.ts';
 import { apiPlugin } from '../ws-api/mod.ts';
 import { dbPlugin } from '../ws-db/mod.ts';
 import { designPlugin } from '../ws-design/mod.ts';
+import { resolvePreviewBase } from '../preview/config.ts';
 
 export const CONFIG_MODULE = 'virtual:berrybench-config';
 export const SNAPSHOTS_MODULE = 'virtual:berrybench-snapshots';
 export const SNAPSHOTS_PREFIX = 'virtual:berrybench-snapshots/';
+/** Env module consumed by the shell: `{ dev, preview: { base } }`. */
+export const ENV_MODULE = 'virtual:berrybench-env';
 /** Project-relative snapshot directory; mirrors packages/snapshot/mod.ts. */
 export const SNAPSHOT_DIR = '.berrybench/snapshots';
 
@@ -163,16 +167,36 @@ export function berrybench(opts: { root: string }): Plugin {
   const snapshotsPath = join(opts.root, SNAPSHOT_DIR);
   const watchRoot = join(opts.root, BERRYBENCH_DIR);
 
+  // Captured at configResolved; load() emits the dev/build variant so the one
+  // virtual module serves both modes (build + `vite preview` -> prod object).
+  let envState = { dev: false };
+
   return {
     name: 'berrybench',
 
+    configResolved(config) {
+      envState = {
+        // 'serve' + a non-production mode is the dev server; anything else
+        // (build, production-ish serve) emits the static relative base.
+        dev: config.command === 'serve' && config.mode !== 'production',
+      };
+    },
+
     resolveId(source) {
-      if (source === CONFIG_MODULE || source === SNAPSHOTS_MODULE) return source;
+      if (source === CONFIG_MODULE || source === SNAPSHOTS_MODULE || source === ENV_MODULE) {
+        return source;
+      }
       const id = snapshotIdOf(source);
       return id !== undefined ? source : null;
     },
 
     async load(id) {
+      if (id === ENV_MODULE) {
+        return `export default ${JSON.stringify({
+          dev: envState.dev,
+          preview: { base: envState.dev ? resolvePreviewBase(true) : './preview/' },
+        })};`;
+      }
       if (id === CONFIG_MODULE) {
         try {
           const text = await Deno.readTextFile(configPath);
@@ -233,6 +257,7 @@ export function berrybench(opts: { root: string }): Plugin {
         for (const id of [
           CONFIG_MODULE,
           SNAPSHOTS_MODULE,
+          ENV_MODULE,
           ...SNAPSHOT_IDS.map((name) => SNAPSHOTS_PREFIX + name),
         ]) {
           const mod = server.moduleGraph.getModuleById(id);

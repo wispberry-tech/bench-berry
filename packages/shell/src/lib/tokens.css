@@ -307,3 +307,26 @@ html[data-theme="dark"] .select{background-image:url("data:image/svg+xml,%3Csvg 
 .palette-item.selected .icon{color:var(--accent)}
 .palette-empty{padding:28px;text-align:center;color:var(--text-3);font-size:12.5px}
 .palette-foot{display:flex;gap:14px;align-items:center;padding:9px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text-3)}
+/* ---------- phase 4: design preview pane (story tabs + live preview) ---------- */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);position:relative}
+.tab{padding:7px 12px;font-size:12.5px;color:var(--text-3);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--text);border-bottom-color:var(--accent)}
+.v-ds-tabs{margin:16px 0 14px}
+.v-ds-tabpane{display:none}
+.v-ds-tabpane.active{display:block}
+.v-ds-preview{display:flex;align-items:flex-start;gap:16px}
+.v-ds-preview-main{flex:1;min-width:0}
+.preview-frame{display:block;width:100%;height:480px;border:1px solid var(--border);border-radius:var(--r-m);background:#fff}
+html[data-theme="dark"] .preview-frame{background:#17171b}
+.v-ds-preview-note{margin-top:8px}
+.v-ds-preview-err{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:8px;background:var(--danger-bg);border:1px solid var(--danger-border);border-radius:var(--r-m);padding:12px 14px}
+.v-ds-controls{width:240px;flex:none;display:flex;flex-direction:column;gap:11px;border:1px solid var(--border);border-radius:var(--r-m);background:var(--surface);padding:14px}
+.v-ds-controls-empty{align-items:flex-start}
+.v-ds-controls-title{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3)}
+.v-ds-docs{display:flex;flex-direction:column;gap:14px;max-width:720px}
+.v-ds-docs-desc{font-size:12.5px;color:var(--text-2);line-height:1.55}
+.v-ds-docs-json{display:flex;flex-direction:column;gap:12px}
+.v-ds-docs-json-title{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3)}
+.v-ds-code-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.codeblock{margin:0;padding:12px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-m);font-family:var(--mono);font-size:12px;line-height:1.55;color:var(--text);white-space:pre;overflow:auto;max-width:760px}

@@ -16,9 +16,14 @@
     "@std/path": "jsr:@std/path@^1",
     "@std/fs": "jsr:@std/fs@^1",
     "pg": "npm:pg@^8",
+    "react": "npm:react@^19",
+    "react-dom": "npm:react-dom@^19",
+    "vue": "npm:vue@^3",
     "vite": "npm:vite@^7",
     "svelte": "npm:svelte@^5",
-    "@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^5"
+    "@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^5",
+    "@vitejs/plugin-react": "npm:@vitejs/plugin-react@^4",
+    "@vitejs/plugin-vue": "npm:@vitejs/plugin-vue@^6"
   },
   "fmt": {
     "useTabs": false,

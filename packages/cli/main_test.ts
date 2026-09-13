@@ -230,6 +230,10 @@ Deno.test('build writes resolved-config.json and manifest.json', async (t) => {
         throw new Error(`manifest generatedAt missing: ${raw}`);
       }
     });
+    await t.step('preview build emitted the iframe app', async () => {
+      // The canvas bundle (all three runtimes) lands at <dist>/preview.
+      await Deno.stat(`${tmp}/dist/preview/index.html`);
+    });
   } finally {
     await Deno.remove(tmp, { recursive: true });
   }

@@ -2,7 +2,7 @@
 // Pure HTML-string builders for workspace panes. Every interpolated value is
 // escaped (esc); the strings are rendered via {@html} in the workspace
 // components. Panes carry data-ws/data-id attributes for Phase 4 cross-links.
-import type { ApiSnapshot, DbSnapshot, DesignSnapshot } from './types.ts';
+import type { ApiSnapshot, DbSnapshot } from './types.ts';
 
 /** Escape a value for safe interpolation into HTML text/attribute context. */
 export function esc(value: unknown): string {
@@ -53,16 +53,6 @@ export function errorPanel(message: string): string {
 }
 
 // ---------- panes ----------
-
-export function designPane(snap: DesignSnapshot, file: string): string {
-  const story = snap.stories.find((s) => s.file === file);
-  const title = story?.title ?? basename(file);
-  return `<div class="v-ds-pane active" data-ws="design" data-id="${esc(file)}">
-  <div class="v-ds-docs-title">${esc(title)}</div>
-  <div class="v-ds-docs-sub"><span class="mono">${esc(file)}</span></div>
-  <div class="pane-actions">${copyButton(file, 'Copy path')}</div>
-</div>`;
-}
 
 export function apiOpPane(snap: ApiSnapshot, id: string): string {
   const op = snap.ops.find((o) => o.id === id);

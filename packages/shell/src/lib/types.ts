@@ -35,10 +35,43 @@ export interface ApiSnapshot {
   ops: { id: string; method: string; path: string; summary?: string }[];
 }
 
+// ---------- phase 4: story meta + preview protocol (§4.6) ----------
+
+/** One scenario override for a story: name + props to render with. */
+export interface StoryScenario {
+  name: string;
+  props: Record<string, unknown>;
+}
+
+/**
+ * Per-story metadata carried in the design snapshot (§4.6). `file` is the
+ * project-relative story path ('src/...'); every other field is optional.
+ */
+export interface StoryMeta {
+  file: string;
+  title?: string;
+  description?: string;
+  props?: Record<string, unknown>;
+  schema?: Record<string, unknown>;
+  code?: string;
+  scenarios?: StoryScenario[];
+}
+
+/**
+ * PostMessage protocol between the shell and the live preview iframe
+ * (mirrors packages/preview/protocol.ts). The shell sends setProps/setStory
+ * and listens for ready/error.
+ */
+export type PreviewMessage =
+  | { type: 'ready' }
+  | { type: 'error'; message: string }
+  | { type: 'setProps'; props: Record<string, unknown> }
+  | { type: 'setStory'; storyId: string };
+
 export interface DesignSnapshot {
   packageName?: string;
   version?: string;
-  stories: { file: string; title?: string }[];
+  stories: StoryMeta[];
 }
 
 export interface DbSnapshot {

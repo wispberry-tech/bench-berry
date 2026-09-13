@@ -11,7 +11,7 @@ import { designPlugin } from '../ws-design/mod.ts';
 import { apiPlugin } from '../ws-api/mod.ts';
 import { dbPlugin } from '../ws-db/mod.ts';
 import { writeSnapshots } from '../snapshot/mod.ts';
-import { berrybench } from './mod.ts';
+import { berrybench, ENV_MODULE } from './mod.ts';
 
 const PLUGINS = [designPlugin, apiPlugin, dbPlugin];
 
@@ -211,6 +211,62 @@ Deno.test('aggregate reports a missing enabled snapshot as an error object', asy
       await server.close();
     }
   } finally {
+    await Deno.remove(root, { recursive: true });
+  }
+});
+
+Deno.test('ENV_MODULE emits the production env object in a build', async () => {
+  const root = await makeProject();
+  try {
+    await materializeBuildOutput(root);
+    const entry = join(root, 'entry-env.ts');
+    await Deno.writeTextFile(
+      entry,
+      "import env from 'virtual:berrybench-env';\nconsole.log(JSON.stringify(env));\n",
+    );
+    const result = await build({
+      configFile: false,
+      logLevel: 'silent',
+      plugins: [berrybench({ root })],
+      build: {
+        write: false,
+        minify: false,
+        rollupOptions: { input: entry, output: { format: 'es' } },
+      },
+    });
+    const code = chunkCode(result);
+    // Build mode: the static relative base + dev:false (rollup reprints
+    // module literals, so match whitespace-tolerantly).
+    assert(code.includes('./preview/'), `bundle missing relative preview base: ${code}`);
+    assertMatch(code, /"dev"\s*:\s*false/, 'bundle missing dev:false');
+  } finally {
+    await Deno.remove(root, { recursive: true });
+  }
+});
+
+Deno.test('ENV_MODULE emits the dev env with the localhost preview base in a dev server', async () => {
+  const root = await makeProject();
+  const previousPort = Deno.env.get('BERRYBENCH_PREVIEW_PORT');
+  Deno.env.set('BERRYBENCH_PREVIEW_PORT', '5999');
+  try {
+    const server = await devServer(root);
+    try {
+      const mod = await server.ssrLoadModule(ENV_MODULE);
+      const env = mod.default as { dev?: boolean; preview?: { base?: string } };
+      assert(env.dev === true, `expected dev:true, got ${JSON.stringify(env)}`);
+      assert(
+        env.preview?.base === 'http://localhost:5999/preview/',
+        `unexpected dev base: ${env.preview?.base}`,
+      );
+    } finally {
+      await server.close();
+    }
+  } finally {
+    if (previousPort === undefined) {
+      Deno.env.delete('BERRYBENCH_PREVIEW_PORT');
+    } else {
+      Deno.env.set('BERRYBENCH_PREVIEW_PORT', previousPort);
+    }
     await Deno.remove(root, { recursive: true });
   }
 });

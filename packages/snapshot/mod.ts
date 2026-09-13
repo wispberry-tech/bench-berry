@@ -49,6 +49,14 @@ export const designSnapshotSchema = z.object({
   stories: z.array(z.object({
     file: z.string(),
     title: z.string().optional(),
+    description: z.string().optional(),
+    props: z.record(z.string(), z.unknown()).optional(),
+    schema: z.record(z.string(), z.unknown()).optional(),
+    code: z.string().optional(),
+    scenarios: z.array(z.object({
+      name: z.string(),
+      props: z.record(z.string(), z.unknown()),
+    })).optional(),
   })),
 });
 

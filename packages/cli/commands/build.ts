@@ -3,6 +3,7 @@ import { build as viteBuild } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { ConfigError } from '../../core/mod.ts';
 import { berrybench } from '../../vite-plugin/mod.ts';
+import { previewViteConfig } from '../../preview/config.ts';
 import type { CliContext } from '../main.ts';
 import {
   printSnapshotLines,
@@ -73,5 +74,21 @@ export async function cmdBuild(
     return 1;
   }
   out(`built ${outDir}`);
+  // Preview bundle: the isolated iframe app (all three runtimes) the shell
+  // embeds for the live canvas; emitted to <dist>/preview. vite 7 rejects
+  // './preview/' as a base (coerces it to root-absolute asset URLs, breaking
+  // the page at <dist>/preview/), so './' is used: html-relative asset URLs
+  // serve the page from any static host, and the shell still iframes it as
+  // './preview/' (env.preview.base).
+  const previewOutDir = join(root, 'dist', 'preview');
+  try {
+    await viteBuild(
+      previewViteConfig(root, previewOutDir, { base: './', emptyOutDir: true }),
+    );
+  } catch (error) {
+    err(`preview build failed: ${error instanceof Error ? error.message : String(error)}`);
+    return 1;
+  }
+  out(`built ${previewOutDir}`);
   return 0;
 }

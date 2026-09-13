@@ -4,6 +4,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { ConfigError } from '../../core/mod.ts';
 import { SNAPSHOT_DIR } from '../../snapshot/mod.ts';
 import { berrybench } from '../../vite-plugin/mod.ts';
+import { previewViteConfig } from '../../preview/config.ts';
 import type { CliContext } from '../main.ts';
 import {
   printSnapshotLines,
@@ -84,6 +85,34 @@ export async function cmdDev(
     return 1;
   }
   out(`berrybench dev: http://localhost:${port}/`);
+  // Second dev server: the live component preview iframe app (the Canvas).
+  // It serves the preview app at '/preview/' and reads story files from the
+  // project's src via the @stories alias — outside the preview app's own
+  // vite root, hence the relaxed fs strictness.
+  const previewPort = Number(Deno.env.get('BERRYBENCH_PREVIEW_PORT') ?? 5174);
+  let previewServer: ViteDevServer;
+  try {
+    previewServer = await createServer({
+      ...previewViteConfig(root, join(root, 'dist/preview'), { base: '/preview/' }),
+      server: {
+        port: previewPort,
+        fs: { strict: false },
+      },
+    });
+    await previewServer.listen();
+  } catch (error) {
+    err(`preview server failed: ${error instanceof Error ? error.message : String(error)}`);
+    try {
+      await server.close();
+    } catch {
+      // Not listening; nothing to close.
+    }
+    return 1;
+  }
+  const address = previewServer.httpServer?.address();
+  const actualPreviewPort =
+    typeof address === 'object' && address !== null ? address.port : previewPort;
+  out(`berrybench preview: http://localhost:${actualPreviewPort}/preview/`);
   await loop;
   return 0; // unreachable: watchLoop never resolves
 }
