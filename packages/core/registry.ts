@@ -1,4 +1,4 @@
-import type { WorkspaceId, WorkspacePlugin } from "./workspace.ts";
+import { WORKSPACE_IDS, type WorkspaceId, type WorkspacePlugin } from "./workspace.ts";
 
 export interface WorkspaceRegistry {
   plugins(): readonly WorkspacePlugin[];
@@ -6,11 +6,8 @@ export interface WorkspaceRegistry {
   workspaceIds(): readonly WorkspaceId[];
 }
 
-const KNOWN_IDS: Record<string, true> = {
-  design: true,
-  api: true,
-  db: true,
-};
+const KNOWN_IDS: Record<string, true> = {};
+for (const id of WORKSPACE_IDS) KNOWN_IDS[id] = true;
 
 /** Build a registry from a plugin list; throws on unknown or duplicate workspace ids. */
 export function createRegistry(plugins: readonly WorkspacePlugin[]): WorkspaceRegistry {

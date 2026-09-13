@@ -1,4 +1,9 @@
-export type WorkspaceId = "design" | "api" | "db";
+/** Canonical workspace ids, in fixed display order. Single source of truth:
+ * the registry, config schema, snapshot writer, vite plugin, and shell types
+ * all derive from this const — a 4th workspace is one const + plugin wiring. */
+export const WORKSPACE_IDS = ["design", "api", "db"] as const;
+
+export type WorkspaceId = (typeof WORKSPACE_IDS)[number];
 
 export interface ProjectContext {
   /** Absolute path to the project root — never Deno.cwd() inside core/plugins. */

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { join, toFileUrl } from "@std/path";
+import { WORKSPACE_IDS } from "./workspace.ts";
 import type { ProjectContext, WorkspaceId, WorkspacePlugin } from "./workspace.ts";
 
 /** Thrown for any config problem: malformed file, unknown workspace ids, or an invalid final resolution. */
@@ -13,15 +14,21 @@ export interface WorkspaceResolution {
 
 export interface ResolvedConfig {
   workspaces: Record<WorkspaceId, WorkspaceResolution>;
-  theme?: { accent?: string; defaultTheme?: "light" | "dark" };
+  theme?: { accent?: string };
+  /** Unknown top-level keys from the config file, preserved for round-trip fidelity. */
+  extra: Record<string, unknown>;
 }
 
-const WORKSPACE_IDS = ["design", "api", "db"] as const;
-const KNOWN_IDS: Record<string, true> = {
-  design: true,
-  api: true,
-  db: true,
-};
+/**
+ * Shared text for the all-disabled error: the CLI's `config` save path, the
+ * vite write-back guard, and resolveConfig all surface the same message so
+ * shell error display matches CLI output.
+ */
+export const ALL_DISABLED_MESSAGE =
+  "enable at least one workspace (hint: berrybench config enable design)";
+
+const KNOWN_IDS: Record<string, true> = {};
+for (const id of WORKSPACE_IDS) KNOWN_IDS[id] = true;
 const WorkspaceIdSchema = z.enum(WORKSPACE_IDS);
 
 const WorkspaceConfigSchema = z.object({
@@ -36,7 +43,6 @@ const FileConfigSchema = z.object({
   workspaces: z.record(WorkspaceIdSchema, WorkspaceConfigSchema).optional(),
   theme: z.object({
     accent: z.string().optional(),
-    defaultTheme: z.enum(["light", "dark"]).optional(),
   }).optional(),
 }).passthrough();
 
@@ -65,6 +71,7 @@ export async function resolveConfig(
   }
 
   let theme: ResolvedConfig["theme"];
+  let extra: Record<string, unknown> = {};
   let file = fileConfig;
   if (file === undefined) {
     file = await readFileConfig(ctx.root);
@@ -74,6 +81,18 @@ export async function resolveConfig(
     const parsed = FileConfigSchema.safeParse(file);
     if (!parsed.success) {
       throw new ConfigError(`invalid berrybench.config.ts: ${describeZodError(parsed.error)}`);
+    }
+    // Preserve unknown top-level keys (deep-cloned) so a config write-back
+    // round-trips them instead of silently dropping user settings.
+    extra = {};
+    for (const [key, value] of Object.entries(parsed.data)) {
+      if (key === "workspaces" || key === "theme") continue;
+      try {
+        extra[key] = structuredClone(value);
+      } catch {
+        // Non-cloneable value (shouldn't happen in a config file): keep as-is.
+        extra[key] = value;
+      }
     }
     for (const [id, cfg] of Object.entries(parsed.data.workspaces ?? {})) {
       const workspaceId = id as WorkspaceId;
@@ -111,11 +130,9 @@ export async function resolveConfig(
   }
   const anyEnabled = Object.values(workspaces).some((w) => w.enabled);
   if (!anyEnabled) {
-    throw new ConfigError(
-      "enable at least one workspace (hint: berrybench config --enable design)",
-    );
+    throw new ConfigError(ALL_DISABLED_MESSAGE);
   }
-  return { workspaces, ...(theme !== undefined ? { theme } : {}) };
+  return { workspaces, ...(theme !== undefined ? { theme } : {}), extra };
 }
 
 function assertKnownWorkspaceIds(file: unknown): void {
@@ -141,16 +158,19 @@ export function formatConfigFile(
   detectedNotes: Record<string, string>,
 ): string {
   const lines = [CONFIG_HEADER, "export default {", "  workspaces: {"];
-  const ORDER: readonly WorkspaceId[] = ["design", "api", "db"];
   const ids = [
-    ...ORDER.filter((id) => id in resolved.workspaces),
-    ...Object.keys(resolved.workspaces).filter((id) => !ORDER.includes(id as WorkspaceId)).sort(),
+    ...WORKSPACE_IDS.filter((id) => id in resolved.workspaces),
+    ...Object.keys(resolved.workspaces).filter((id) => !WORKSPACE_IDS.includes(id as WorkspaceId))
+      .sort(),
   ];
   for (const id of ids) {
     const note = detectedNotes[id];
     if (note !== undefined) lines.push(`    // ${id}: ${note}`);
     const workspace = resolved.workspaces[id as WorkspaceId];
     let entry = `    ${id}: { enabled: ${workspace.enabled}`;
+    if (workspace.enabledBy === "ui") {
+      entry += `, enabledBy: 'ui'`;
+    }
     if (workspace.source !== undefined) {
       entry += `, source: ${serializeValue(workspace.source)}`;
     }
@@ -162,10 +182,13 @@ export function formatConfigFile(
     if (resolved.theme.accent !== undefined) {
       parts.push(`accent: ${serializeValue(resolved.theme.accent)}`);
     }
-    if (resolved.theme.defaultTheme !== undefined) {
-      parts.push(`defaultTheme: ${serializeValue(resolved.theme.defaultTheme)}`);
-    }
     lines.push(`  theme: { ${parts.join(", ")} },`);
+  }
+  // Unknown top-level keys from the file, re-emitted key-sorted so user
+  // settings survive a write-back untouched.
+  const extraKeys = Object.keys(resolved.extra ?? {}).sort((a, b) => a.localeCompare(b));
+  for (const key of extraKeys) {
+    lines.push(`  ${isIdentifier(key) ? key : quote(key)}: ${serializeValue(resolved.extra[key])},`);
   }
   lines.push("};");
   return `${lines.join("\n")}\n`;

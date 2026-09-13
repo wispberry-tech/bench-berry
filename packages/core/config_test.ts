@@ -119,9 +119,68 @@ Deno.test("unknown workspace id in env -> ConfigError", async () => {
 
 Deno.test("file theme flows through to resolved config", async () => {
   const resolved = await resolveConfig(ctx(), allPlugins(), {
-    theme: { accent: "violet", defaultTheme: "dark" },
+    theme: { accent: "violet" },
   });
-  assertEquals(resolved.theme, { accent: "violet", defaultTheme: "dark" });
+  assertEquals(resolved.theme, { accent: "violet" });
+});
+
+Deno.test("unknown top-level keys survive resolve -> format -> re-read", async () => {
+  const fileConfig = {
+    mySetting: 123,
+    nested: { deep: [1, 2, { three: "x" }] },
+    workspaces: { db: { enabled: true } },
+  };
+  const resolved = await resolveConfig(ctx(), allPlugins(), fileConfig);
+  assertEquals(resolved.extra, { mySetting: 123, nested: { deep: [1, 2, { three: "x" }] } });
+
+  const root = await Deno.makeTempDir();
+  await Deno.writeTextFile(
+    join(root, "berrybench.config.ts"),
+    formatConfigFile(resolved, {}),
+  );
+  const reread = await readFileConfig(root);
+  assertEquals(reread, {
+    workspaces: {
+      design: { enabled: true },
+      api: { enabled: true },
+      db: { enabled: true },
+    },
+    mySetting: 123,
+    nested: { deep: [1, 2, { three: "x" }] },
+  });
+  const resolvedAgain = await resolveConfig(ctx(), allPlugins(), reread);
+  assertEquals(resolvedAgain.extra.mySetting, 123);
+  assertEquals(resolvedAgain.workspaces.db.enabled, true);
+
+  // extra values are deep-cloned: mutating the resolution cannot alias the file.
+  const nested = resolved.extra.nested;
+  if (
+    nested !== null && typeof nested === "object" && "deep" in nested && Array.isArray(nested.deep)
+  ) {
+    nested.deep.push(4);
+  }
+  assertEquals(fileConfig.nested.deep.length, 3);
+});
+
+Deno.test("ui toggle survives format + re-read with enabledBy intact", async () => {
+  const resolved = await resolveConfig(ctx(), allPlugins(), {
+    workspaces: {
+      api: { enabled: false, enabledBy: "ui" },
+      db: { enabled: true },
+    },
+  });
+  assertEquals(resolved.workspaces.api, { enabled: false, enabledBy: "ui" });
+
+  const out = formatConfigFile(resolved, {});
+  assertStringIncludes(out, "api: { enabled: false, enabledBy: 'ui' },");
+
+  const root = await Deno.makeTempDir();
+  await Deno.writeTextFile(join(root, "berrybench.config.ts"), out);
+  const reread = await readFileConfig(root);
+  const resolvedAgain = await resolveConfig(ctx(), allPlugins(), reread);
+  // The ui provenance stamp must survive a write-back + re-read cycle.
+  assertEquals(resolvedAgain.workspaces.api, { enabled: false, enabledBy: "ui" });
+  assertEquals(resolvedAgain.workspaces.db, { enabled: true, enabledBy: "config" });
 });
 
 Deno.test("formatConfigFile: header, sorted keys, source block, notes", async () => {
@@ -129,7 +188,7 @@ Deno.test("formatConfigFile: header, sorted keys, source block, notes", async ()
     workspaces: {
       db: { enabled: true, source: { connectionString: "postgres://localhost/x" } },
     },
-    theme: { accent: "violet", defaultTheme: "light" },
+    theme: { accent: "violet" },
   });
   const out = formatConfigFile(resolved, { db: "DATABASE_URL present" });
   assertStringIncludes(
@@ -142,7 +201,7 @@ Deno.test("formatConfigFile: header, sorted keys, source block, notes", async ()
   assert(designIdx >= 0 && designIdx < apiIdx && apiIdx < dbIdx);
   assertStringIncludes(out, "source: { connectionString: 'postgres://localhost/x' }");
   assertStringIncludes(out, "// db: DATABASE_URL present");
-  assertStringIncludes(out, "theme: { accent: 'violet', defaultTheme: 'light' }");
+  assertStringIncludes(out, "theme: { accent: 'violet' }");
   const apiLine = out.split("\n").find((line) => line.includes("api: {"));
   assert(apiLine !== undefined && !apiLine.includes("source:"));
 });

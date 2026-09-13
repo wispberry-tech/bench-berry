@@ -144,6 +144,7 @@ Deno.test("aggregate snapshot module serves one key per enabled workspace", asyn
         api: { enabled: true, enabledBy: "auto" },
         db: { enabled: false, enabledBy: "default" },
       },
+      extra: {},
     };
     await Deno.writeTextFile(
       join(root, ".berrybench/resolved-config.json"),
@@ -190,6 +191,7 @@ Deno.test("aggregate reports a missing enabled snapshot as an error object", asy
         api: { enabled: true, enabledBy: "config" },
         db: { enabled: false, enabledBy: "default" },
       },
+      extra: {},
     };
     await Deno.writeTextFile(
       join(root, ".berrybench/resolved-config.json"),
@@ -282,6 +284,7 @@ Deno.test("POST /__berrybench/config merges the delta and persists the config fi
         db: { enabled: false, enabledBy: "default" },
       },
       theme: { accent: "#4f46e5" },
+      extra: {},
     };
     await Deno.writeTextFile(
       join(root, ".berrybench/resolved-config.json"),
@@ -305,7 +308,7 @@ Deno.test("POST /__berrybench/config merges the delta and persists the config fi
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           workspaces: { db: { enabled: true } },
-          theme: { defaultTheme: "dark" },
+          theme: { accent: "#c026d3" },
         }),
       });
       assert(res.status === 200, `expected 200, got ${res.status}`);
@@ -323,8 +326,67 @@ Deno.test("POST /__berrybench/config merges the delta and persists the config fi
         text.includes("source: { storyGlob: 'src/**/*.svelte' }"),
         `design source not preserved: ${text}`,
       );
-      assert(text.includes("accent: '#4f46e5'"), `existing theme accent dropped: ${text}`);
-      assert(text.includes("defaultTheme: 'dark'"), `theme delta missing: ${text}`);
+      assert(text.includes("accent: '#c026d3'"), `theme delta missing: ${text}`);
+      assert(!text.includes("defaultTheme"), `defaultTheme must not be written: ${text}`);
+    } finally {
+      await server.close();
+    }
+  } finally {
+    await Deno.remove(root, { recursive: true });
+  }
+});
+
+Deno.test("POST /__berrybench/config rejects an all-disabled delta without touching the file", async () => {
+  const root = await makeProject();
+  try {
+    await Deno.mkdir(join(root, ".berrybench"), { recursive: true });
+    const current: ResolvedConfig = {
+      workspaces: {
+        design: { enabled: true, enabledBy: "config" },
+        api: { enabled: true, enabledBy: "auto" },
+        db: { enabled: true, enabledBy: "config" },
+      },
+      extra: {},
+    };
+    await Deno.writeTextFile(
+      join(root, ".berrybench/resolved-config.json"),
+      JSON.stringify(current, null, 2),
+    );
+    const originalFile = "export default { workspaces: {} };\n";
+    await Deno.writeTextFile(join(root, "berrybench.config.ts"), originalFile);
+
+    const server = await createServer({
+      root,
+      configFile: false,
+      logLevel: "silent",
+      plugins: [berrybench({ root })],
+      server: { port: 0 },
+    });
+    try {
+      await server.listen();
+      const port = (server.httpServer!.address() as { port: number }).port;
+      const res = await fetch(`http://127.0.0.1:${port}/__berrybench/config`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          workspaces: {
+            design: { enabled: false },
+            api: { enabled: false },
+            db: { enabled: false },
+          },
+        }),
+      });
+      assert(res.status === 400, `expected 400, got ${res.status}`);
+      const body = await res.json() as { ok?: boolean; error?: string };
+      assert(
+        body.ok === false && body.error!.startsWith("enable at least one workspace"),
+        `unexpected body: ${JSON.stringify(body)}`,
+      );
+      // The canonical writer must never run for a broken resolution.
+      assert(
+        await Deno.readTextFile(join(root, "berrybench.config.ts")) === originalFile,
+        "config file changed on rejected write-back",
+      );
     } finally {
       await server.close();
     }

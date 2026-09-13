@@ -9,9 +9,9 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Plugin } from "vite";
 import { isAbsolute, join, relative } from "@std/path";
-import { resolveConfig, writeConfigFile } from "../core/config.ts";
+import { ALL_DISABLED_MESSAGE, resolveConfig, writeConfigFile } from "../core/config.ts";
 import type { ResolvedConfig } from "../core/config.ts";
-import type { WorkspaceId } from "../core/workspace.ts";
+import { WORKSPACE_IDS, type WorkspaceId } from "../core/workspace.ts";
 import { apiPlugin } from "../ws-api/mod.ts";
 import { dbPlugin } from "../ws-db/mod.ts";
 import { designPlugin } from "../ws-design/mod.ts";
@@ -28,7 +28,8 @@ export const SNAPSHOT_DIR = ".berrybench/snapshots";
 const CONFIG_FILE = ".berrybench/resolved-config.json";
 const CONFIG_FILE_NAME = "berrybench.config.ts";
 const BERRYBENCH_DIR = ".berrybench";
-const SNAPSHOT_IDS = ["design", "api", "db"] as const;
+/** Canonical workspace ids; the single source of truth lives in core/workspace.ts. */
+const SNAPSHOT_IDS = WORKSPACE_IDS;
 
 /**
  * The workspace plugins whose ids appear in a resolved config; mirrors
@@ -46,7 +47,7 @@ function snapshotIdOf(id: string): string | undefined {
 /** Validated delta body for POST /__berrybench/config (absent keys are unchanged). */
 interface ConfigDelta {
   workspaces?: Record<string, { enabled: boolean }>;
-  theme?: { accent?: string; defaultTheme?: "light" | "dark" };
+  theme?: { accent?: string };
 }
 
 /** Parse + validate the settings write-back body; throws Error with a user-facing message. */
@@ -96,12 +97,6 @@ function parseConfigDelta(raw: string): ConfigDelta {
       if (typeof theme.accent !== "string") throw new Error("theme.accent must be a string");
       parsed.theme.accent = theme.accent;
     }
-    if (theme.defaultTheme !== undefined) {
-      if (theme.defaultTheme !== "light" && theme.defaultTheme !== "dark") {
-        throw new Error("theme.defaultTheme must be 'light' or 'dark'");
-      }
-      parsed.theme.defaultTheme = theme.defaultTheme;
-    }
   }
   return parsed;
 }
@@ -139,18 +134,27 @@ function mergeConfigDelta(current: ResolvedConfig, delta: ConfigDelta): Resolved
   if (delta.theme !== undefined) {
     const theme = { ...(merged.theme ?? {}) as NonNullable<ResolvedConfig["theme"]> };
     if (delta.theme.accent !== undefined) theme.accent = delta.theme.accent;
-    if (delta.theme.defaultTheme !== undefined) theme.defaultTheme = delta.theme.defaultTheme;
     merged.theme = theme;
   }
   return merged;
 }
+
+/** Marker for oversized write-back bodies; the middleware maps this to HTTP 413. */
+class RequestTooLargeError extends Error {}
+
+/** Cap for the settings write-back body (a delta is tiny; 1 MiB is generous). */
+const MAX_BODY_UTF16 = 1024 * 1024;
 
 function readRequestBody(req: IncomingMessage): Promise<string> {
   const { promise, resolve, reject } = Promise.withResolvers<string>();
   let data = "";
   req.setEncoding("utf8");
   req.on("data", (chunk: string) => {
+    if (data.length > MAX_BODY_UTF16) return; // already rejecting; stop accumulating
     data += chunk;
+    if (data.length > MAX_BODY_UTF16) {
+      reject(new RequestTooLargeError("request body too large (max 1 MiB)"));
+    }
   });
   req.on("end", () => resolve(data));
   req.on("error", reject);
@@ -215,9 +219,11 @@ export function berrybench(opts: { root: string }): Plugin {
         try {
           const text = await Deno.readTextFile(configPath);
           const resolved = JSON.parse(text) as ResolvedConfig;
+          // Keys come from the resolved config's OWN workspace entries (not a
+          // static list), so a new workspace id aggregates automatically.
           const enabled: Record<string, unknown> = {};
-          for (const name of SNAPSHOT_IDS) {
-            if (resolved.workspaces?.[name]?.enabled !== true) continue;
+          for (const [name, ws] of Object.entries(resolved.workspaces ?? {})) {
+            if (ws?.enabled !== true) continue;
             try {
               const snap = await Deno.readTextFile(join(snapshotsPath, `${name}.json`));
               enabled[name] = JSON.parse(snap);
@@ -285,9 +291,21 @@ export function berrybench(opts: { root: string }): Plugin {
         try {
           const delta = parseConfigDelta(await readRequestBody(req));
           const current = await currentResolvedConfig(opts.root);
-          await writeConfigFile(opts.root, mergeConfigDelta(current, delta));
+          const merged = mergeConfigDelta(current, delta);
+          // resolveConfig hard-fails on an all-disabled resolution; refuse the
+          // write-back here with the identical message so the shell's error
+          // display matches CLI output, and never persist a broken config.
+          if (!Object.values(merged.workspaces).some((w) => w.enabled)) {
+            respondJson(res, 400, { ok: false, error: ALL_DISABLED_MESSAGE });
+            return;
+          }
+          await writeConfigFile(opts.root, merged);
           respondJson(res, 200, { ok: true, file: CONFIG_FILE_NAME });
         } catch (error) {
+          if (error instanceof RequestTooLargeError) {
+            respondJson(res, 413, { ok: false, error: error.message });
+            return;
+          }
           const message = error instanceof Error ? error.message : String(error);
           respondJson(res, 400, { ok: false, error: message });
         }

@@ -50,9 +50,6 @@ export async function cmdConfig(
   if (resolved.theme !== undefined) {
     const parts: string[] = [];
     if (resolved.theme.accent !== undefined) parts.push(`accent=${resolved.theme.accent}`);
-    if (resolved.theme.defaultTheme !== undefined) {
-      parts.push(`default=${resolved.theme.defaultTheme}`);
-    }
     if (parts.length > 0) out(`theme: ${parts.join(" ")}`);
   }
   return 0;
