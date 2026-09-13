@@ -61,20 +61,22 @@ export async function cmdInit(
 
 /**
  * Story convention (§4.6 v2): a fresh project (no `src/` yet) gets a
- * components pair copied verbatim from templates/stories/ so `deno task dev`
- * has something to render. Existing src/ trees are left alone.
+ * components pair copied verbatim from templates/stories/ into the DEFAULT
+ * stories root `src/stories/` so `berrybench dev` has something to render.
+ * Existing src/ trees are left alone (both stories-root and colocated files
+ * are discovered by the design plugin's glob).
  */
 async function scaffoldStories(proj: string, out: Out): Promise<void> {
   const designRoot = (await designRootOf(proj)) ?? proj;
-  const srcDir = join(designRoot, "src");
+  const srcDir = join(designRoot, 'src');
   try {
     const stat = await Deno.stat(srcDir);
     if (stat.isDirectory) return;
   } catch {
     // No src/ yet: proceed with the scaffold.
   }
-  const templatesDir = join(import.meta.dirname!, "../../../templates/stories");
-  const componentsDir = join(srcDir, "components");
+  const templatesDir = join(import.meta.dirname!, '../../../templates/stories');
+  const storiesDir = join(srcDir, 'stories');
   // Probe the template source before touching the project: compiled binaries
   // cannot reach the repo-relative path (import.meta.dirname is the
   // executable's extract dir), and init must still succeed there — the config
@@ -85,10 +87,10 @@ async function scaffoldStories(proj: string, out: Out): Promise<void> {
     if (error instanceof Deno.errors.NotFound) return;
     throw error;
   }
-  const storyFile = join(componentsDir, "button.story.svelte");
+  const storyFile = join(storiesDir, "button.story.svelte");
   try {
-    await Deno.mkdir(componentsDir, { recursive: true });
-    await Deno.copyFile(join(templatesDir, "button.svelte"), join(componentsDir, "button.svelte"));
+    await Deno.mkdir(storiesDir, { recursive: true });
+    await Deno.copyFile(join(templatesDir, "button.svelte"), join(storiesDir, "button.svelte"));
     await Deno.copyFile(join(templatesDir, "button.story.svelte"), storyFile);
   } catch (error) {
     if (error instanceof Deno.errors.NotFound) {

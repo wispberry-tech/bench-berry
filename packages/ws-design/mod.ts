@@ -24,7 +24,12 @@ export interface DesignSnapshot {
   stories: DesignStory[];
 }
 
-const STORY_PATTERNS = ["src/**/*.story.svelte", "src/**/*.story.tsx"] as const;
+// Story discovery: the DEFAULT home for stories is the design package's own
+// src/stories/ root (init scaffolds there); story files may ALSO be colocated
+// beside components anywhere under src/ (src/components/Button/button.story.svelte).
+// One glob covers both; files are matched purely by the *.story.{svelte,tsx}
+// suffix and are read with the design package (or srcRoot subdir) as root.
+const STORY_PATTERNS = ['src/**/*.story.svelte', 'src/**/*.story.tsx'] as const;
 
 /** Candidate dirs for the design package, probed in order (root first). */
 const DESIGN_DIRS = [".", "frontend", "web", "ui", "app", "client"] as const;

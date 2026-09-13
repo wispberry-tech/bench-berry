@@ -1,4 +1,6 @@
-import { createSubscriber } from "./chunk-YJ56H3UW.js";
+import {
+  createSubscriber
+} from "./chunk-YJ56H3UW.js";
 import {
   active_effect,
   active_reaction,
@@ -11,7 +13,7 @@ import {
   render_effect,
   set_active_effect,
   set_active_reaction,
-  writable,
+  writable
 } from "./chunk-4PRHFUDT.js";
 import "./chunk-PRVSSIY5.js";
 import "./chunk-EGK6ZIR3.js";
@@ -47,11 +49,11 @@ function toStore(get2, set) {
     return {
       set,
       update: (fn) => set(fn(get2())),
-      subscribe: store.subscribe,
+      subscribe: store.subscribe
     };
   }
   return {
-    subscribe: store.subscribe,
+    subscribe: store.subscribe
   };
 }
 function fromStore(store) {
@@ -82,14 +84,22 @@ function fromStore(store) {
       },
       set current(v) {
         store.set(v);
-      },
+      }
     };
   }
   return {
     get current() {
       return current();
-    },
+    }
   };
 }
-export { derived, fromStore, get, readable, readonly, toStore, writable };
+export {
+  derived,
+  fromStore,
+  get,
+  readable,
+  readonly,
+  toStore,
+  writable
+};
 //# sourceMappingURL=svelte_store.js.map

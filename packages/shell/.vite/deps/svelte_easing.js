@@ -29,7 +29,7 @@ import {
   quintOut,
   sineIn,
   sineInOut,
-  sineOut,
+  sineOut
 } from "./chunk-WUT4PERJ.js";
 export {
   backIn,
@@ -62,5 +62,5 @@ export {
   quintOut,
   sineIn,
   sineInOut,
-  sineOut,
+  sineOut
 };

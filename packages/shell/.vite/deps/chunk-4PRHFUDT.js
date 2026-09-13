@@ -4,9 +4,13 @@ import {
   derived_inert,
   hydration_mismatch,
   state_proxy_equality_mismatch,
-  true_default,
+  true_default
 } from "./chunk-PRVSSIY5.js";
-import { async_mode_flag, legacy_mode_flag, tracing_mode_flag } from "./chunk-EGK6ZIR3.js";
+import {
+  async_mode_flag,
+  legacy_mode_flag,
+  tracing_mode_flag
+} from "./chunk-EGK6ZIR3.js";
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/internal/shared/utils.js
 var is_array = Array.isArray;
@@ -48,17 +52,13 @@ function deferred() {
   return { promise, resolve, reject };
 }
 function fallback(value, fallback2, lazy = false) {
-  return value === void 0
-    ? lazy
-      ? (
-        /** @type {() => V} */
-        fallback2()
-      )
-      : (
-        /** @type {V} */
-        fallback2
-      )
-    : value;
+  return value === void 0 ? lazy ? (
+    /** @type {() => V} */
+    fallback2()
+  ) : (
+    /** @type {V} */
+    fallback2
+  ) : value;
 }
 function to_array(value, n) {
   if (Array.isArray(value)) {
@@ -232,19 +232,17 @@ ${indent}in ${context.function?.[FILENAME].split("/").pop()}`;
     message: error.message + `
 ${component_stack}
 `,
-    stack: error.stack?.split("\n").filter((line) => !line.includes("svelte/src/internal")).join(
-      "\n",
-    ),
+    stack: error.stack?.split("\n").filter((line) => !line.includes("svelte/src/internal")).join("\n")
   };
 }
 function apply_adjustments(error) {
   const adjusted = adjustments.get(error);
   if (adjusted) {
     define_property(error, "message", {
-      value: adjusted.message,
+      value: adjusted.message
     });
     define_property(error, "stack", {
-      value: adjusted.stack,
+      value: adjusted.stack
     });
   }
 }
@@ -409,11 +407,7 @@ https://svelte.dev/e/derived_references_self`);
 function each_key_duplicate(a, b, value) {
   if (true_default) {
     const error = new Error(`each_key_duplicate
-${
-      value
-        ? `Keyed each block has duplicate key \`${value}\` at indexes ${a} and ${b}`
-        : `Keyed each block has duplicate key at indexes ${a} and ${b}`
-    }
+${value ? `Keyed each block has duplicate key \`${value}\` at indexes ${a} and ${b}` : `Keyed each block has duplicate key at indexes ${a} and ${b}`}
 https://svelte.dev/e/each_key_duplicate`);
     error.name = "Svelte error";
     throw error;
@@ -664,7 +658,7 @@ function create_context(get_context, set_context, has_context) {
       return get_context(key);
     },
     (context) => set_context(key, context),
-    () => has_context(key),
+    () => has_context(key)
   ];
 }
 function get_parent_context(context) {
@@ -698,7 +692,7 @@ function add_svelte_meta(callback, type, component, line, column, additional) {
     line,
     column,
     parent,
-    ...additional,
+    ...additional
   };
   try {
     return callback();
@@ -732,8 +726,8 @@ function setContext(key, context) {
       active_effect.f
     );
     var valid = !active_reaction && (flags & BRANCH_EFFECT) !== 0 && // pop() runs synchronously, so this indicates we're setting context after an await
-      !/** @type {ComponentContext} */
-      component_context.i;
+    !/** @type {ComponentContext} */
+    component_context.i;
     if (!valid) {
       set_context_after_init();
     }
@@ -764,7 +758,7 @@ function push(props, runes = false, fn) {
       /** @type {Effect} */
       active_effect
     ),
-    l: legacy_mode_flag && !runes ? { s: null, u: null, $: [] } : null,
+    l: legacy_mode_flag && !runes ? { s: null, u: null, $: [] } : null
   };
   if (true_default) {
     component_context.function = fn;
@@ -828,9 +822,7 @@ function equals(value) {
   return value === this.v;
 }
 function safe_not_equal(a, b) {
-  return a != a
-    ? b == b
-    : a !== b || a !== null && typeof a === "object" || typeof a === "function";
+  return a != a ? b == b : a !== b || a !== null && typeof a === "object" || typeof a === "function";
 }
 function safe_equals(value) {
   return !safe_not_equal(value, this.v);
@@ -841,13 +833,9 @@ var bold = "font-weight: bold";
 var normal = "font-weight: normal";
 function dynamic_void_element_content(tag2) {
   if (true_default) {
-    console.warn(
-      `%c[svelte] dynamic_void_element_content
+    console.warn(`%c[svelte] dynamic_void_element_content
 %c\`<svelte:element this="${tag2}">\` is a void element — it cannot have content
-https://svelte.dev/e/dynamic_void_element_content`,
-      bold,
-      normal,
-    );
+https://svelte.dev/e/dynamic_void_element_content`, bold, normal);
   } else {
     console.warn(`https://svelte.dev/e/dynamic_void_element_content`);
   }
@@ -856,16 +844,12 @@ function state_snapshot_uncloneable(properties) {
   if (true_default) {
     console.warn(
       `%c[svelte] state_snapshot_uncloneable
-%c${
-        properties
-          ? `The following properties cannot be cloned with \`$state.snapshot\` — the return value contains the originals:
+%c${properties ? `The following properties cannot be cloned with \`$state.snapshot\` — the return value contains the originals:
 
-${properties}`
-          : "Value cannot be cloned with `$state.snapshot` — the original value was returned"
-      }
+${properties}` : "Value cannot be cloned with `$state.snapshot` — the original value was returned"}
 https://svelte.dev/e/state_snapshot_uncloneable`,
       bold,
-      normal,
+      normal
     );
   } else {
     console.warn(`https://svelte.dev/e/state_snapshot_uncloneable`);
@@ -884,10 +868,8 @@ function snapshot(value, skip_warning = false, no_tojson = false) {
       const slice = paths.length > 10 ? paths.slice(0, 7) : paths.slice(0, 10);
       const excess = paths.length - slice.length;
       let uncloned = slice.map((path) => `- <value>${path}`).join("\n");
-      if (excess > 0) {
-        uncloned += `
+      if (excess > 0) uncloned += `
 - ...and ${excess} more`;
-      }
       state_snapshot_uncloneable(uncloned);
     }
     return copy;
@@ -898,18 +880,14 @@ function clone(value, cloned, path, paths, original = null, no_tojson = false) {
   if (typeof value === "object" && value !== null) {
     var unwrapped = cloned.get(value);
     if (unwrapped !== void 0) return unwrapped;
-    if (value instanceof Map) {
-      return (
-        /** @type {Snapshot<T>} */
-        new Map(value)
-      );
-    }
-    if (value instanceof Set) {
-      return (
-        /** @type {Snapshot<T>} */
-        new Set(value)
-      );
-    }
+    if (value instanceof Map) return (
+      /** @type {Snapshot<T>} */
+      new Map(value)
+    );
+    if (value instanceof Set) return (
+      /** @type {Snapshot<T>} */
+      new Set(value)
+    );
     if (is_array(value)) {
       var copy = (
         /** @type {Snapshot<any>} */
@@ -922,14 +900,7 @@ function clone(value, cloned, path, paths, original = null, no_tojson = false) {
       for (var i = 0; i < value.length; i += 1) {
         var element = value[i];
         if (i in value) {
-          copy[i] = clone(
-            element,
-            cloned,
-            true_default ? `${path}[${i}]` : path,
-            paths,
-            null,
-            no_tojson,
-          );
+          copy[i] = clone(element, cloned, true_default ? `${path}[${i}]` : path, paths, null, no_tojson);
         }
       }
       return copy;
@@ -948,7 +919,7 @@ function clone(value, cloned, path, paths, original = null, no_tojson = false) {
           true_default ? `${path}.${key}` : path,
           paths,
           null,
-          no_tojson,
+          no_tojson
         );
       }
       return copy;
@@ -960,10 +931,8 @@ function clone(value, cloned, path, paths, original = null, no_tojson = false) {
         structuredClone(value)
       );
     }
-    if (
-      typeof /** @type {T & { toJSON?: any } } */
-        value.toJSON === "function" && !no_tojson
-    ) {
+    if (typeof /** @type {T & { toJSON?: any } } */
+    value.toJSON === "function" && !no_tojson) {
       return clone(
         /** @type {T & { toJSON(): any } } */
         value.toJSON(),
@@ -971,7 +940,7 @@ function clone(value, cloned, path, paths, original = null, no_tojson = false) {
         true_default ? `${path}.toJSON()` : path,
         paths,
         // Associate the instance with the toJSON clone
-        value,
+        value
       );
     }
   }
@@ -1010,21 +979,17 @@ function log_entry(signal, entry) {
     active_reaction
   );
   const dirty = signal.wv > current_reaction.wv || current_reaction.wv === 0;
-  const style = dirty
-    ? "color: CornflowerBlue; font-weight: bold"
-    : "color: grey; font-weight: normal";
+  const style = dirty ? "color: CornflowerBlue; font-weight: bold" : "color: grey; font-weight: normal";
   console.groupCollapsed(
     signal.label ? `%c${type}%c ${signal.label}` : `%c${type}%c`,
     style,
     dirty ? "font-weight: normal" : style,
-    typeof value === "object" && value !== null && STATE_SYMBOL in value
-      ? snapshot(value, true)
-      : value,
+    typeof value === "object" && value !== null && STATE_SYMBOL in value ? snapshot(value, true) : value
   );
   if (type === "$derived") {
     const deps = new Set(
       /** @type {Derived} */
-      signal.deps,
+      signal.deps
     );
     for (const dep of deps) {
       log_entry(dep);
@@ -1104,10 +1069,10 @@ function get_error(label2) {
   }
   stack2.unshift("\n");
   define_property(error, "stack", {
-    value: stack2.join("\n"),
+    value: stack2.join("\n")
   });
   define_property(error, "name", {
-    value: label2,
+    value: label2
   });
   return (
     /** @type {Error & { stack: string }} */
@@ -1172,7 +1137,8 @@ function add_form_reset_listener() {
         Promise.resolve().then(() => {
           if (!evt.defaultPrevented) {
             for (
-              const e of /**@type {HTMLFormElement} */
+              const e of
+              /**@type {HTMLFormElement} */
               evt.target.elements
             ) {
               e[FORM_RESET_HANDLER]?.();
@@ -1181,7 +1147,7 @@ function add_form_reset_listener() {
         });
       },
       // In the capture phase to guarantee we get noticed of it (no possibility of stopPropagation)
-      { capture: true },
+      { capture: true }
     );
   }
 }
@@ -1236,10 +1202,7 @@ function flatten(blockers, sync, async, fn) {
   var deriveds = sync.map(d);
   if (true_default) {
     deriveds.forEach((d2, i) => {
-      d2.label = sync[i].toString().replace("() => ", "").replaceAll(
-        "$.eager(() => ",
-        "$state.eager(",
-      ).replace(/\$\.get\((.+?)\)/g, (_, id) => id);
+      d2.label = sync[i].toString().replace("() => ", "").replaceAll("$.eager(() => ", "$state.eager(").replace(/\$\.get\((.+?)\)/g, (_, id) => id);
     });
   }
   if (async.length === 0 && pending.length === 0) {
@@ -1251,11 +1214,7 @@ function flatten(blockers, sync, async, fn) {
     active_effect
   );
   var restore = capture();
-  var blocker_promise = pending.length === 1
-    ? pending[0].promise
-    : pending.length > 1
-    ? Promise.all(pending.map((b) => b.promise))
-    : null;
+  var blocker_promise = pending.length === 1 ? pending[0].promise : pending.length > 1 ? Promise.all(pending.map((b) => b.promise)) : null;
   function finish(async2) {
     if ((parent.f & DESTROYED) !== 0) {
       return;
@@ -1274,9 +1233,7 @@ function flatten(blockers, sync, async, fn) {
     return;
   }
   function run3() {
-    Promise.all(async.map((expression) => async_derived(expression))).then(finish).catch((error) =>
-      invoke_error_boundary(error, parent)
-    ).finally(decrement_pending);
+    Promise.all(async.map((expression) => async_derived(expression))).then(finish).catch((error) => invoke_error_boundary(error, parent)).finally(decrement_pending);
   }
   if (blocker_promise) {
     blocker_promise.then(() => {
@@ -1511,7 +1468,7 @@ function derived(fn) {
     ),
     wv: 0,
     parent: active_effect,
-    ac: null,
+    ac: null
   };
   if (true_default && tracing_mode_flag) {
     signal.created = get_error("created at");
@@ -1534,7 +1491,7 @@ function async_derived(fn, label2, location) {
   );
   var signal = source(
     /** @type {V} */
-    UNINITIALIZED,
+    UNINITIALIZED
   );
   if (true_default) signal.label = label2 ?? fn.toString();
   var should_suspend = !active_reaction;
@@ -1545,11 +1502,7 @@ function async_derived(fn, label2, location) {
       active_effect
     );
     if (true_default) {
-      reactivity_loss_tracker = {
-        effect: effect2,
-        effect_deps: /* @__PURE__ */ new Set(),
-        warned: false,
-      };
+      reactivity_loss_tracker = { effect: effect2, effect_deps: /* @__PURE__ */ new Set(), warned: false };
     }
     var d = deferred();
     promise = d.promise;
@@ -1619,7 +1572,7 @@ function async_derived(fn, label2, location) {
               await_waterfall(
                 /** @type {string} */
                 signal.label,
-                location,
+                location
               );
               recent_async_deriveds.delete(signal);
             }
@@ -1670,7 +1623,7 @@ function destroy_derived_effects(derived3) {
     for (var i = 0; i < effects.length; i += 1) {
       destroy_effect(
         /** @type {Effect} */
-        effects[i],
+        effects[i]
       );
     }
   }
@@ -1680,10 +1633,8 @@ function execute_derived(derived3) {
   var value;
   var prev_active_effect = active_effect;
   var parent = derived3.parent;
-  if (
-    !is_destroying_effect && parent !== null && derived3.v !== UNINITIALIZED && // if it was never evaluated before, it's guaranteed to fail downstream, so we try to execute instead
-    (parent.f & (DESTROYED | INERT)) !== 0
-  ) {
+  if (!is_destroying_effect && parent !== null && derived3.v !== UNINITIALIZED && // if it was never evaluated before, it's guaranteed to fail downstream, so we try to execute instead
+  (parent.f & (DESTROYED | INERT)) !== 0) {
     derived_inert();
     return derived3.v;
   }
@@ -1787,7 +1738,7 @@ function source(v, stack2) {
     reactions: null,
     equals,
     rv: 0,
-    wv: 0,
+    wv: 0
   };
   if (true_default && tracing_mode_flag) {
     signal.created = stack2 ?? get_error("created at");
@@ -1815,18 +1766,14 @@ function mutable_source(initial_value, immutable = false, trackable = true) {
 function mutate(source2, value) {
   set(
     source2,
-    untrack(() => get(source2)),
+    untrack(() => get(source2))
   );
   return value;
 }
 function set(source2, value, should_proxy = false) {
-  if (
-    active_reaction !== null && // since we are untracking the function inside `$inspect.with` we need to add this check
-    // to ensure we error if state is set inside an inspect effect
-    (!untracking || (active_reaction.f & EAGER_EFFECT) !== 0) && is_runes() &&
-    (active_reaction.f & (DERIVED | BLOCK_EFFECT | ASYNC | EAGER_EFFECT)) !== 0 &&
-    (current_sources === null || !current_sources.has(source2))
-  ) {
+  if (active_reaction !== null && // since we are untracking the function inside `$inspect.with` we need to add this check
+  // to ensure we error if state is set inside an inspect effect
+  (!untracking || (active_reaction.f & EAGER_EFFECT) !== 0) && is_runes() && (active_reaction.f & (DERIVED | BLOCK_EFFECT | ASYNC | EAGER_EFFECT)) !== 0 && (current_sources === null || !current_sources.has(source2))) {
     state_unsafe_mutation();
   }
   let new_value = should_proxy ? proxy(value) : value;
@@ -1834,7 +1781,7 @@ function set(source2, value, should_proxy = false) {
     tag_proxy(
       new_value,
       /** @type {string} */
-      source2.label,
+      source2.label
     );
   }
   return internal_set(source2, new_value, legacy_updates);
@@ -1852,13 +1799,10 @@ function internal_set(source2, value, updated_during_traversal = null) {
       if (tracing_mode_flag || active_effect !== null) {
         source2.updated ??= /* @__PURE__ */ new Map();
         const count = (source2.updated.get("")?.count ?? 0) + 1;
-        source2.updated.set("", {
-          error: (
-            /** @type {any} */
-            null
-          ),
-          count,
-        });
+        source2.updated.set("", { error: (
+          /** @type {any} */
+          null
+        ), count });
         if (tracing_mode_flag || count > 5) {
           const error = get_error("updated at");
           if (error !== null) {
@@ -1889,10 +1833,7 @@ function internal_set(source2, value, updated_during_traversal = null) {
     }
     source2.wv = increment_write_version();
     mark_reactions(source2, DIRTY, updated_during_traversal);
-    if (
-      is_runes() && active_effect !== null && (active_effect.f & CLEAN) !== 0 &&
-      (active_effect.f & (BRANCH_EFFECT | ROOT_EFFECT)) === 0
-    ) {
+    if (is_runes() && active_effect !== null && (active_effect.f & CLEAN) !== 0 && (active_effect.f & (BRANCH_EFFECT | ROOT_EFFECT)) === 0) {
       if (untracked_writes === null) {
         set_untracked_writes([source2]);
       } else {
@@ -1952,7 +1893,7 @@ function mark_reactions(signal, status, updated_during_traversal) {
     if ((flags & EAGER_EFFECT) !== 0) {
       eager_effects.add(
         /** @type {Effect} */
-        reaction,
+        reaction
       );
     } else if ((flags & DERIVED) !== 0) {
       var derived3 = (
@@ -1961,10 +1902,7 @@ function mark_reactions(signal, status, updated_during_traversal) {
       );
       batch_values?.delete(derived3);
       if ((flags & WAS_MARKED) === 0) {
-        if (
-          flags & CONNECTED &&
-          (active_effect === null || (active_effect.f & REACTION_IS_UPDATING) === 0)
-        ) {
+        if (flags & CONNECTED && (active_effect === null || (active_effect.f & REACTION_IS_UPDATING) === 0)) {
           reaction.f |= WAS_MARKED;
         }
         mark_reactions(derived3, MAYBE_DIRTY, updated_during_traversal);
@@ -1996,7 +1934,7 @@ function clear_marked(deps) {
     dep.f ^= WAS_MARKED;
     clear_marked(
       /** @type {Derived} */
-      dep.deps,
+      dep.deps
     );
   }
 }
@@ -2018,12 +1956,11 @@ function subscribe_to_store(store, run3, invalidate) {
     return noop;
   }
   const unsub = untrack(
-    () =>
-      store.subscribe(
-        run3,
-        // @ts-expect-error
-        invalidate,
-      ),
+    () => store.subscribe(
+      run3,
+      // @ts-expect-error
+      invalidate
+    )
   );
   return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
 }
@@ -2032,7 +1969,7 @@ function subscribe_to_store(store, run3, invalidate) {
 var subscriber_queue = [];
 function readable(value, start) {
   return {
-    subscribe: writable(value, start).subscribe,
+    subscribe: writable(value, start).subscribe
   };
 }
 function writable(value, start = noop) {
@@ -2059,7 +1996,7 @@ function writable(value, start = noop) {
   function update2(fn) {
     set2(fn(
       /** @type {T} */
-      value,
+      value
     ));
   }
   function subscribe(run3, invalidate = noop) {
@@ -2070,7 +2007,7 @@ function writable(value, start = noop) {
     }
     run3(
       /** @type {T} */
-      value,
+      value
     );
     return () => {
       subscribers.delete(subscriber);
@@ -2107,20 +2044,19 @@ function derived2(stores, fn, initial_value) {
       }
     };
     const unsubscribers = stores_array.map(
-      (store, i) =>
-        subscribe_to_store(
-          store,
-          (value) => {
-            values[i] = value;
-            pending &= ~(1 << i);
-            if (started) {
-              sync();
-            }
-          },
-          () => {
-            pending |= 1 << i;
-          },
-        ),
+      (store, i) => subscribe_to_store(
+        store,
+        (value) => {
+          values[i] = value;
+          pending &= ~(1 << i);
+          if (started) {
+            sync();
+          }
+        },
+        () => {
+          pending |= 1 << i;
+        }
+      )
     );
     started = true;
     sync();
@@ -2134,7 +2070,7 @@ function derived2(stores, fn, initial_value) {
 function readonly(store) {
   return {
     // @ts-expect-error TODO i suspect the bind is unnecessary
-    subscribe: store.subscribe.bind(store),
+    subscribe: store.subscribe.bind(store)
   };
 }
 function get2(store) {
@@ -2151,7 +2087,7 @@ function store_get(store, store_name, stores) {
   const entry = stores[store_name] ??= {
     store: null,
     source: mutable_source(void 0),
-    unsubscribe: noop,
+    unsubscribe: noop
   };
   if (true_default) {
     entry.source.label = store_name;
@@ -2207,7 +2143,7 @@ function setup_stores() {
       }
       define_property(stores, IS_UNMOUNTED, {
         enumerable: false,
-        value: true,
+        value: true
       });
     });
   }
@@ -2515,8 +2451,7 @@ var Batch = class _Batch {
       var flags = effect2.f;
       var is_branch = (flags & (BRANCH_EFFECT | ROOT_EFFECT)) !== 0;
       var is_skippable_branch = is_branch && (flags & CLEAN) !== 0;
-      var skip = is_skippable_branch || (flags & INERT) !== 0 ||
-        this.#skipped_branches.has(effect2);
+      var skip = is_skippable_branch || (flags & INERT) !== 0 || this.#skipped_branches.has(effect2);
       if (!skip && effect2.fn !== null) {
         if (is_branch) {
           effect2.f ^= CLEAN;
@@ -2585,7 +2520,7 @@ var Batch = class _Batch {
         if ((flags & DERIVED) !== 0) {
           mark(
             /** @type {Derived} */
-            reaction,
+            reaction
           );
         } else {
           var effect2 = (
@@ -2706,9 +2641,8 @@ var Batch = class _Batch {
         }
       }
       var current = [...batch.current.keys()].filter(
-        (source3) =>
-          !/** @type {[any, boolean]} */
-          batch.current.get(source3)[1],
+        (source3) => !/** @type {[any, boolean]} */
+        batch.current.get(source3)[1]
       );
       if (!batch.#started || current.length === 0) continue;
       var others = current.filter((source3) => !this.current.has(source3));
@@ -2745,10 +2679,7 @@ var Batch = class _Batch {
         }).map(([c]) => c);
         if (current_unequal.length > 0) {
           for (const effect2 of this.#new_effects) {
-            if (
-              (effect2.f & (DESTROYED | INERT | EAGER_EFFECT)) === 0 &&
-              depends_on(effect2, current_unequal, checked)
-            ) {
+            if ((effect2.f & (DESTROYED | INERT | EAGER_EFFECT)) === 0 && depends_on(effect2, current_unequal, checked)) {
               if ((effect2.f & (ASYNC | BLOCK_EFFECT)) !== 0) {
                 set_signal_status(effect2, DIRTY);
                 batch.schedule(effect2);
@@ -2872,14 +2803,12 @@ var Batch = class _Batch {
     }
   }
   /**
+   *
    * @param {Effect} effect
    */
   schedule(effect2) {
     last_scheduled_effect = effect2;
-    if (
-      effect2.b?.is_pending && (effect2.f & (EFFECT | RENDER_EFFECT | MANAGED_EFFECT)) !== 0 &&
-      (effect2.f & REACTION_RAN) === 0
-    ) {
+    if (effect2.b?.is_pending && (effect2.f & (EFFECT | RENDER_EFFECT | MANAGED_EFFECT)) !== 0 && (effect2.f & REACTION_RAN) === 0) {
       effect2.b.defer_effect(effect2);
       return;
     }
@@ -2889,10 +2818,7 @@ var Batch = class _Batch {
       var flags = e.f;
       if (collected_effects !== null && e === active_effect) {
         if (async_mode_flag) return;
-        if (
-          (active_reaction === null || (active_reaction.f & DERIVED) === 0) &&
-          !legacy_is_updating_store
-        ) {
+        if ((active_reaction === null || (active_reaction.f & DERIVED) === 0) && !legacy_is_updating_store) {
           return;
         }
       }
@@ -2951,7 +2877,8 @@ function infinite_loop_guard() {
   if (true_default) {
     var updates = /* @__PURE__ */ new Map();
     for (
-      const source2 of /** @type {Batch} */
+      const source2 of
+      /** @type {Batch} */
       current_batch.current.keys()
     ) {
       for (const [stack2, update2] of source2.updated ?? []) {
@@ -2988,10 +2915,7 @@ function flush_queued_effects(effects) {
     if ((effect2.f & (DESTROYED | INERT)) === 0 && is_dirty(effect2)) {
       eager_block_effects = /* @__PURE__ */ new Set();
       update_effect(effect2);
-      if (
-        effect2.deps === null && effect2.first === null && effect2.nodes === null &&
-        effect2.teardown === null && effect2.ac === null
-      ) {
+      if (effect2.deps === null && effect2.first === null && effect2.nodes === null && effect2.teardown === null && effect2.ac === null) {
         unlink_effect(effect2);
       }
       if (eager_block_effects?.size > 0) {
@@ -3031,16 +2955,13 @@ function mark_effects(value, sources, marked, checked) {
           reaction,
           sources,
           marked,
-          checked,
+          checked
         );
-      } else if (
-        (flags & (ASYNC | BLOCK_EFFECT)) !== 0 && (flags & DIRTY) === 0 &&
-        depends_on(reaction, sources, checked)
-      ) {
+      } else if ((flags & (ASYNC | BLOCK_EFFECT)) !== 0 && (flags & DIRTY) === 0 && depends_on(reaction, sources, checked)) {
         set_signal_status(reaction, DIRTY);
         schedule_effect(
           /** @type {Effect} */
-          reaction,
+          reaction
         );
       }
     }
@@ -3054,13 +2975,13 @@ function mark_eager_effects(value, effects) {
       mark_eager_effects(
         /** @type {Derived} */
         reaction,
-        effects,
+        effects
       );
     } else if ((flags & EAGER_EFFECT) !== 0) {
       set_signal_status(reaction, DIRTY);
       effects.add(
         /** @type {Effect} */
-        reaction,
+        reaction
       );
     }
   }
@@ -3073,18 +2994,16 @@ function depends_on(reaction, sources, checked) {
       if (includes.call(sources, dep)) {
         return true;
       }
-      if (
-        (dep.f & DERIVED) !== 0 && depends_on(
-          /** @type {Derived} */
-          dep,
-          sources,
-          checked,
-        )
-      ) {
+      if ((dep.f & DERIVED) !== 0 && depends_on(
+        /** @type {Derived} */
+        dep,
+        sources,
+        checked
+      )) {
         checked.set(
           /** @type {Derived} */
           dep,
-          true,
+          true
         );
         return true;
       }
@@ -3212,7 +3131,7 @@ function fork(fn) {
       if (!committed && batch.linked) {
         batch.discard();
       }
-    },
+    }
   };
 }
 
@@ -3262,7 +3181,7 @@ function create_effect(type, fn) {
     prev: null,
     teardown: null,
     wv: 0,
-    ac: null,
+    ac: null
   };
   if (true_default) {
     effect2.component_function = dev_current_component_function;
@@ -3282,10 +3201,8 @@ function create_effect(type, fn) {
       destroy_effect(effect2);
       throw e2;
     }
-    if (
-      e.deps === null && e.teardown === null && e.nodes === null && e.first === e.last && // either `null`, or a singular child
-      (e.f & EFFECT_PRESERVED) === 0
-    ) {
+    if (e.deps === null && e.teardown === null && e.nodes === null && e.first === e.last && // either `null`, or a singular child
+    (e.f & EFFECT_PRESERVED) === 0) {
       e = e.first;
       if ((type & BLOCK_EFFECT) !== 0 && (type & EFFECT_TRANSPARENT) !== 0 && e !== null) {
         e.f |= EFFECT_TRANSPARENT;
@@ -3297,9 +3214,7 @@ function create_effect(type, fn) {
     if (parent !== null) {
       push_effect(e, parent);
     }
-    if (
-      active_reaction !== null && (active_reaction.f & DERIVED) !== 0 && (type & ROOT_EFFECT) === 0
-    ) {
+    if (active_reaction !== null && (active_reaction.f & DERIVED) !== 0 && (type & ROOT_EFFECT) === 0) {
       var derived3 = (
         /** @type {Derived} */
         active_reaction
@@ -3322,15 +3237,14 @@ function user_effect(fn) {
   validate_effect("$effect");
   if (true_default) {
     define_property(fn, "name", {
-      value: "$effect",
+      value: "$effect"
     });
   }
   var flags = (
     /** @type {Effect} */
     active_effect.f
   );
-  var defer = !active_reaction && (flags & BRANCH_EFFECT) !== 0 && component_context !== null &&
-    !component_context.i;
+  var defer = !active_reaction && (flags & BRANCH_EFFECT) !== 0 && component_context !== null && !component_context.i;
   if (defer) {
     var context = (
       /** @type {ComponentContext} */
@@ -3348,7 +3262,7 @@ function user_pre_effect(fn) {
   validate_effect("$effect.pre");
   if (true_default) {
     define_property(fn, "name", {
-      value: "$effect.pre",
+      value: "$effect.pre"
     });
   }
   return create_effect(RENDER_EFFECT | USER_EFFECT, fn);
@@ -3508,14 +3422,11 @@ function destroy_block_effect_children(signal) {
 }
 function destroy_effect(effect2, remove_dom = true) {
   var removed = false;
-  if (
-    (remove_dom || (effect2.f & HEAD_EFFECT) !== 0) && effect2.nodes !== null &&
-    effect2.nodes.end !== null
-  ) {
+  if ((remove_dom || (effect2.f & HEAD_EFFECT) !== 0) && effect2.nodes !== null && effect2.nodes.end !== null) {
     remove_effect_dom(
       effect2.nodes.start,
       /** @type {TemplateNode} */
-      effect2.nodes.end,
+      effect2.nodes.end
     );
     removed = true;
   }
@@ -3538,16 +3449,7 @@ function destroy_effect(effect2, remove_dom = true) {
   if (true_default) {
     effect2.component_function = null;
   }
-  effect2.next =
-    effect2.prev =
-    effect2.teardown =
-    effect2.ctx =
-    effect2.deps =
-    effect2.fn =
-    effect2.nodes =
-    effect2.ac =
-    effect2.b =
-      null;
+  effect2.next = effect2.prev = effect2.teardown = effect2.ctx = effect2.deps = effect2.fn = effect2.nodes = effect2.ac = effect2.b = null;
 }
 function remove_effect_dom(node, end) {
   while (node !== null) {
@@ -3601,9 +3503,9 @@ function pause_children(effect2, transitions, local) {
     var sibling2 = child2.next;
     if ((child2.f & ROOT_EFFECT) === 0) {
       var transparent = (child2.f & EFFECT_TRANSPARENT) !== 0 || // If this is a branch effect without a block effect parent,
-        // it means the parent block effect was pruned. In that case,
-        // transparency information was transferred to the branch effect.
-        (child2.f & BRANCH_EFFECT) !== 0 && (effect2.f & BLOCK_EFFECT) !== 0;
+      // it means the parent block effect was pruned. In that case,
+      // transparency information was transferred to the branch effect.
+      (child2.f & BRANCH_EFFECT) !== 0 && (effect2.f & BLOCK_EFFECT) !== 0;
       pause_children(child2, transitions, transparent ? local : false);
     }
     child2 = sibling2;
@@ -3637,12 +3539,10 @@ function resume_children(effect2, local) {
     }
   }
 }
-function aborted(
-  effect2 = (
-    /** @type {Effect} */
-    active_effect
-  ),
-) {
+function aborted(effect2 = (
+  /** @type {Effect} */
+  active_effect
+)) {
   return (effect2.f & DESTROYED) !== 0;
 }
 function move_effect(effect2, fragment) {
@@ -3731,26 +3631,22 @@ function is_dirty(reaction) {
     var length = dependencies.length;
     for (var i = 0; i < length; i++) {
       var dependency = dependencies[i];
-      if (
-        is_dirty(
-          /** @type {Derived} */
-          dependency,
-        )
-      ) {
+      if (is_dirty(
+        /** @type {Derived} */
+        dependency
+      )) {
         update_derived(
           /** @type {Derived} */
-          dependency,
+          dependency
         );
       }
       if (dependency.wv > reaction.wv) {
         return true;
       }
     }
-    if (
-      (flags & CONNECTED) !== 0 && // During time traveling we don't want to reset the status so that
-      // traversal of the graph in the other batches still happens
-      batch_values === null
-    ) {
+    if ((flags & CONNECTED) !== 0 && // During time traveling we don't want to reset the status so that
+    // traversal of the graph in the other batches still happens
+    batch_values === null) {
       set_signal_status(reaction, CLEAN);
     }
   }
@@ -3769,7 +3665,7 @@ function schedule_possible_effect_self_invalidation(signal, effect2, root = true
         /** @type {Derived} */
         reaction,
         effect2,
-        false,
+        false
       );
     } else if (effect2 === reaction) {
       if (root) {
@@ -3779,7 +3675,7 @@ function schedule_possible_effect_self_invalidation(signal, effect2, root = true
       }
       schedule_effect(
         /** @type {Effect} */
-        reaction,
+        reaction
       );
     }
   }
@@ -3795,7 +3691,7 @@ function update_reaction(reaction) {
   var previous_update_version = update_version;
   var flags = reaction.f;
   new_deps = /** @type {null | Value[]} */
-    null;
+  null;
   skipped_deps = 0;
   untracked_writes = null;
   active_reaction = (flags & (BRANCH_EFFECT | ROOT_EFFECT)) === 0 ? reaction : null;
@@ -3818,20 +3714,13 @@ function update_reaction(reaction) {
     var result = fn();
     reaction.f |= REACTION_RAN;
     var deps = update_dependencies(reaction);
-    if (
-      is_runes() && untracked_writes !== null && !untracking && deps !== null &&
-      (reaction.f & (DERIVED | MAYBE_DIRTY | DIRTY)) === 0
-    ) {
-      for (
-        var i = 0;
-        i < /** @type {Source[]} */
-          untracked_writes.length;
-        i++
-      ) {
+    if (is_runes() && untracked_writes !== null && !untracking && deps !== null && (reaction.f & (DERIVED | MAYBE_DIRTY | DIRTY)) === 0) {
+      for (var i = 0; i < /** @type {Source[]} */
+      untracked_writes.length; i++) {
         schedule_possible_effect_self_invalidation(
           untracked_writes[i],
           /** @type {Effect} */
-          reaction,
+          reaction
         );
       }
     }
@@ -3851,10 +3740,8 @@ function update_reaction(reaction) {
         if (previous_untracked_writes === null) {
           previous_untracked_writes = untracked_writes;
         } else {
-          previous_untracked_writes.push(
-            .../** @type {Source[]} */
-            untracked_writes,
-          );
+          previous_untracked_writes.push(.../** @type {Source[]} */
+          untracked_writes);
         }
       }
     }
@@ -3918,12 +3805,10 @@ function remove_reaction(signal, dependency) {
       }
     }
   }
-  if (
-    reactions === null && (dependency.f & DERIVED) !== 0 && // Destroying a child effect while updating a parent effect can cause a dependency to appear
-    // to be unused, when in fact it is used by the currently-updating parent. Checking `new_deps`
-    // allows us to skip the expensive work of disconnecting and immediately reconnecting it
-    (new_deps === null || !includes.call(new_deps, dependency))
-  ) {
+  if (reactions === null && (dependency.f & DERIVED) !== 0 && // Destroying a child effect while updating a parent effect can cause a dependency to appear
+  // to be unused, when in fact it is used by the currently-updating parent. Checking `new_deps`
+  // allows us to skip the expensive work of disconnecting and immediately reconnecting it
+  (new_deps === null || !includes.call(new_deps, dependency))) {
     var derived3 = (
       /** @type {Derived} */
       dependency
@@ -4046,27 +3931,20 @@ function get(signal) {
     }
   }
   if (true_default) {
-    if (
-      !untracking && reactivity_loss_tracker && // By checking that current/previous batch are null we filter out false positives.
-      // reactivity_loss_tracker is only reset after a microtask, so if a flush happens
-      // before that, we get warnings for things we shouldn't warn on.
-      current_batch === null && previous_batch === null && !reactivity_loss_tracker.warned &&
-      (reactivity_loss_tracker.effect.f & REACTION_IS_UPDATING) === 0 &&
-      !reactivity_loss_tracker.effect_deps.has(signal)
-    ) {
+    if (!untracking && reactivity_loss_tracker && // By checking that current/previous batch are null we filter out false positives.
+    // reactivity_loss_tracker is only reset after a microtask, so if a flush happens
+    // before that, we get warnings for things we shouldn't warn on.
+    current_batch === null && previous_batch === null && !reactivity_loss_tracker.warned && (reactivity_loss_tracker.effect.f & REACTION_IS_UPDATING) === 0 && !reactivity_loss_tracker.effect_deps.has(signal)) {
       reactivity_loss_tracker.warned = true;
       await_reactivity_loss(
         /** @type {string} */
-        signal.label,
+        signal.label
       );
       var trace2 = get_error("traced at");
       if (trace2) console.warn(trace2);
     }
     recent_async_deriveds.delete(signal);
-    if (
-      tracing_mode_flag && !untracking && tracing_expressions !== null &&
-      active_reaction !== null && tracing_expressions.reaction === active_reaction
-    ) {
+    if (tracing_mode_flag && !untracking && tracing_expressions !== null && active_reaction !== null && tracing_expressions.reaction === active_reaction) {
       if (signal.trace) {
         signal.trace();
       } else {
@@ -4095,16 +3973,13 @@ function get(signal) {
     );
     if (is_destroying_effect) {
       var value = derived3.v;
-      if (
-        (derived3.f & CLEAN) === 0 && derived3.reactions !== null || depends_on_old_values(derived3)
-      ) {
+      if ((derived3.f & CLEAN) === 0 && derived3.reactions !== null || depends_on_old_values(derived3)) {
         value = execute_derived(derived3);
       }
       old_values.set(derived3, value);
       return value;
     }
-    var should_connect = (derived3.f & CONNECTED) === 0 && !untracking &&
-      active_reaction !== null && (is_updating_effect || (active_reaction.f & CONNECTED) !== 0);
+    var should_connect = (derived3.f & CONNECTED) === 0 && !untracking && active_reaction !== null && (is_updating_effect || (active_reaction.f & CONNECTED) !== 0);
     var is_new = (derived3.f & REACTION_RAN) === 0;
     if (is_dirty(derived3)) {
       if (should_connect) {
@@ -4133,11 +4008,11 @@ function reconnect(derived3) {
     if ((dep.f & DERIVED) !== 0 && (dep.f & CONNECTED) === 0) {
       unfreeze_derived_effects(
         /** @type {Derived} */
-        dep,
+        dep
       );
       reconnect(
         /** @type {Derived} */
-        dep,
+        dep
       );
     }
   }
@@ -4149,12 +4024,10 @@ function depends_on_old_values(derived3) {
     if (old_values.has(dep)) {
       return true;
     }
-    if (
-      (dep.f & DERIVED) !== 0 && depends_on_old_values(
-        /** @type {Derived} */
-        dep,
-      )
-    ) {
+    if ((dep.f & DERIVED) !== 0 && depends_on_old_values(
+      /** @type {Derived} */
+      dep
+    )) {
       return true;
     }
   }
@@ -4188,10 +4061,8 @@ function deep_read_state(value) {
   }
 }
 function deep_read(value, visited = /* @__PURE__ */ new Set()) {
-  if (
-    typeof value === "object" && value !== null && // We don't want to traverse DOM elements
-    !(value instanceof EventTarget) && !visited.has(value)
-  ) {
+  if (typeof value === "object" && value !== null && // We don't want to traverse DOM elements
+  !(value instanceof EventTarget) && !visited.has(value)) {
     visited.add(value);
     if (value instanceof Date) {
       value.getTime();
@@ -4203,10 +4074,7 @@ function deep_read(value, visited = /* @__PURE__ */ new Set()) {
       }
     }
     const proto = get_prototype_of(value);
-    if (
-      proto !== Object.prototype && proto !== Array.prototype && proto !== Map.prototype &&
-      proto !== Set.prototype && proto !== Date.prototype
-    ) {
+    if (proto !== Object.prototype && proto !== Array.prototype && proto !== Map.prototype && proto !== Set.prototype && proto !== Date.prototype) {
       const descriptors = get_descriptors(proto);
       for (let key in descriptors) {
         const get3 = descriptors[key].get;
@@ -4224,10 +4092,7 @@ function deep_read(value, visited = /* @__PURE__ */ new Set()) {
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/internal/client/proxy.js
 var regex_is_valid_identifier = /^[a-zA-Z_$][a-zA-Z_$0-9]*$/;
 function proxy(value) {
-  if (
-    typeof value !== "object" || value === null || STATE_SYMBOL in value ||
-    COMPONENT_SYMBOL in value
-  ) {
+  if (typeof value !== "object" || value === null || STATE_SYMBOL in value || COMPONENT_SYMBOL in value) {
     return value;
   }
   const prototype = get_prototype_of(value);
@@ -4253,20 +4118,17 @@ function proxy(value) {
     return result;
   };
   if (is_proxied_array) {
-    sources.set(
-      "length",
-      state(
-        /** @type {any[]} */
-        value.length,
-        stack2,
-      ),
-    );
+    sources.set("length", state(
+      /** @type {any[]} */
+      value.length,
+      stack2
+    ));
     if (true_default) {
       value = /** @type {any} */
-        inspectable_array(
-          /** @type {any[]} */
-          value,
-        );
+      inspectable_array(
+        /** @type {any[]} */
+        value
+      );
     }
   }
   var path = "";
@@ -4286,10 +4148,7 @@ function proxy(value) {
     value,
     {
       defineProperty(_, prop, descriptor) {
-        if (
-          !("value" in descriptor) || descriptor.configurable === false ||
-          descriptor.enumerable === false || descriptor.writable === false
-        ) {
+        if (!("value" in descriptor) || descriptor.configurable === false || descriptor.enumerable === false || descriptor.writable === false) {
           state_descriptors_fixed();
         }
         var s = sources.get(prop);
@@ -4363,7 +4222,7 @@ function proxy(value) {
               enumerable: true,
               configurable: true,
               value: value2,
-              writable: true,
+              writable: true
             };
           }
         }
@@ -4375,9 +4234,7 @@ function proxy(value) {
         }
         var s = sources.get(prop);
         var has = s !== void 0 && s.v !== UNINITIALIZED || Reflect.has(target, prop);
-        if (
-          s !== void 0 || active_effect !== null && (!has || get_descriptor(target, prop)?.writable)
-        ) {
+        if (s !== void 0 || active_effect !== null && (!has || get_descriptor(target, prop)?.writable)) {
           if (s === void 0) {
             s = with_parent(() => {
               var p = has ? proxy(target[prop]) : UNINITIALIZED;
@@ -4400,12 +4257,8 @@ function proxy(value) {
         var s = sources.get(prop);
         var has = prop in target;
         if (is_proxied_array && prop === "length") {
-          for (
-            var i = value2;
-            i < /** @type {Source<number>} */
-              s.v;
-            i += 1
-          ) {
+          for (var i = value2; i < /** @type {Source<number>} */
+          s.v; i += 1) {
             var other_s = sources.get(i + "");
             if (other_s !== void 0) {
               set(other_s, UNINITIALIZED);
@@ -4466,8 +4319,8 @@ function proxy(value) {
       },
       setPrototypeOf() {
         state_prototype_fixed();
-      },
-    },
+      }
+    }
   );
 }
 function get_label(path, prop) {
@@ -4496,27 +4349,25 @@ var ARRAY_MUTATING_METHODS = /* @__PURE__ */ new Set([
   "shift",
   "sort",
   "splice",
-  "unshift",
+  "unshift"
 ]);
 function inspectable_array(array) {
   return new Proxy(array, {
     get(target, prop, receiver) {
       var value = Reflect.get(target, prop, receiver);
-      if (
-        !ARRAY_MUTATING_METHODS.has(
-          /** @type {string} */
-          prop,
-        )
-      ) {
+      if (!ARRAY_MUTATING_METHODS.has(
+        /** @type {string} */
+        prop
+      )) {
         return value;
       }
-      return function (...args) {
+      return function(...args) {
         set_eager_effects_deferred();
         var result = value.apply(this, args);
         flush_eager_effects();
         return result;
       };
-    },
+    }
   });
 }
 
@@ -4528,7 +4379,7 @@ function init_array_prototype_warnings() {
     cleanup();
   }
   const { indexOf, lastIndexOf, includes: includes2 } = array_prototype2;
-  array_prototype2.indexOf = function (item, from_index) {
+  array_prototype2.indexOf = function(item, from_index) {
     const index = indexOf.call(this, item, from_index);
     if (index === -1) {
       for (let i = from_index ?? 0; i < this.length; i += 1) {
@@ -4540,7 +4391,7 @@ function init_array_prototype_warnings() {
     }
     return index;
   };
-  array_prototype2.lastIndexOf = function (item, from_index) {
+  array_prototype2.lastIndexOf = function(item, from_index) {
     const index = lastIndexOf.call(this, item, from_index ?? this.length - 1);
     if (index === -1) {
       for (let i = 0; i <= (from_index ?? this.length - 1); i += 1) {
@@ -4552,7 +4403,7 @@ function init_array_prototype_warnings() {
     }
     return index;
   };
-  array_prototype2.includes = function (item, from_index) {
+  array_prototype2.includes = function(item, from_index) {
     const has = includes2.call(this, item, from_index);
     if (!has) {
       for (let i = 0; i < this.length; i += 1) {
@@ -4649,7 +4500,7 @@ function child(node, is_text) {
   if (is_text) {
     merge_text_nodes(
       /** @type {Text} */
-      child2,
+      child2
     );
   }
   set_hydrate_node(child2);
@@ -4670,7 +4521,7 @@ function first_child(node, is_text = false) {
     }
     merge_text_nodes(
       /** @type {Text} */
-      hydrate_node,
+      hydrate_node
     );
   }
   return hydrate_node;
@@ -4689,7 +4540,7 @@ function sibling(node, count = 1, is_text = false) {
   while (count--) {
     last_sibling = next_sibling;
     next_sibling = /** @type {TemplateNode} */
-      get_next_sibling(next_sibling);
+    get_next_sibling(next_sibling);
   }
   if (!hydrating) {
     return next_sibling;
@@ -4707,7 +4558,7 @@ function sibling(node, count = 1, is_text = false) {
     }
     merge_text_nodes(
       /** @type {Text} */
-      next_sibling,
+      next_sibling
     );
   }
   set_hydrate_node(next_sibling);
@@ -4734,9 +4585,7 @@ function create_element(tag2, namespace, is2) {
   }
   return (
     /** @type {T extends keyof HTMLElementTagNameMap ? HTMLElementTagNameMap[T] : Element} */
-    is2
-      ? document.createElementNS(namespace, tag2, { is: is2 })
-      : document.createElementNS(namespace, tag2)
+    is2 ? document.createElementNS(namespace, tag2, { is: is2 }) : document.createElementNS(namespace, tag2)
   );
 }
 function create_fragment() {
@@ -4763,7 +4612,7 @@ function merge_text_nodes(text) {
   while (next2 !== null && next2.nodeType === TEXT_NODE) {
     next2.remove();
     text.nodeValue += /** @type {string} */
-      next2.nodeValue;
+    next2.nodeValue;
     next2 = text.nextSibling;
   }
 }
@@ -4803,7 +4652,7 @@ function next(count = 1) {
     var node = hydrate_node;
     while (i--) {
       node = /** @type {TemplateNode} */
-        get_next_sibling(node);
+      get_next_sibling(node);
     }
     hydrate_node = node;
   }
@@ -4820,10 +4669,8 @@ function skip_nodes(remove = true) {
       if (data === HYDRATION_END) {
         if (depth === 0) return node;
         depth -= 1;
-      } else if (
-        data === HYDRATION_START || data === HYDRATION_START_ELSE || // "[1", "[2", etc. for if blocks
-        data[0] === "[" && !isNaN(Number(data.slice(1)))
-      ) {
+      } else if (data === HYDRATION_START || data === HYDRATION_START_ELSE || // "[1", "[2", etc. for if blocks
+      data[0] === "[" && !isNaN(Number(data.slice(1)))) {
         depth += 1;
       }
     }
@@ -4847,247 +4694,247 @@ function read_hydration_instruction(node) {
 }
 
 export {
-  $document,
-  $window,
-  aborted,
-  active_effect,
-  active_reaction,
-  add_form_reset_listener,
-  add_svelte_meta,
+  is_array,
   array_from,
-  async_derived,
-  ATTACHMENT_KEY,
-  ATTRIBUTES_CACHE,
-  autofocus,
-  Batch,
-  bind_invalid_checkbox_value,
-  block,
-  BLOCK_EFFECT,
-  BOUNDARY_EFFECT,
-  branch,
-  BRANCH_EFFECT,
-  capture,
-  capture_store_binding,
-  child,
-  CLASS_CACHE,
-  clear_text_content,
-  COMMENT_NODE,
-  component_api_changed,
-  component_api_invalid_new,
-  component_context,
-  component_root,
-  create_comment,
-  create_element,
-  create_fragment,
-  create_text,
-  createContext,
-  current_batch,
-  deep_read,
-  deep_read_state,
-  defer_effect,
-  deferred,
-  deferred_template_effect,
+  object_keys,
   define_property,
-  derived as derived2,
-  derived2 as derived,
-  derived_safe_equal,
-  destroy_effect,
-  DESTROYED,
-  DESTROYING,
-  dev_current_component_function,
-  dev_stack,
-  DIRTY,
-  DOCUMENT_FRAGMENT_NODE,
-  dynamic_void_element_content,
-  EACH_INDEX_REACTIVE,
-  EACH_IS_ANIMATED,
-  EACH_IS_CONTROLLED,
-  EACH_ITEM_IMMUTABLE,
-  EACH_ITEM_REACTIVE,
-  each_key_duplicate,
-  each_key_volatile,
-  eager,
-  eager_effect,
-  effect,
-  EFFECT_OFFSCREEN,
-  effect_pending_outside_reaction,
-  EFFECT_PRESERVED,
-  effect_root,
-  effect_tracking,
-  EFFECT_TRANSPARENT,
-  ELEMENT_NODE,
-  equals2 as equals,
-  exclude_from_object,
-  experimental_async_required,
-  fallback,
-  FILENAME,
-  first_child,
-  flatten,
-  flushSync,
-  for_await_track_reactivity_loss,
-  fork,
-  FORM_RESET_HANDLER,
-  get as get2,
-  get2 as get,
-  get_abort_signal_outside_reaction,
   get_descriptor,
   get_descriptors,
-  get_error,
-  get_first_child,
-  get_next_sibling,
   get_prototype_of,
-  getAllContexts,
-  getContext,
   has_own_property,
-  hasContext,
+  is_function,
+  noop,
+  is_promise,
+  run,
+  run_all,
+  deferred,
+  fallback,
+  to_array,
+  exclude_from_object,
+  BLOCK_EFFECT,
+  BRANCH_EFFECT,
+  BOUNDARY_EFFECT,
+  DIRTY,
+  MAYBE_DIRTY,
+  INERT,
+  DESTROYED,
+  REACTION_RAN,
+  DESTROYING,
+  EFFECT_TRANSPARENT,
   HEAD_EFFECT,
-  HMR,
+  EFFECT_PRESERVED,
+  EFFECT_OFFSCREEN,
+  STATE_SYMBOL,
+  LEGACY_PROPS,
+  LOADING_ATTR_SYMBOL,
+  ATTRIBUTES_CACHE,
+  CLASS_CACHE,
+  STYLE_CACHE,
+  TEXT_CACHE,
+  FORM_RESET_HANDLER,
   HMR_ANCHOR,
-  hydratable_missing_but_required,
-  hydrate_next,
-  hydrate_node,
-  hydrate_template,
-  hydrating,
-  HYDRATION_END,
-  HYDRATION_ERROR,
-  hydration_failed,
+  IS_XHTML,
+  ELEMENT_NODE,
+  TEXT_NODE,
+  COMMENT_NODE,
+  DOCUMENT_FRAGMENT_NODE,
+  EACH_ITEM_REACTIVE,
+  EACH_INDEX_REACTIVE,
+  EACH_IS_CONTROLLED,
+  EACH_IS_ANIMATED,
+  EACH_ITEM_IMMUTABLE,
+  PROPS_IS_IMMUTABLE,
+  PROPS_IS_RUNES,
+  PROPS_IS_UPDATED,
+  PROPS_IS_BINDABLE,
+  PROPS_IS_LAZY_INITIAL,
+  TRANSITION_IN,
+  TRANSITION_OUT,
+  TRANSITION_GLOBAL,
+  TEMPLATE_FRAGMENT,
+  TEMPLATE_USE_IMPORT_NODE,
+  TEMPLATE_USE_SVG,
+  TEMPLATE_USE_MATHML,
   HYDRATION_START,
   HYDRATION_START_ELSE,
   HYDRATION_START_FAILED,
-  increment,
-  INERT,
-  init_operations,
-  internal_set,
-  invalid_default_snippet,
-  invalid_snippet,
-  invalid_snippet_arguments,
-  invalidate_inner_signals,
-  invalidate_store,
-  invoke_error_boundary,
-  is,
-  is_array,
-  is_destroying_effect,
-  is_firefox,
-  is_flushing_sync,
-  is_function,
-  is_promise,
-  is_runes,
-  IS_XHTML,
-  label,
-  legacy_pre_effect,
-  legacy_pre_effect_reset,
-  LEGACY_PROPS,
-  lifecycle_legacy_only,
-  lifecycle_outside_component,
-  listen,
-  listen_to_event_and_reset_event,
-  LOADING_ATTR_SYMBOL,
-  managed,
-  mark_as_component,
-  mark_store_binding,
-  MAYBE_DIRTY,
-  merge_text_nodes,
-  move_effect,
-  mutable_source,
-  mutate,
+  HYDRATION_END,
+  HYDRATION_ERROR,
+  UNINITIALIZED,
+  FILENAME,
+  HMR,
   NAMESPACE_HTML,
-  NAMESPACE_MATHML,
   NAMESPACE_SVG,
-  next,
-  noop,
-  object_keys,
-  only_child,
-  pause_effect,
-  pop,
-  previous_batch,
-  props_invalid_value,
-  PROPS_IS_BINDABLE,
-  PROPS_IS_IMMUTABLE,
-  PROPS_IS_LAZY_INITIAL,
-  PROPS_IS_RUNES,
-  PROPS_IS_UPDATED,
-  props_rest_readonly,
-  proxy,
-  push,
-  queue_micro_task,
-  REACTION_RAN,
-  read_hydration_instruction,
-  readable,
-  readonly,
-  remove_effect_dom,
-  remove_textarea_child,
-  render_effect,
-  reset,
-  resume_effect,
-  run,
-  run2,
-  run_after_blockers,
-  run_all,
-  rune_outside_svelte,
-  safe_get,
-  safe_not_equal,
-  save,
-  set,
-  set_active_effect,
-  set_active_reaction,
-  set_attribute,
-  set_component_context,
-  set_dev_current_component_function,
-  set_hydrate_node,
+  NAMESPACE_MATHML,
+  ATTACHMENT_KEY,
+  hydrating,
   set_hydrating,
-  set_signal_status,
-  setContext,
-  settled,
-  setup_stores,
-  should_defer_append,
-  sibling,
+  hydrate_node,
+  set_hydrate_node,
+  hydrate_next,
+  reset,
+  hydrate_template,
+  next,
   skip_nodes,
-  snapshot,
+  read_hydration_instruction,
+  safe_not_equal,
+  experimental_async_required,
+  invalid_default_snippet,
+  invalid_snippet_arguments,
+  lifecycle_outside_component,
   snippet_without_render_tag,
-  source,
-  state,
-  STATE_SYMBOL,
-  store_get,
   store_invalid_shape,
-  store_mutate,
-  store_set,
-  store_unsub,
-  strict_equals,
-  STYLE_CACHE,
-  svelte_boundary_reset_onerror,
   svelte_element_invalid_this_value,
+  bind_invalid_checkbox_value,
+  component_api_changed,
+  component_api_invalid_new,
+  each_key_duplicate,
+  each_key_volatile,
+  effect_pending_outside_reaction,
+  get_abort_signal_outside_reaction,
+  hydratable_missing_but_required,
+  hydration_failed,
+  invalid_snippet,
+  lifecycle_legacy_only,
+  props_invalid_value,
+  props_rest_readonly,
+  rune_outside_svelte,
+  svelte_boundary_reset_onerror,
+  dynamic_void_element_content,
+  snapshot,
+  trace,
   tag,
   tag_proxy,
-  teardown,
-  template_effect,
-  TEMPLATE_FRAGMENT,
-  TEMPLATE_USE_IMPORT_NODE,
-  TEMPLATE_USE_MATHML,
-  TEMPLATE_USE_SVG,
-  TEXT_CACHE,
-  TEXT_NODE,
-  tick,
-  to_array,
-  trace,
-  track_reactivity_loss,
-  TRANSITION_GLOBAL,
-  TRANSITION_IN,
-  TRANSITION_OUT,
-  UNINITIALIZED,
+  label,
+  get_error,
+  component_context,
+  set_component_context,
+  dev_stack,
+  add_svelte_meta,
+  dev_current_component_function,
+  set_dev_current_component_function,
+  createContext,
+  getContext,
+  setContext,
+  hasContext,
+  getAllContexts,
+  push,
+  pop,
+  mark_as_component,
+  is_runes,
+  queue_micro_task,
+  set_signal_status,
+  defer_effect,
+  readable,
+  writable,
+  derived2 as derived,
+  readonly,
+  get2 as get,
+  store_get,
+  store_unsub,
+  store_set,
+  invalidate_store,
+  setup_stores,
+  store_mutate,
+  update_store,
+  update_pre_store,
+  mark_store_binding,
+  capture_store_binding,
+  autofocus,
+  remove_textarea_child,
+  add_form_reset_listener,
+  listen,
+  without_reactive_context,
+  listen_to_event_and_reset_event,
+  flatten,
+  run_after_blockers,
+  capture,
+  save,
   unsave,
+  track_reactivity_loss,
+  for_await_track_reactivity_loss,
   unset_context,
-  untrack,
+  run2,
+  wait,
+  derived as derived2,
+  async_derived,
+  user_derived,
+  derived_safe_equal,
+  current_batch,
+  previous_batch,
+  is_flushing_sync,
+  Batch,
+  flushSync,
+  eager,
+  fork,
+  source,
+  state,
+  mutable_source,
+  mutate,
+  set,
+  internal_set,
   update,
   update_pre,
-  update_pre_store,
-  update_store,
-  update_version,
-  user_derived,
+  increment,
+  proxy,
+  is,
+  strict_equals,
+  equals2 as equals,
+  $window,
+  $document,
+  is_firefox,
+  init_operations,
+  create_text,
+  get_first_child,
+  get_next_sibling,
+  child,
+  first_child,
+  only_child,
+  sibling,
+  clear_text_content,
+  should_defer_append,
+  create_element,
+  create_fragment,
+  create_comment,
+  set_attribute,
+  merge_text_nodes,
+  invoke_error_boundary,
+  validate_effect,
+  effect_tracking,
+  teardown,
   user_effect,
   user_pre_effect,
-  validate_effect,
-  wait,
-  without_reactive_context,
-  writable,
+  eager_effect,
+  effect_root,
+  component_root,
+  effect,
+  legacy_pre_effect,
+  legacy_pre_effect_reset,
+  render_effect,
+  template_effect,
+  deferred_template_effect,
+  block,
+  managed,
+  branch,
+  destroy_effect,
+  remove_effect_dom,
+  pause_effect,
+  resume_effect,
+  aborted,
+  move_effect,
+  invalidate_inner_signals,
+  is_destroying_effect,
+  active_reaction,
+  set_active_reaction,
+  active_effect,
+  set_active_effect,
+  update_version,
+  tick,
+  settled,
+  get as get2,
+  safe_get,
+  untrack,
+  deep_read_state,
+  deep_read
 };
 //# sourceMappingURL=chunk-4PRHFUDT.js.map

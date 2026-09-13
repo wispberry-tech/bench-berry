@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 — 2026-09-12
+
+- Story default location: `berrybench init` scaffolds the story pair into `src/stories/` (the DEFAULT stories root) instead of `src/components/`. Colocated stories beside components anywhere under `src/` remain fully supported — discovery is a single `src/**/*.story.{svelte,tsx}` glob covering both.
+
 ## 0.1.0 — 2026-09-12
 
 Initial release.

@@ -2,19 +2,43 @@ import {
   all_registered_events,
   handle_event_propagation,
   on,
-  root_event_handles,
+  root_event_handles
 } from "./chunk-ZSFKHKHQ.js";
-import { createSubscriber } from "./chunk-YJ56H3UW.js";
 import {
+  createSubscriber
+} from "./chunk-YJ56H3UW.js";
+import {
+  BOUNDARY_EFFECT,
+  Batch,
+  COMMENT_NODE,
+  DIRTY,
+  DOCUMENT_FRAGMENT_NODE,
+  EFFECT_PRESERVED,
+  EFFECT_TRANSPARENT,
+  FILENAME,
+  HYDRATION_END,
+  HYDRATION_ERROR,
+  HYDRATION_START,
+  HYDRATION_START_ELSE,
+  HYDRATION_START_FAILED,
+  IS_XHTML,
+  LEGACY_PROPS,
+  MAYBE_DIRTY,
+  NAMESPACE_MATHML,
+  NAMESPACE_SVG,
+  REACTION_RAN,
+  TEMPLATE_FRAGMENT,
+  TEMPLATE_USE_IMPORT_NODE,
+  TEMPLATE_USE_MATHML,
+  TEMPLATE_USE_SVG,
+  TEXT_CACHE,
+  TEXT_NODE,
   active_effect,
   active_reaction,
   array_from,
-  Batch,
   block,
-  BOUNDARY_EFFECT,
   branch,
   clear_text_content,
-  COMMENT_NODE,
   component_context,
   component_root,
   create_comment,
@@ -26,12 +50,7 @@ import {
   define_property,
   destroy_effect,
   dev_current_component_function,
-  DIRTY,
-  DOCUMENT_FRAGMENT_NODE,
   effect_pending_outside_reaction,
-  EFFECT_PRESERVED,
-  EFFECT_TRANSPARENT,
-  FILENAME,
   flushSync,
   get2 as get,
   get_first_child,
@@ -39,34 +58,23 @@ import {
   hydrate_next,
   hydrate_node,
   hydrating,
-  HYDRATION_END,
-  HYDRATION_ERROR,
   hydration_failed,
-  HYDRATION_START,
-  HYDRATION_START_ELSE,
-  HYDRATION_START_FAILED,
   init_operations,
   internal_set,
   invoke_error_boundary,
   is_array,
   is_firefox,
-  IS_XHTML,
-  LEGACY_PROPS,
   lifecycle_outside_component,
   mark_as_component,
-  MAYBE_DIRTY,
   merge_text_nodes,
   move_effect,
   mutable_source,
-  NAMESPACE_MATHML,
-  NAMESPACE_SVG,
   next,
   noop,
   pause_effect,
   pop,
   push,
   queue_micro_task,
-  REACTION_RAN,
   set,
   set_active_effect,
   set_active_reaction,
@@ -79,32 +87,27 @@ import {
   source,
   svelte_boundary_reset_onerror,
   tag,
-  TEMPLATE_FRAGMENT,
-  TEMPLATE_USE_IMPORT_NODE,
-  TEMPLATE_USE_MATHML,
-  TEMPLATE_USE_SVG,
-  TEXT_CACHE,
-  TEXT_NODE,
-  user_pre_effect,
+  user_pre_effect
 } from "./chunk-4PRHFUDT.js";
 import {
   hydration_mismatch,
   legacy_recursive_reactive_block,
   lifecycle_double_unmount,
   svelte_boundary_reset_noop,
-  true_default,
+  true_default
 } from "./chunk-PRVSSIY5.js";
-import { async_mode_flag } from "./chunk-EGK6ZIR3.js";
+import {
+  async_mode_flag
+} from "./chunk-EGK6ZIR3.js";
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/internal/client/dom/reconciler.js
 var policy = (
   // We gotta write it like this because after downleveling the pure comment may end up in the wrong location
-  globalThis?.window?.trustedTypes &&
-  globalThis.window.trustedTypes.createPolicy("svelte-trusted-html", {
+  globalThis?.window?.trustedTypes && globalThis.window.trustedTypes.createPolicy("svelte-trusted-html", {
     /** @param {string} html */
     createHTML: (html) => {
       return html;
-    },
+    }
   })
 );
 function create_trusted_html(html) {
@@ -143,10 +146,8 @@ function from_html(content, flags2) {
     }
     if (node === void 0) {
       node = create_fragment_from_html(has_start ? content : "<!>" + content);
-      if (!is_fragment) {
-        node = /** @type {TemplateNode} */
-          get_first_child(node);
-      }
+      if (!is_fragment) node = /** @type {TemplateNode} */
+      get_first_child(node);
     }
     var clone = (
       /** @type {TemplateNode} */
@@ -192,12 +193,12 @@ function from_namespace(content, flags2, ns = "svg") {
         while (get_first_child(root)) {
           node.appendChild(
             /** @type {TemplateNode} */
-            get_first_child(root),
+            get_first_child(root)
           );
         }
       } else {
         node = /** @type {Element} */
-          get_first_child(root);
+        get_first_child(root);
       }
     }
     var clone = (
@@ -244,14 +245,12 @@ function fragment_from_tree(structure, ns) {
       set_attribute(element, key, attributes[key]);
     }
     if (children.length > 0) {
-      var target = element.nodeName === TEMPLATE_TAG
-        ? (
-          /** @type {HTMLTemplateElement} */
-          element.content
-        )
-        : element;
+      var target = element.nodeName === TEMPLATE_TAG ? (
+        /** @type {HTMLTemplateElement} */
+        element.content
+      ) : element;
       target.append(
-        fragment_from_tree(children, element.nodeName === "foreignObject" ? void 0 : namespace),
+        fragment_from_tree(children, element.nodeName === "foreignObject" ? void 0 : namespace)
       );
     }
     fragment.append(element);
@@ -268,16 +267,10 @@ function from_tree(structure, flags2) {
       return hydrate_node;
     }
     if (node === void 0) {
-      const ns = (flags2 & TEMPLATE_USE_SVG) !== 0
-        ? NAMESPACE_SVG
-        : (flags2 & TEMPLATE_USE_MATHML) !== 0
-        ? NAMESPACE_MATHML
-        : void 0;
+      const ns = (flags2 & TEMPLATE_USE_SVG) !== 0 ? NAMESPACE_SVG : (flags2 & TEMPLATE_USE_MATHML) !== 0 ? NAMESPACE_MATHML : void 0;
       node = fragment_from_tree(structure, ns);
-      if (!is_fragment) {
-        node = /** @type {TemplateNode} */
-          get_first_child(node);
-      }
+      if (!is_fragment) node = /** @type {TemplateNode} */
+      get_first_child(node);
     }
     var clone = (
       /** @type {TemplateNode} */
@@ -307,12 +300,10 @@ function run_scripts(node) {
   const is_fragment = node.nodeType === DOCUMENT_FRAGMENT_NODE;
   const scripts = (
     /** @type {HTMLElement} */
-    node.nodeName === SCRIPT_TAG
-      ? [
-        /** @type {HTMLScriptElement} */
-        node,
-      ]
-      : node.querySelectorAll("script")
+    node.nodeName === SCRIPT_TAG ? [
+      /** @type {HTMLScriptElement} */
+      node
+    ] : node.querySelectorAll("script")
   );
   const effect = (
     /** @type {Effect & { nodes: EffectNodes }} */
@@ -347,7 +338,7 @@ function text(value = "") {
   } else {
     merge_text_nodes(
       /** @type {Text} */
-      node,
+      node
     );
   }
   assign_nodes(node, node);
@@ -382,14 +373,11 @@ function append(anchor, dom) {
   }
   anchor.before(
     /** @type {Node} */
-    dom,
+    dom
   );
 }
 function props_id() {
-  if (
-    hydrating && hydrate_node && hydrate_node.nodeType === COMMENT_NODE &&
-    hydrate_node.textContent?.startsWith(`$`)
-  ) {
+  if (hydrating && hydrate_node && hydrate_node.nodeType === COMMENT_NODE && hydrate_node.textContent?.startsWith(`$`)) {
     const id = hydrate_node.textContent.substring(1);
     hydrate_next();
     return id;
@@ -423,7 +411,7 @@ var VOID_ELEMENT_NAMES = [
   "param",
   "source",
   "track",
-  "wbr",
+  "wbr"
 ];
 function is_void(name) {
   return VOID_ELEMENT_NAMES.includes(name) || name.toLowerCase() === "!doctype";
@@ -454,7 +442,7 @@ var DELEGATED_EVENTS = [
   "pointerup",
   "touchend",
   "touchmove",
-  "touchstart",
+  "touchstart"
 ];
 function can_delegate_event(event_name) {
   return DELEGATED_EVENTS.includes(event_name);
@@ -487,7 +475,7 @@ var DOM_BOOLEAN_ATTRIBUTES = [
   "webkitdirectory",
   "defer",
   "disablepictureinpicture",
-  "disableremoteplayback",
+  "disableremoteplayback"
 ];
 var ATTRIBUTE_ALIASES = {
   // no `class: 'className'` because we handle that separately
@@ -502,7 +490,7 @@ var ATTRIBUTE_ALIASES = {
   novalidate: "noValidate",
   allowfullscreen: "allowFullscreen",
   disablepictureinpicture: "disablePictureInPicture",
-  disableremoteplayback: "disableRemotePlayback",
+  disableremoteplayback: "disableRemotePlayback"
 };
 function normalize_attribute(name) {
   name = name.toLowerCase();
@@ -523,7 +511,7 @@ var DOM_PROPERTIES = [
   "noValidate",
   "allowFullscreen",
   "disablePictureInPicture",
-  "disableRemotePlayback",
+  "disableRemotePlayback"
 ];
 var PASSIVE_EVENTS = ["touchstart", "touchmove"];
 function is_passive_event(name) {
@@ -535,7 +523,7 @@ var STATE_CREATION_RUNES = (
     "$state",
     "$state.raw",
     "$derived",
-    "$derived.by",
+    "$derived.by"
   ]
 );
 var RUNES = (
@@ -555,7 +543,7 @@ var RUNES = (
     "$inspect",
     "$inspect().with",
     "$inspect.trace",
-    "$host",
+    "$host"
   ]
 );
 var RAW_TEXT_ELEMENTS = (
@@ -565,7 +553,7 @@ var RAW_TEXT_ELEMENTS = (
 function is_raw_text_element(name) {
   return RAW_TEXT_ELEMENTS.includes(
     /** @type {typeof RAW_TEXT_ELEMENTS[number]} */
-    name,
+    name
   );
 }
 function sanitize_location(location) {
@@ -651,7 +639,7 @@ var Boundary = class {
       children(anchor);
     };
     this.parent = /** @type {Effect} */
-      active_effect.b;
+    active_effect.b;
     this.transform_error = transform_error ?? this.parent?.transform_error ?? ((e) => e);
     this.#effect = block(() => {
       if (hydrating) {
@@ -697,7 +685,7 @@ var Boundary = class {
       failed(
         this.#anchor,
         () => error,
-        () => reset,
+        () => reset
       );
     });
   }
@@ -764,12 +752,10 @@ var Boundary = class {
       });
       if (this.#main_effect === null) {
         this.#offscreen_fragment = null;
-        if (handled) {
-          this.#resolve(
-            /** @type {Batch} */
-            current_batch,
-          );
-        }
+        if (handled) this.#resolve(
+          /** @type {Batch} */
+          current_batch
+        );
         return;
       }
       if (this.#pending_count === 0) {
@@ -780,11 +766,11 @@ var Boundary = class {
           this.#pending_effect,
           () => {
             this.#pending_effect = null;
-          },
+          }
         );
         this.#resolve(
           /** @type {Batch} */
-          current_batch,
+          current_batch
         );
       }
     });
@@ -808,7 +794,7 @@ var Boundary = class {
       } else {
         this.#resolve(
           /** @type {Batch} */
-          current_batch,
+          current_batch
         );
       }
     } catch (error) {
@@ -909,7 +895,7 @@ var Boundary = class {
     this.#effect_pending_subscriber();
     return get(
       /** @type {Source<number>} */
-      this.#effect_pending,
+      this.#effect_pending
     );
   }
   /** @param {unknown} error */
@@ -947,7 +933,7 @@ var Boundary = class {
     if (hydrating) {
       set_hydrate_node(
         /** @type {TemplateNode} */
-        this.#hydrate_open,
+        this.#hydrate_open
       );
       next();
       set_hydrate_node(skip_nodes());
@@ -969,14 +955,14 @@ var Boundary = class {
               failed(
                 this.#anchor,
                 () => transformed_error,
-                () => reset,
+                () => reset
               );
             });
           } catch (error2) {
             invoke_error_boundary(
               error2,
               /** @type {Effect} */
-              this.#effect.parent,
+              this.#effect.parent
             );
             return null;
           }
@@ -991,14 +977,12 @@ var Boundary = class {
         invoke_error_boundary(e, this.#effect && this.#effect.parent);
         return;
       }
-      if (
-        result !== null && typeof result === "object" && typeof /** @type {any} */
-          result.then === "function"
-      ) {
+      if (result !== null && typeof result === "object" && typeof /** @type {any} */
+      result.then === "function") {
         result.then(
           handle_error_result,
           /** @param {unknown} e */
-          (e) => invoke_error_boundary(e, this.#effect && this.#effect.parent),
+          (e) => invoke_error_boundary(e, this.#effect && this.#effect.parent)
         );
       } else {
         handle_error_result(result);
@@ -1024,10 +1008,8 @@ function set_should_intro(value) {
 }
 function set_text(text2, value) {
   var str = value == null ? "" : typeof value === "object" ? `${value}` : value;
-  if (
-    str !== /** @type {any} */
-      (text2[TEXT_CACHE] ??= text2.nodeValue)
-  ) {
+  if (str !== /** @type {any} */
+  (text2[TEXT_CACHE] ??= text2.nodeValue)) {
     text2[TEXT_CACHE] = str;
     text2.nodeValue = `${str}`;
   }
@@ -1043,10 +1025,8 @@ function hydrate(component, options) {
   const previous_hydrate_node = hydrate_node;
   try {
     var anchor = get_first_child(target);
-    while (
-      anchor && (anchor.nodeType !== COMMENT_NODE || /** @type {Comment} */
-        anchor.data !== HYDRATION_START)
-    ) {
+    while (anchor && (anchor.nodeType !== COMMENT_NODE || /** @type {Comment} */
+    anchor.data !== HYDRATION_START)) {
       anchor = get_next_sibling(anchor);
     }
     if (!anchor) {
@@ -1055,7 +1035,7 @@ function hydrate(component, options) {
     set_hydrating(true);
     set_hydrate_node(
       /** @type {Comment} */
-      anchor,
+      anchor
     );
     const instance = _mount(component, { ...options, anchor });
     set_hydrating(false);
@@ -1064,10 +1044,7 @@ function hydrate(component, options) {
       instance
     );
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message.split("\n").some((line) => line.startsWith("https://svelte.dev/e/"))
-    ) {
+    if (error instanceof Error && error.message.split("\n").some((line) => line.startsWith("https://svelte.dev/e/"))) {
       throw error;
     }
     if (error !== HYDRATION_ERROR) {
@@ -1086,10 +1063,7 @@ function hydrate(component, options) {
   }
 }
 var listeners = /* @__PURE__ */ new Map();
-function _mount(
-  Component,
-  { target, anchor, props = {}, events, context, intro = true, transformError },
-) {
+function _mount(Component, { target, anchor, props = {}, events, context, intro = true, transformError }) {
   init_operations();
   var component = void 0;
   var unmount2 = component_root(() => {
@@ -1099,7 +1073,7 @@ function _mount(
       anchor_node,
       {
         pending: () => {
-        },
+        }
       },
       (anchor_node2) => {
         push({});
@@ -1115,7 +1089,7 @@ function _mount(
           assign_nodes(
             /** @type {TemplateNode} */
             anchor_node2,
-            null,
+            null
           );
         }
         should_intro = intro;
@@ -1123,18 +1097,15 @@ function _mount(
         should_intro = true;
         if (hydrating) {
           active_effect.nodes.end = hydrate_node;
-          if (
-            hydrate_node === null ||
-            hydrate_node.nodeType !== COMMENT_NODE || /** @type {Comment} */
-            hydrate_node.data !== HYDRATION_END
-          ) {
+          if (hydrate_node === null || hydrate_node.nodeType !== COMMENT_NODE || /** @type {Comment} */
+          hydrate_node.data !== HYDRATION_END) {
             hydration_mismatch();
             throw HYDRATION_ERROR;
           }
         }
         pop();
       },
-      transformError,
+      transformError
     );
     var registered_events = /* @__PURE__ */ new Set();
     var event_handle = (events2) => {
@@ -1207,7 +1178,7 @@ function unmount(component, options) {
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/internal/client/dom/legacy/event-modifiers.js
 function trusted(fn) {
-  return function (...args) {
+  return function(...args) {
     var event = (
       /** @type {Event} */
       args[0]
@@ -1218,7 +1189,7 @@ function trusted(fn) {
   };
 }
 function self(fn) {
-  return function (...args) {
+  return function(...args) {
     var event = (
       /** @type {Event} */
       args[0]
@@ -1229,7 +1200,7 @@ function self(fn) {
   };
 }
 function stopPropagation(fn) {
-  return function (...args) {
+  return function(...args) {
     var event = (
       /** @type {Event} */
       args[0]
@@ -1240,14 +1211,14 @@ function stopPropagation(fn) {
 }
 function once(fn) {
   var ran = false;
-  return function (...args) {
+  return function(...args) {
     if (ran) return;
     ran = true;
     return fn?.apply(this, args);
   };
 }
 function stopImmediatePropagation(fn) {
-  return function (...args) {
+  return function(...args) {
     var event = (
       /** @type {Event} */
       args[0]
@@ -1257,7 +1228,7 @@ function stopImmediatePropagation(fn) {
   };
 }
 function preventDefault(fn) {
-  return function (...args) {
+  return function(...args) {
     var event = (
       /** @type {Event} */
       args[0]
@@ -1269,14 +1240,14 @@ function preventDefault(fn) {
 function passive(node, [event, handler]) {
   user_pre_effect(() => {
     return on(node, event, handler() ?? noop, {
-      passive: true,
+      passive: true
     });
   });
 }
 function nonpassive(node, [event, handler]) {
   user_pre_effect(() => {
     return on(node, event, handler() ?? noop, {
-      passive: false,
+      passive: false
     });
   });
 }
@@ -1291,7 +1262,7 @@ function asClassComponent(component) {
     constructor(options) {
       super({
         component,
-        ...options,
+        ...options
       });
     }
   };
@@ -1327,8 +1298,8 @@ var Svelte4Component = class {
         set(target, prop, value) {
           set(sources.get(prop) ?? add_source(prop, value), value);
           return Reflect.set(target, prop, value);
-        },
-      },
+        }
+      }
     );
     this.#instance = (options.hydrate ? hydrate : mount)(options.component, {
       target: options.target,
@@ -1337,7 +1308,7 @@ var Svelte4Component = class {
       context: options.context,
       intro: options.intro ?? false,
       recover: options.recover,
-      transformError: options.transformError,
+      transformError: options.transformError
     });
     if (!async_mode_flag && (!options?.props?.$$host || options.sync === false)) {
       flushSync();
@@ -1353,13 +1324,13 @@ var Svelte4Component = class {
         set(value) {
           this.#instance[key] = value;
         },
-        enumerable: true,
+        enumerable: true
       });
     }
     this.#instance.$set = /** @param {Record<string, any>} next */
-      (next2) => {
-        Object.assign(props, next2);
-      };
+    (next2) => {
+      Object.assign(props, next2);
+    };
     this.#instance.$destroy = () => {
       unmount(this.#instance);
     };
@@ -1380,7 +1351,7 @@ var Svelte4Component = class {
     return () => {
       this.#events[event] = this.#events[event].filter(
         /** @param {any} fn */
-        (fn) => fn !== cb,
+        (fn) => fn !== cb
       );
     };
   }
@@ -1406,7 +1377,7 @@ function run(fn) {
   });
 }
 function handlers(...handlers2) {
-  return function (event) {
+  return function(event) {
     const { stopImmediatePropagation: stopImmediatePropagation2 } = event;
     let stopped = false;
     event.stopImmediatePropagation = () => {
@@ -1456,45 +1427,45 @@ function createBubbler() {
 }
 
 export {
-  append,
-  asClassComponent,
-  assign_nodes,
-  boundary,
-  can_delegate_event,
-  comment,
-  create_fragment_from_html,
-  create_trusted_html,
-  createBubbler,
-  createClassComponent,
-  from_html,
-  from_mathml,
-  from_svg,
-  from_tree,
-  handlers,
   hash,
-  hydrate,
-  is_capture_event,
-  is_raw_text_element,
   is_void,
-  mount,
-  nonpassive,
+  is_capture_event,
+  can_delegate_event,
   normalize_attribute,
-  once,
-  passive,
-  pending,
-  preventDefault,
-  props_id,
-  run,
+  is_raw_text_element,
   sanitize_location,
-  self,
+  create_trusted_html,
+  create_fragment_from_html,
+  assign_nodes,
+  from_html,
+  from_svg,
+  from_mathml,
+  from_tree,
+  with_script,
+  text,
+  comment,
+  append,
+  props_id,
+  boundary,
+  pending,
+  should_intro,
   set_should_intro,
   set_text,
-  should_intro,
-  stopImmediatePropagation,
-  stopPropagation,
-  text,
-  trusted,
+  mount,
+  hydrate,
   unmount,
-  with_script,
+  trusted,
+  self,
+  stopPropagation,
+  once,
+  stopImmediatePropagation,
+  preventDefault,
+  passive,
+  nonpassive,
+  createClassComponent,
+  asClassComponent,
+  run,
+  handlers,
+  createBubbler
 };
 //# sourceMappingURL=chunk-FAHIXZFP.js.map

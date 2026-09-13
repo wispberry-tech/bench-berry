@@ -102,11 +102,11 @@ Deno.test(
         const code = await run(["init", "."], cap.ctx);
         if (code !== 0) throw new Error(`init exited ${code}: ${cap.stderr.join("\n")}`);
         await Deno.stat(join(tmp, "berrybench.config.ts"));
-        await Deno.stat(join(tmp, "src/components/button.svelte"));
-        await Deno.stat(join(tmp, "src/components/button.story.svelte"));
+        await Deno.stat(join(tmp, "src/stories/button.svelte"));
+        await Deno.stat(join(tmp, "src/stories/button.story.svelte"));
         if (
           cap.stdout.join("\n").includes(
-            "scaffolded src/components/button.story.svelte (story convention)",
+            "scaffolded src/stories/button.story.svelte (story convention)",
           ) !== true
         ) {
           throw new Error(`scaffold line missing: ${cap.stdout.join("\n")}`);
@@ -122,7 +122,7 @@ Deno.test(
           throw new Error(`design stories: ${JSON.stringify(design)}`);
         }
         const story = design.stories[0]!;
-        if (story.file !== "src/components/button.story.svelte") {
+        if (story.file !== "src/stories/button.story.svelte") {
           throw new Error(`story file: ${story.file}`);
         }
         if (story.title !== "Button") throw new Error(`story title: ${String(story.title)}`);

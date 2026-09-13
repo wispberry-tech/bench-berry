@@ -48,14 +48,14 @@ Deno.test("detect: false on empty dir, true once package.json exists", async () 
 
 Deno.test("detect + load: design package inside frontend/ (Go-monorepo shape)", async () => {
   await withTempDir(async (dir) => {
-    await Deno.mkdir(join(dir, "frontend", "src", "components"), { recursive: true });
+    await Deno.mkdir(join(dir, "frontend", "src", "stories"), { recursive: true });
     await Deno.writeTextFile(
       join(dir, "frontend", "package.json"),
       await Deno.readTextFile(join(FIXTURES_DIR, "package.json")),
     );
     await Deno.copyFile(
       join(FIXTURES_DIR, "button.story.svelte"),
-      join(dir, "frontend", "src", "components", "button.story.svelte"),
+      join(dir, "frontend", "src", "stories", "button.story.svelte"),
     );
 
     assert(await designPlugin.detect(ctx(dir)) === true, "frontend/package.json must detect");
@@ -65,7 +65,7 @@ Deno.test("detect + load: design package inside frontend/ (Go-monorepo shape)", 
     eq(snapshot.stories.length, 1, "stories glob resolves under frontend/src");
     eq(
       snapshot.stories[0]?.file,
-      "src/components/button.story.svelte",
+      "src/stories/button.story.svelte",
       "story file is design-root-relative",
     );
   });
@@ -73,9 +73,9 @@ Deno.test("detect + load: design package inside frontend/ (Go-monorepo shape)", 
 
 Deno.test("load: stories plus package metadata", async () => {
   await withTempDir(async (dir) => {
-    const storyRel = "src/components/button.story.svelte";
+    const storyRel = "src/stories/button.story.svelte";
     const storyPath = join(dir, storyRel);
-    await Deno.mkdir(join(dir, "src", "components"), { recursive: true });
+    await Deno.mkdir(join(dir, "src", "stories"), { recursive: true });
     await Deno.copyFile(join(FIXTURES_DIR, "button.story.svelte"), storyPath);
     await Deno.writeTextFile(
       join(dir, "package.json"),

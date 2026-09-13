@@ -29,7 +29,7 @@ import {
   quintOut,
   sineIn,
   sineInOut,
-  sineOut,
+  sineOut
 } from "./chunk-WUT4PERJ.js";
 import "./chunk-Q4AC2O6Z.js";
 export {
@@ -63,5 +63,5 @@ export {
   quintOut,
   sineIn,
   sineInOut,
-  sineOut,
+  sineOut
 };

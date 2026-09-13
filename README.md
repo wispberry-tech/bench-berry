@@ -16,7 +16,7 @@ berrybench build       # writes snapshots + manifest, emits a static dist/
 
 | Command | What it does |
 |---|---|
-| `berrybench init [dir]` | Detect design/api/db inputs and write `berrybench.config.ts` (refuses to overwrite). When the project has no `src/` yet it also scaffolds `src/components/button.svelte` + `src/components/button.story.svelte` as a starting story. |
+| `berrybench init [dir]` | Detect design/api/db inputs and write `berrybench.config.ts` (refuses to overwrite). When the project has no `src/` yet it also scaffolds `src/stories/button.svelte` + `src/stories/button.story.svelte` as a starting story. |
 | `berrybench config --print [--json]` | Print the fully resolved config. |
 | `berrybench config enable\|disable <id> [dir]` | Toggle a workspace in `berrybench.config.ts`. |
 | `berrybench detect` | Show per-workspace detection and enablement as a table. |
@@ -58,9 +58,9 @@ Each enabled workspace writes `.berrybench/snapshots/<id>.json`, validated again
 
 ## Story convention
 
-The design workspace collects `src/**/*.story.svelte` (Svelte 5) and `src/**/*.story.tsx` (React) files. A story is a component plus literal meta that BerryBench extracts without executing your code.
+The DEFAULT story home is the design package's own `src/stories/` root (`berrybench init` scaffolds there); stories may ALSO be colocated beside components anywhere under `src/` (e.g. `src/components/Button/button.story.svelte`). The design workspace collects `src/**/*.story.svelte` (Svelte 5) and `src/**/*.story.tsx` (React) files. A story is a component plus literal meta that BerryBench extracts without executing your code.
 
-Svelte 5 story (`src/components/button.story.svelte`):
+Svelte 5 story (`src/stories/button.story.svelte`):
 
 ```svelte
 <script>

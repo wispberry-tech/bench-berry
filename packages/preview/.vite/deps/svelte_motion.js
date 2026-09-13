@@ -1,8 +1,15 @@
-import { MediaQuery } from "./chunk-IYVF7OU4.js";
+import {
+  MediaQuery
+} from "./chunk-IYVF7OU4.js";
 import "./chunk-DSTF3GBF.js";
 import "./chunk-T37U6M6V.js";
-import { linear } from "./chunk-WUT4PERJ.js";
-import { loop, raf } from "./chunk-GRGQ3I6B.js";
+import {
+  linear
+} from "./chunk-WUT4PERJ.js";
+import {
+  loop,
+  raf
+} from "./chunk-GRGQ3I6B.js";
 import "./chunk-NCXCYGJP.js";
 import "./chunk-FAHIXZFP.js";
 import "./chunk-ZSFKHKHQ.js";
@@ -15,9 +22,11 @@ import {
   set,
   state,
   tag,
-  writable,
+  writable
 } from "./chunk-4PRHFUDT.js";
-import { true_default } from "./chunk-PRVSSIY5.js";
+import {
+  true_default
+} from "./chunk-PRVSSIY5.js";
 import "./chunk-EGK6ZIR3.js";
 import "./chunk-Q4AC2O6Z.js";
 
@@ -46,7 +55,7 @@ function tick_spring(ctx, last_value, current_value, target_value) {
       (_, i) => (
         // @ts-ignore
         tick_spring(ctx, last_value[i], current_value[i], target_value[i])
-      ),
+      )
     );
   } else if (typeof current_value === "object") {
     const next_value = {};
@@ -104,16 +113,14 @@ function spring(value, opts = {}) {
           inv_mass,
           opts: spring2,
           settled: true,
-          dt: elapsed * 60 / 1e3,
+          dt: elapsed * 60 / 1e3
         };
         const next_value = tick_spring(ctx, last_value, value, target_value);
         last_time = now;
         last_value = /** @type {T} */
-          value;
-        store.set(
-          value = /** @type {T} */
-            next_value,
-        );
+        value;
+        store.set(value = /** @type {T} */
+        next_value);
         if (ctx.settled) {
           task = null;
         }
@@ -128,20 +135,16 @@ function spring(value, opts = {}) {
   }
   const spring2 = {
     set: set2,
-    update: (fn, opts2) =>
-      set2(
-        fn(
-          /** @type {T} */
-          target_value,
-          /** @type {T} */
-          value,
-        ),
-        opts2,
-      ),
+    update: (fn, opts2) => set2(fn(
+      /** @type {T} */
+      target_value,
+      /** @type {T} */
+      value
+    ), opts2),
     subscribe: store.subscribe,
     stiffness,
     damping,
-    precision,
+    precision
   };
   return spring2;
 }
@@ -220,10 +223,10 @@ var Spring = class _Spring {
           opts: {
             stiffness: this.#stiffness.v,
             damping: this.#damping.v,
-            precision: this.#precision.v,
+            precision: this.#precision.v
           },
           settled: true,
-          dt: elapsed * 60 / 1e3,
+          dt: elapsed * 60 / 1e3
         };
         var next = tick_spring(ctx, this.#last_value, this.#current.v, this.#target.v);
         this.#last_value = this.#current.v;
@@ -315,7 +318,7 @@ function get_interpolator(a, b) {
         return get_interpolator(
           /** @type {Array<any>} */
           a[i],
-          bi,
+          bi
         );
       })
     );
@@ -370,7 +373,7 @@ function tweened(value, defaults = {}) {
       delay = 0,
       duration = 400,
       easing = linear,
-      interpolate = get_interpolator,
+      interpolate = get_interpolator
     } = { ...defaults, ...opts };
     if (duration === 0) {
       if (previous_task) {
@@ -388,15 +391,14 @@ function tweened(value, defaults = {}) {
         fn = interpolate(
           /** @type {any} */
           value,
-          new_value,
+          new_value
         );
-        if (typeof duration === "function") {
+        if (typeof duration === "function")
           duration = duration(
             /** @type {any} */
             value,
-            new_value,
+            new_value
           );
-        }
         started = true;
       }
       if (previous_task) {
@@ -404,10 +406,8 @@ function tweened(value, defaults = {}) {
         previous_task = null;
       }
       const elapsed = now - start;
-      if (
-        elapsed > /** @type {number} */
-          duration
-      ) {
+      if (elapsed > /** @type {number} */
+      duration) {
         store.set(value = new_value);
         return false;
       }
@@ -418,17 +418,13 @@ function tweened(value, defaults = {}) {
   }
   return {
     set: set2,
-    update: (fn, opts) =>
-      set2(
-        fn(
-          /** @type {any} */
-          target_value,
-          /** @type {any} */
-          value,
-        ),
-        opts,
-      ),
-    subscribe: store.subscribe,
+    update: (fn, opts) => set2(fn(
+      /** @type {any} */
+      target_value,
+      /** @type {any} */
+      value
+    ), opts),
+    subscribe: store.subscribe
   };
 }
 var Tween = class _Tween {
@@ -489,7 +485,7 @@ var Tween = class _Tween {
       delay = 0,
       duration = 400,
       easing = linear,
-      interpolate = get_interpolator,
+      interpolate = get_interpolator
     } = { ...this.#defaults, ...options };
     if (duration === 0) {
       this.#task?.abort();
@@ -515,20 +511,13 @@ var Tween = class _Tween {
         previous_task = null;
       }
       const elapsed = now - start;
-      if (
-        elapsed > /** @type {number} */
-          duration
-      ) {
+      if (elapsed > /** @type {number} */
+      duration) {
         set(this.#current, value);
         return false;
       }
-      set(
-        this.#current,
-        fn(easing(
-          elapsed / /** @type {number} */
-            duration,
-        )),
-      );
+      set(this.#current, fn(easing(elapsed / /** @type {number} */
+      duration)));
       return true;
     });
     return this.#task.promise;
@@ -546,7 +535,13 @@ var Tween = class _Tween {
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/motion/index.js
 var prefersReducedMotion = new MediaQuery(
-  "(prefers-reduced-motion: reduce)",
+  "(prefers-reduced-motion: reduce)"
 );
-export { prefersReducedMotion, Spring, spring, Tween, tweened };
+export {
+  Spring,
+  Tween,
+  prefersReducedMotion,
+  spring,
+  tweened
+};
 //# sourceMappingURL=svelte_motion.js.map

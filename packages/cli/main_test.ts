@@ -45,11 +45,11 @@ Deno.test("init scaffolds a config and config --print --json resolves it", async
     });
 
     await t.step("init scaffolds the story convention on an empty project", async () => {
-      await Deno.stat(`${tmp}/src/components/button.svelte`);
-      await Deno.stat(`${tmp}/src/components/button.story.svelte`);
+      await Deno.stat(`${tmp}/src/stories/button.svelte`);
+      await Deno.stat(`${tmp}/src/stories/button.story.svelte`);
       if (
         initStdout.join("\n").includes(
-          "scaffolded src/components/button.story.svelte (story convention)",
+          "scaffolded src/stories/button.story.svelte (story convention)",
         ) !==
           true
       ) {
@@ -84,7 +84,7 @@ Deno.test("init with an existing src/ skips the story scaffold", async (t) => {
         throw new Error(`scaffold line printed despite existing src/: ${cap.stdout.join("\n")}`);
       }
       try {
-        await Deno.stat(`${tmp}/src/components/button.story.svelte`);
+        await Deno.stat(`${tmp}/src/stories/button.story.svelte`);
         throw new Error("story scaffold unexpectedly created");
       } catch (error) {
         if ((error as Error).message.includes("unexpectedly created")) throw error;
@@ -107,8 +107,8 @@ Deno.test("init scaffolds into frontend/ when the design package lives there", a
       const cap = capturingCtx(tmp);
       const code = await run(["init", "."], cap.ctx);
       if (code !== 0) throw new Error(`init exited ${code}: ${cap.stderr.join("\n")}`);
-      await Deno.stat(`${tmp}/frontend/src/components/button.story.svelte`);
-      if (!cap.stdout.join("\n").includes("frontend/src/components/button.story.svelte")) {
+      await Deno.stat(`${tmp}/frontend/src/stories/button.story.svelte`);
+      if (!cap.stdout.join("\n").includes("frontend/src/stories/button.story.svelte")) {
         throw new Error(`scaffold line missing target path: ${cap.stdout.join("\n")}`);
       }
       try {

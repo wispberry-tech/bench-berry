@@ -6,9 +6,11 @@ import {
   render_effect,
   source,
   tag,
-  untrack,
+  untrack
 } from "./chunk-4PRHFUDT.js";
-import { true_default } from "./chunk-PRVSSIY5.js";
+import {
+  true_default
+} from "./chunk-PRVSSIY5.js";
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/reactivity/create-subscriber.js
 function createSubscriber(start) {
@@ -41,5 +43,7 @@ function createSubscriber(start) {
   };
 }
 
-export { createSubscriber };
+export {
+  createSubscriber
+};
 //# sourceMappingURL=chunk-YJ56H3UW.js.map

@@ -1,4 +1,7 @@
-import { transition_slide_display, true_default } from "./chunk-PRVSSIY5.js";
+import {
+  transition_slide_display,
+  true_default
+} from "./chunk-PRVSSIY5.js";
 import "./chunk-Q4AC2O6Z.js";
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/transition/index.js
@@ -15,16 +18,13 @@ function split_css_unit(value) {
   return split ? [parseFloat(split[1]), split[2] || "px"] : [
     /** @type {number} */
     value,
-    "px",
+    "px"
   ];
 }
 function css_dimension(property, value, t) {
   return Number.isNaN(value) ? "" : `${property}: ${t * value}px;`;
 }
-function blur(
-  node,
-  { delay = 0, duration = 400, easing = cubic_in_out, amount = 5, opacity = 0 } = {},
-) {
+function blur(node, { delay = 0, duration = 400, easing = cubic_in_out, amount = 5, opacity = 0 } = {}) {
   const style = getComputedStyle(node);
   const target_opacity = +style.opacity;
   const f = style.filter === "none" ? "" : style.filter;
@@ -34,7 +34,7 @@ function blur(
     delay,
     duration,
     easing,
-    css: (_t, u) => `opacity: ${target_opacity - od * u}; filter: ${f} blur(${u * value}${unit});`,
+    css: (_t, u) => `opacity: ${target_opacity - od * u}; filter: ${f} blur(${u * value}${unit});`
   };
 }
 function fade(node, { delay = 0, duration = 400, easing = linear } = {}) {
@@ -43,13 +43,10 @@ function fade(node, { delay = 0, duration = 400, easing = linear } = {}) {
     delay,
     duration,
     easing,
-    css: (t) => `opacity: ${t * o}`,
+    css: (t) => `opacity: ${t * o}`
   };
 }
-function fly(
-  node,
-  { delay = 0, duration = 400, easing = cubic_out, x = 0, y = 0, opacity = 0 } = {},
-) {
+function fly(node, { delay = 0, duration = 400, easing = cubic_out, x = 0, y = 0, opacity = 0 } = {}) {
   const style = getComputedStyle(node);
   const target_opacity = +style.opacity;
   const transform = style.transform === "none" ? "" : style.transform;
@@ -61,10 +58,8 @@ function fly(
     duration,
     easing,
     css: (t, u) => `
-			transform: ${transform} translate(${(1 - t) * x_value}${x_unit}, ${
-      (1 - t) * y_value
-    }${y_unit});
-			opacity: ${target_opacity - od * u}`,
+			transform: ${transform} translate(${(1 - t) * x_value}${x_unit}, ${(1 - t) * y_value}${y_unit});
+			opacity: ${target_opacity - od * u}`
   };
 }
 var slide_warning = false;
@@ -83,38 +78,26 @@ function slide(node, { delay = 0, duration = 400, easing = cubic_out, axis = "y"
     (e) => (
       /** @type {'Left' | 'Right' | 'Top' | 'Bottom'} */
       `${e[0].toUpperCase()}${e.slice(1)}`
-    ),
+    )
   );
   const padding_start_value = parseFloat(style[`padding${capitalized_secondary_properties[0]}`]);
   const padding_end_value = parseFloat(style[`padding${capitalized_secondary_properties[1]}`]);
   const margin_start_value = parseFloat(style[`margin${capitalized_secondary_properties[0]}`]);
   const margin_end_value = parseFloat(style[`margin${capitalized_secondary_properties[1]}`]);
   const border_width_start_value = parseFloat(
-    style[`border${capitalized_secondary_properties[0]}Width`],
+    style[`border${capitalized_secondary_properties[0]}Width`]
   );
   const border_width_end_value = parseFloat(
-    style[`border${capitalized_secondary_properties[1]}Width`],
+    style[`border${capitalized_secondary_properties[1]}Width`]
   );
   return {
     delay,
     duration,
     easing,
-    css: (t) =>
-      `overflow: hidden;opacity: ${Math.min(t * 20, 1) * opacity};` +
-      css_dimension(primary_property, primary_property_value, t) +
-      css_dimension(`padding-${secondary_properties[0]}`, padding_start_value, t) +
-      css_dimension(`padding-${secondary_properties[1]}`, padding_end_value, t) +
-      css_dimension(`margin-${secondary_properties[0]}`, margin_start_value, t) +
-      css_dimension(`margin-${secondary_properties[1]}`, margin_end_value, t) +
-      css_dimension(`border-${secondary_properties[0]}-width`, border_width_start_value, t) +
-      css_dimension(`border-${secondary_properties[1]}-width`, border_width_end_value, t) +
-      `min-${primary_property}: 0`,
+    css: (t) => `overflow: hidden;opacity: ${Math.min(t * 20, 1) * opacity};` + css_dimension(primary_property, primary_property_value, t) + css_dimension(`padding-${secondary_properties[0]}`, padding_start_value, t) + css_dimension(`padding-${secondary_properties[1]}`, padding_end_value, t) + css_dimension(`margin-${secondary_properties[0]}`, margin_start_value, t) + css_dimension(`margin-${secondary_properties[1]}`, margin_end_value, t) + css_dimension(`border-${secondary_properties[0]}-width`, border_width_start_value, t) + css_dimension(`border-${secondary_properties[1]}-width`, border_width_end_value, t) + `min-${primary_property}: 0`
   };
 }
-function scale(
-  node,
-  { delay = 0, duration = 400, easing = cubic_out, start = 0, opacity = 0 } = {},
-) {
+function scale(node, { delay = 0, duration = 400, easing = cubic_out, start = 0, opacity = 0 } = {}) {
   const style = getComputedStyle(node);
   const target_opacity = +style.opacity;
   const transform = style.transform === "none" ? "" : style.transform;
@@ -127,7 +110,7 @@ function scale(
     css: (_t, u) => `
 			transform: ${transform} scale(${1 - sd * u});
 			opacity: ${target_opacity - od * u}
-		`,
+		`
   };
 }
 function draw(node, { delay = 0, speed, duration, easing = cubic_in_out } = {}) {
@@ -152,7 +135,7 @@ function draw(node, { delay = 0, speed, duration, easing = cubic_in_out } = {}) 
     css: (_, u) => `
 			stroke-dasharray: ${len};
 			stroke-dashoffset: ${u * len};
-		`,
+		`
   };
 }
 function assign(tar, src) {
@@ -172,7 +155,7 @@ function crossfade({ fallback, ...defaults }) {
         /** @param {number} d */
         (d2) => Math.sqrt(d2) * 30
       ),
-      easing = cubic_out,
+      easing = cubic_out
     } = assign(assign({}, defaults), params);
     const from = from_node.getBoundingClientRect();
     const to = node.getBoundingClientRect();
@@ -191,10 +174,8 @@ function crossfade({ fallback, ...defaults }) {
       css: (t, u) => `
 			   opacity: ${t * opacity};
 			   transform-origin: top left;
-			   transform: ${transform} translate(${u * dx}px,${u * dy}px) scale(${t + (1 - t) * dw}, ${
-        t + (1 - t) * dh
-      });
-		   `,
+			   transform: ${transform} translate(${u * dx}px,${u * dy}px) scale(${t + (1 - t) * dw}, ${t + (1 - t) * dh});
+		   `
     };
   }
   function transition(items, counterparts, intro) {
@@ -208,7 +189,7 @@ function crossfade({ fallback, ...defaults }) {
             /** @type {Element} */
             other_node,
             node,
-            params,
+            params
           );
         }
         items.delete(params.key);
@@ -218,5 +199,13 @@ function crossfade({ fallback, ...defaults }) {
   }
   return [transition(to_send, to_receive, false), transition(to_receive, to_send, true)];
 }
-export { blur, crossfade, draw, fade, fly, scale, slide };
+export {
+  blur,
+  crossfade,
+  draw,
+  fade,
+  fly,
+  scale,
+  slide
+};
 //# sourceMappingURL=svelte_transition.js.map

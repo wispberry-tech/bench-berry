@@ -1,5 +1,9 @@
-import { ReactiveValue } from "./chunk-DSTF3GBF.js";
-import { on } from "./chunk-ZSFKHKHQ.js";
+import {
+  ReactiveValue
+} from "./chunk-DSTF3GBF.js";
+import {
+  on
+} from "./chunk-ZSFKHKHQ.js";
 import {
   active_reaction,
   get2 as get,
@@ -11,9 +15,11 @@ import {
   state,
   tag,
   update_version,
-  user_derived,
+  user_derived
 } from "./chunk-4PRHFUDT.js";
-import { true_default } from "./chunk-PRVSSIY5.js";
+import {
+  true_default
+} from "./chunk-PRVSSIY5.js";
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/reactivity/date.js
 var inited = false;
@@ -40,7 +46,7 @@ var SvelteDate = class _SvelteDate extends Date {
     );
     for (const method of methods) {
       if (method.startsWith("get") || method.startsWith("to") || method === "valueOf") {
-        proto[method] = function (...args) {
+        proto[method] = function(...args) {
           if (args.length > 0) {
             get(this.#time);
             return date_proto[method].apply(this, args);
@@ -63,7 +69,7 @@ var SvelteDate = class _SvelteDate extends Date {
         };
       }
       if (method.startsWith("set")) {
-        proto[method] = function (...args) {
+        proto[method] = function(...args) {
           var result = date_proto[method].apply(this, args);
           set(this.#time, date_proto.getTime.call(this));
           return result;
@@ -119,13 +125,13 @@ var SvelteSet = class _SvelteSet extends Set {
     var proto = _SvelteSet.prototype;
     var set_proto = Set.prototype;
     for (const method of read_methods) {
-      proto[method] = function (...v) {
+      proto[method] = function(...v) {
         get(this.#version);
         return set_proto[method].apply(this, v);
       };
     }
     for (const method of set_like_methods) {
-      proto[method] = function (...v) {
+      proto[method] = function(...v) {
         get(this.#version);
         var set2 = (
           /** @type {Set<T>} */
@@ -295,7 +301,7 @@ var SvelteMap = class extends Map {
   /**
    * @param {K} key
    * @param {V} value
-   */
+   * */
   getOrInsert(key, value) {
     if (!super.has(key)) {
       this.set(key, value);
@@ -321,7 +327,7 @@ var SvelteMap = class extends Map {
   /**
    * @param {K} key
    * @param {V} value
-   */
+   * */
   set(key, value) {
     var sources = this.#sources;
     var s = sources.get(key);
@@ -343,7 +349,7 @@ var SvelteMap = class extends Map {
         (r) => (
           /** @type {NonNullable<typeof v_reactions>} */
           v_reactions.has(r)
-        ),
+        )
       );
       if (needs_version_increase) {
         increment(version);
@@ -695,15 +701,7 @@ var SvelteURL = class extends URL {
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/reactivity/media-query.js
 var parenthesis_regex = /\(.+\)/;
-var non_parenthesized_keywords = /* @__PURE__ */ new Set([
-  "all",
-  "print",
-  "screen",
-  "and",
-  "or",
-  "not",
-  "only",
-]);
+var non_parenthesized_keywords = /* @__PURE__ */ new Set(["all", "print", "screen", "and", "or", "not", "only"]);
 var MediaQuery = class extends ReactiveValue {
   /**
    * @param {string} query A media query string
@@ -711,16 +709,21 @@ var MediaQuery = class extends ReactiveValue {
    */
   constructor(query, fallback) {
     let final_query = parenthesis_regex.test(query) || // we need to use `some` here because technically this `window.matchMedia('random,screen')` still returns true
-        query.split(/[\s,]+/).some((keyword) => non_parenthesized_keywords.has(keyword.trim()))
-      ? query
-      : `(${query})`;
+    query.split(/[\s,]+/).some((keyword) => non_parenthesized_keywords.has(keyword.trim())) ? query : `(${query})`;
     const q = window.matchMedia(final_query);
     super(
       () => q.matches,
-      (update) => on(q, "change", update),
+      (update) => on(q, "change", update)
     );
   }
 };
 
-export { MediaQuery, SvelteDate, SvelteMap, SvelteSet, SvelteURL, SvelteURLSearchParams };
+export {
+  SvelteDate,
+  SvelteSet,
+  SvelteMap,
+  SvelteURLSearchParams,
+  SvelteURL,
+  MediaQuery
+};
 //# sourceMappingURL=chunk-IYVF7OU4.js.map

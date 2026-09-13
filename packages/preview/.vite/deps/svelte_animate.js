@@ -1,4 +1,6 @@
-import { cubicOut } from "./chunk-WUT4PERJ.js";
+import {
+  cubicOut
+} from "./chunk-WUT4PERJ.js";
 import "./chunk-Q4AC2O6Z.js";
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/animate/index.js
@@ -30,7 +32,7 @@ function flip(node, { from, to }, params = {}) {
       var sx2 = t + u * dsx;
       var sy2 = t + u * dsy;
       return `transform: ${transform} translate(${x}px, ${y}px) scale(${sx2}, ${sy2});`;
-    },
+    }
   };
 }
 function get_zoom(element) {
@@ -45,9 +47,11 @@ function get_zoom(element) {
   while (current !== null) {
     zoom *= +getComputedStyle(current).zoom;
     current = /** @type {Element | null} */
-      current.parentElement;
+    current.parentElement;
   }
   return zoom;
 }
-export { flip };
+export {
+  flip
+};
 //# sourceMappingURL=svelte_animate.js.map

@@ -23,13 +23,7 @@ function bounceOut(t) {
   const cb = 35442 / 1805;
   const cc = 16061 / 1805;
   const t2 = t * t;
-  return t < a
-    ? 7.5625 * t2
-    : t < b
-    ? 9.075 * t2 - 9.9 * t + 3.4
-    : t < c
-    ? ca * t2 - cb * t + cc
-    : 10.8 * t * t - 20.52 * t + 10.72;
+  return t < a ? 7.5625 * t2 : t < b ? 9.075 * t2 - 9.9 * t + 3.4 : t < c ? ca * t2 - cb * t + cc : 10.8 * t * t - 20.52 * t + 10.72;
 }
 function bounceInOut(t) {
   return t < 0.5 ? 0.5 * (1 - bounceOut(1 - t * 2)) : 0.5 * bounceOut(t * 2 - 1) + 0.5;
@@ -58,9 +52,7 @@ function cubicOut(t) {
   return f * f * f + 1;
 }
 function elasticInOut(t) {
-  return t < 0.5
-    ? 0.5 * Math.sin(13 * Math.PI / 2 * 2 * t) * Math.pow(2, 10 * (2 * t - 1))
-    : 0.5 * Math.sin(-13 * Math.PI / 2 * (2 * t - 1 + 1)) * Math.pow(2, -10 * (2 * t - 1)) + 1;
+  return t < 0.5 ? 0.5 * Math.sin(13 * Math.PI / 2 * 2 * t) * Math.pow(2, 10 * (2 * t - 1)) : 0.5 * Math.sin(-13 * Math.PI / 2 * (2 * t - 1 + 1)) * Math.pow(2, -10 * (2 * t - 1)) + 1;
 }
 function elasticIn(t) {
   return Math.sin(13 * t * Math.PI / 2) * Math.pow(2, 10 * (t - 1));
@@ -69,11 +61,7 @@ function elasticOut(t) {
   return Math.sin(-13 * (t + 1) * Math.PI / 2) * Math.pow(2, -10 * t) + 1;
 }
 function expoInOut(t) {
-  return t === 0 || t === 1
-    ? t
-    : t < 0.5
-    ? 0.5 * Math.pow(2, 20 * t - 10)
-    : -0.5 * Math.pow(2, 10 - t * 20) + 1;
+  return t === 0 || t === 1 ? t : t < 0.5 ? 0.5 * Math.pow(2, 20 * t - 10) : -0.5 * Math.pow(2, 10 - t * 20) + 1;
 }
 function expoIn(t) {
   return t === 0 ? t : Math.pow(2, 10 * (t - 1));
@@ -125,36 +113,36 @@ function sineOut(t) {
 }
 
 export {
-  backIn,
-  backInOut,
-  backOut,
-  bounceIn,
-  bounceInOut,
-  bounceOut,
-  circIn,
-  circInOut,
-  circOut,
-  cubicIn,
-  cubicInOut,
-  cubicOut,
-  elasticIn,
-  elasticInOut,
-  elasticOut,
-  expoIn,
-  expoInOut,
-  expoOut,
   linear,
-  quadIn,
+  backInOut,
+  backIn,
+  backOut,
+  bounceOut,
+  bounceInOut,
+  bounceIn,
+  circInOut,
+  circIn,
+  circOut,
+  cubicInOut,
+  cubicIn,
+  cubicOut,
+  elasticInOut,
+  elasticIn,
+  elasticOut,
+  expoInOut,
+  expoIn,
+  expoOut,
   quadInOut,
+  quadIn,
   quadOut,
-  quartIn,
   quartInOut,
+  quartIn,
   quartOut,
-  quintIn,
   quintInOut,
+  quintIn,
   quintOut,
-  sineIn,
   sineInOut,
-  sineOut,
+  sineIn,
+  sineOut
 };
 //# sourceMappingURL=chunk-WUT4PERJ.js.map
