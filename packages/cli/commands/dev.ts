@@ -1,5 +1,6 @@
-import { join, SEPARATOR } from "@std/path";
+import { dirname, join, SEPARATOR } from "@std/path";
 import { createServer, type ViteDevServer } from "vite";
+import tailwindcss from "@tailwindcss/vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { ConfigError } from "../../core/mod.ts";
 import { SNAPSHOT_DIR } from "../../snapshot/mod.ts";
@@ -8,6 +9,7 @@ import { previewViteConfig } from "../../preview/config.ts";
 import type { CliContext } from "../main.ts";
 import {
   designPreviewAliases,
+  missingShellDir,
   type Out,
   printSnapshotLines,
   projectDir,
@@ -41,6 +43,16 @@ export async function cmdDev(
   }
 
   const root = projectDir(ctx, dirArg);
+  // Probe before writing any .berrybench artifacts: a failing command must
+  // leave no side effects behind.
+  const shellDir = Deno.env.get("BERRYBENCH_SHELL_DIR") ??
+    join(import.meta.dirname!, "../../shell");
+  if (await missingShellDir(shellDir)) {
+    err(
+      `Shell app not found at ${shellDir}; run from a berry-bench checkout or set BERRYBENCH_SHELL_DIR to a berry-bench checkout/packages/shell`,
+    );
+    return 1;
+  }
   try {
     await writeOnce(root, ctx.env, out, err);
   } catch (error) {
@@ -51,14 +63,6 @@ export async function cmdDev(
     throw error;
   }
 
-  const shellDir = Deno.env.get("BERRYBENCH_SHELL_DIR") ??
-    join(import.meta.dirname!, "../../shell");
-  if (await missingShellDir(shellDir)) {
-    err(
-      `Shell app not found at ${shellDir}; run from a berry-bench checkout or set BERRYBENCH_SHELL_DIR to a berry-bench checkout/packages/shell`,
-    );
-    return 1;
-  }
   const port = Number(Deno.env.get("BERRYBENCH_PORT") ?? 5173);
 
   let server: ViteDevServer;
@@ -68,12 +72,15 @@ export async function cmdDev(
       base: "/",
       server: {
         port,
+        // Deterministic failure on a busy port: the printed URL and the
+        // preview iframe base always point at the actually-bound port.
+        strictPort: true,
         fs: { strict: false },
       },
-      plugins: [svelte(), berrybench({ root })],
+      plugins: [tailwindcss(), svelte(), berrybench({ root })],
     });
   } catch (error) {
-    err(`dev server failed: ${error instanceof Error ? error.message : String(error)}`);
+    err(serverStartupError(error, port, "BERRYBENCH_PORT", "dev server"));
     return 1;
   }
 
@@ -84,7 +91,7 @@ export async function cmdDev(
   try {
     await server.listen();
   } catch (error) {
-    err(`dev server failed: ${error instanceof Error ? error.message : String(error)}`);
+    err(serverStartupError(error, port, "BERRYBENCH_PORT", "dev server"));
     try {
       await server.close();
     } catch {
@@ -98,21 +105,29 @@ export async function cmdDev(
   // project's src via the @stories alias — outside the preview app's own
   // vite root, hence the relaxed fs strictness.
   const previewPort = Number(Deno.env.get("BERRYBENCH_PREVIEW_PORT") ?? 5174);
+  // Compiled binaries: import.meta.dirname resolves to the executable's
+  // extract dir, so the preview app must come from a sibling of the
+  // user-supplied shell checkout instead of the build machine's checkout.
+  const previewAppRoot = Deno.env.get("BERRYBENCH_SHELL_DIR") !== undefined
+    ? join(dirname(shellDir), "preview")
+    : undefined;
   let previewServer: ViteDevServer;
   try {
     previewServer = await createServer({
       ...previewViteConfig(root, join(root, "dist/preview"), {
         base: "/preview/",
         ...designPreviewAliases(root),
+        ...(previewAppRoot !== undefined ? { root: previewAppRoot } : {}),
       }),
       server: {
         port: previewPort,
+        strictPort: true,
         fs: { strict: false },
       },
     });
     await previewServer.listen();
   } catch (error) {
-    err(`preview server failed: ${error instanceof Error ? error.message : String(error)}`);
+    err(serverStartupError(error, previewPort, "BERRYBENCH_PREVIEW_PORT", "preview server"));
     try {
       await server.close();
     } catch {
@@ -130,20 +145,15 @@ export async function cmdDev(
 }
 
 /**
- * True when the shell app is unreachable: the resolved shell dir does not
- * exist and BERRYBENCH_SHELL_DIR was not set to point elsewhere. In compiled
- * binaries import.meta.dirname points at the executable's extract dir, so the
- * default repo-relative path is the compiled-binary failure case.
+ * Classify a dev-server startup failure: an occupied strict port gets a
+ * deterministic env-var hint; anything else degrades to the generic message.
  */
-async function missingShellDir(shellDir: string): Promise<boolean> {
-  if (Deno.env.get("BERRYBENCH_SHELL_DIR") !== undefined) return false;
-  try {
-    await Deno.stat(shellDir);
-    return false;
-  } catch (error) {
-    if (error instanceof Deno.errors.NotFound) return true;
-    throw error;
+function serverStartupError(error: unknown, port: number, envVar: string, label: string): string {
+  const message = error instanceof Error ? error.message : String(error);
+  if (message.includes("already in use")) {
+    return `port ${port} is in use — set ${envVar} to a free port`;
   }
+  return `${label} failed: ${message}`;
 }
 
 /** One resolve + snapshot write + report pass, shared by the initial run and every watch batch. */
@@ -161,8 +171,12 @@ async function writeOnce(
 /**
  * Deno.watchFs loop with a 300ms debounce. Events under the snapshot output
  * dir and the resolved-config file are ignored so our own writes cannot
- * retrigger a batch.
+ * retrigger a batch; node_modules/.git/dist noise is ignored too. A per-batch
+ * failure is a warning (keep watching so a fix hot-applies); a broken watcher
+ * itself is fatal — a dead watcher with live servers misleads more than a
+ * stopped session, so it prints the error and exits 1.
  */
+const IGNORED_PATH_SEGMENTS = ["/node_modules/", "/.git/", "/dist/"] as const;
 async function watchLoop(
   root: string,
   env: Record<string, string | undefined>,
@@ -172,24 +186,31 @@ async function watchLoop(
   const snapDir = join(root, SNAPSHOT_DIR);
   const resolvedConfigPath = join(root, RESOLVED_CONFIG_FILE);
   const ownOutput = (p: string): boolean =>
-    p === snapDir || p.startsWith(`${snapDir}${SEPARATOR}`) || p === resolvedConfigPath;
+    p === snapDir || p.startsWith(`${snapDir}${SEPARATOR}`) || p === resolvedConfigPath ||
+    IGNORED_PATH_SEGMENTS.some((seg) => p.includes(seg) || p.endsWith(seg.slice(0, -1)));
   const watcher = Deno.watchFs(root, { recursive: true });
   let timer: ReturnType<typeof setTimeout> | undefined;
-  for await (const event of watcher) {
-    if (event.paths.length > 0 && event.paths.every(ownOutput)) continue;
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      timer = undefined;
-      void (async () => {
-        try {
-          await writeOnce(root, env, out, err);
-        } catch (error) {
-          // A mid-session resolution failure (e.g. config breakage) is a
-          // warning, not a crash: keep watching so a fix hot-applies.
-          const message = error instanceof Error ? error.message : String(error);
-          err(`snapshot failed: ${message}`);
-        }
-      })();
-    }, 300);
+  try {
+    for await (const event of watcher) {
+      if (event.paths.length > 0 && event.paths.every(ownOutput)) continue;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        timer = undefined;
+        void (async () => {
+          try {
+            await writeOnce(root, env, out, err);
+          } catch (error) {
+            // A mid-session resolution failure (e.g. config breakage) is a
+            // warning, not a crash: keep watching so a fix hot-applies.
+            const message = error instanceof Error ? error.message : String(error);
+            err(`snapshot failed: ${message}`);
+          }
+        })();
+      }, 300);
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    err(`watcher failed: ${message}`);
+    Deno.exit(1);
   }
 }

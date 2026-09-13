@@ -1,5 +1,6 @@
-import { join } from "@std/path";
+import { dirname, join } from "@std/path";
 import { build as viteBuild } from "vite";
+import tailwindcss from "@tailwindcss/vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { ConfigError } from "../../core/mod.ts";
 import { berrybench } from "../../vite-plugin/mod.ts";
@@ -7,6 +8,7 @@ import { previewViteConfig } from "../../preview/config.ts";
 import type { CliContext } from "../main.ts";
 import {
   designPreviewAliases,
+  missingShellDir,
   type Out,
   printSnapshotLines,
   projectDir,
@@ -31,6 +33,19 @@ export async function cmdBuild(
   }
 
   const root = projectDir(ctx, dirArg);
+  // Probe before writing any .berrybench artifacts: a failing command must
+  // leave no side effects behind. Compiled binaries cannot reach the
+  // repo-relative default (import.meta.dirname is the executable's extract
+  // dir); fail with a clear hint instead of a vite error deep in the build.
+  const shellDir = Deno.env.get("BERRYBENCH_SHELL_DIR") ??
+    join(import.meta.dirname!, "../../shell");
+  if (await missingShellDir(shellDir)) {
+    err(
+      `Shell app not found at ${shellDir}; run from a berry-bench checkout or set BERRYBENCH_SHELL_DIR to a berry-bench checkout/packages/shell`,
+    );
+    return 1;
+  }
+
   let written: SnapshotWrite;
   try {
     written = await writeProjectSnapshots(root, ctx.env);
@@ -58,24 +73,6 @@ export async function cmdBuild(
   out(manifestPath);
   printSnapshotLines(out, written.resolved, written.results);
 
-  const shellDir = Deno.env.get("BERRYBENCH_SHELL_DIR") ??
-    join(import.meta.dirname!, "../../shell");
-  // Compiled binaries cannot reach the repo-relative default (import.meta.dirname
-  // is the executable's extract dir); fail with a clear hint instead of a vite
-  // error deep in the build.
-  if (Deno.env.get("BERRYBENCH_SHELL_DIR") === undefined) {
-    try {
-      await Deno.stat(shellDir);
-    } catch (error) {
-      if (error instanceof Deno.errors.NotFound) {
-        err(
-          `Shell app not found at ${shellDir}; run from a berry-bench checkout or set BERRYBENCH_SHELL_DIR to a berry-bench checkout/packages/shell`,
-        );
-        return 1;
-      }
-      throw error;
-    }
-  }
   const outDir = join(root, "dist");
   try {
     await viteBuild({
@@ -85,7 +82,7 @@ export async function cmdBuild(
         outDir,
         emptyOutDir: true,
       },
-      plugins: [svelte(), berrybench({ root })],
+      plugins: [tailwindcss(), svelte(), berrybench({ root })],
     });
   } catch (error) {
     err(`build failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -99,12 +96,19 @@ export async function cmdBuild(
   // serve the page from any static host, and the shell still iframes it as
   // './preview/' (env.preview.base).
   const previewOutDir = join(root, "dist", "preview");
+  // Compiled binaries: import.meta.dirname resolves to the executable's
+  // extract dir, so the preview app must come from a sibling of the
+  // user-supplied shell checkout instead of the build machine's checkout.
+  const previewAppRoot = Deno.env.get("BERRYBENCH_SHELL_DIR") !== undefined
+    ? join(dirname(shellDir), "preview")
+    : undefined;
   try {
     await viteBuild(
       previewViteConfig(root, previewOutDir, {
         base: "./",
         emptyOutDir: true,
         ...designPreviewAliases(root),
+        ...(previewAppRoot !== undefined ? { root: previewAppRoot } : {}),
       }),
     );
   } catch (error) {

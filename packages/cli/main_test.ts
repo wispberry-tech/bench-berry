@@ -1,5 +1,6 @@
-import { run, VERSION } from "./main.ts";
+import { parseProjectEnvFile, projectDirFromArgs, run, VERSION } from "./main.ts";
 import type { CliContext } from "./main.ts";
+import { join } from "@std/path";
 import { readFileConfig } from "../core/config.ts";
 import { listSnapshots, readSnapshot } from "../snapshot/mod.ts";
 
@@ -370,5 +371,111 @@ Deno.test("snapshot with an absolute dir writes there, not to cwd", async (t) =>
   } finally {
     await Deno.remove(target, { recursive: true });
     await Deno.remove(cwd, { recursive: true });
+  }
+});
+
+Deno.test("parseProjectEnvFile reads .env with the dotenv grammar", async () => {
+  const tmp = await Deno.makeTempDir();
+  try {
+    const dsn = "postgresql://u:p@localhost:5433/db?sslmode=disable";
+    await Deno.writeTextFile(
+      `${tmp}/.env`,
+      [
+        "# comment",
+        `BERRYBENCH_DATABASE_URL=${dsn}`,
+        "export QUOTED='single quoted'",
+        'DOUBLE="double quoted"',
+        "EMPTY=",
+      ].join("\n"),
+    );
+    const parsed = parseProjectEnvFile(tmp);
+    if (parsed.BERRYBENCH_DATABASE_URL !== dsn) {
+      throw new Error(`dsn parsed wrong: ${JSON.stringify(parsed)}`);
+    }
+    if (parsed.QUOTED !== "single quoted" || parsed.DOUBLE !== "double quoted") {
+      throw new Error(`quotes not stripped: ${JSON.stringify(parsed)}`);
+    }
+    if (parsed.EMPTY !== "") {
+      throw new Error(`empty value not parsed: ${JSON.stringify(parsed)}`);
+    }
+  } finally {
+    await Deno.remove(tmp, { recursive: true });
+  }
+});
+
+Deno.test("parseProjectEnvFile yields {} without a .env", async () => {
+  const tmp = await Deno.makeTempDir();
+  try {
+    const parsed = parseProjectEnvFile(tmp);
+    if (Object.keys(parsed).length !== 0) {
+      throw new Error(`expected {} got ${JSON.stringify(parsed)}`);
+    }
+  } finally {
+    await Deno.remove(tmp, { recursive: true });
+  }
+});
+
+Deno.test("projectDirFromArgs mirrors each command's dir-arg parsing", () => {
+  const cases: Array<[string[], string, string]> = [
+    [["dev"], "/work", "/work"],
+    [["dev", "site"], "/work", "/work/site"],
+    [["dev", "/abs", "--watch"], "/work", "/abs"],
+    [["snapshot", "--strict", "."], "/work", "/work"],
+    [["build", "site"], "/work", "/work/site"],
+    [["init", "/abs"], "/work", "/abs"],
+    [["config", "enable", "db", "site"], "/work", "/work/site"],
+    [["config", "disable", "db", "/abs"], "/work", "/abs"],
+    [["config", "--print"], "/work", "/work"],
+  ];
+  for (const [args, cwd, expected] of cases) {
+    const got = projectDirFromArgs(args, cwd);
+    if (got !== expected) {
+      throw new Error(`${JSON.stringify(args)} -> ${got}, expected ${expected}`);
+    }
+  }
+});
+
+/** Repo root: main_test.ts lives at packages/cli/. */
+const REPO_ROOT = join(import.meta.dirname!, "../..");
+
+Deno.test("the CLI entrypoint loads .env from the project root", async () => {
+  const tmp = await Deno.makeTempDir();
+  // Isolate the child from any BERRYBENCH_* vars exported in this environment.
+  const env: Record<string, string> = {};
+  for (const [key, value] of Object.entries(Deno.env.toObject())) {
+    if (!key.startsWith("BERRYBENCH_")) env[key] = value;
+  }
+  try {
+    await Deno.writeTextFile(
+      `${tmp}/berrybench.config.ts`,
+      "export default { workspaces: { db: { enabled: true } } };\n",
+    );
+    const snapshotOnce = async (): Promise<string> => {
+      const cmd = new Deno.Command(Deno.execPath(), {
+        args: ["run", "-A", "packages/cli/main.ts", "snapshot", tmp],
+        cwd: REPO_ROOT,
+        env,
+        stdout: "piped",
+        stderr: "piped",
+      });
+      const { code, stdout, stderr } = await cmd.output();
+      if (code !== 0) {
+        throw new Error(`snapshot exited ${code}: ${new TextDecoder().decode(stderr)}`);
+      }
+      return new TextDecoder().decode(stdout);
+    };
+
+    const without = await snapshotOnce();
+    if (/db: on \(\w+\) · error: no database connection configured/.test(without) !== true) {
+      throw new Error(`expected no-connection error without .env: ${without}`);
+    }
+
+    await Deno.writeTextFile(`${tmp}/.env`, "BERRYBENCH_DATABASE_URL=not-a-url\n");
+    const withDotEnv = await snapshotOnce();
+    if (/db: on \(\w+\) · error: database connection failed/.test(withDotEnv) !== true) {
+      throw new Error(`expected connection-failure error with .env: ${withDotEnv}`);
+    }
+  } finally {
+    await Deno.remove(tmp, { recursive: true });
   }
 });

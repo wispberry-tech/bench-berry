@@ -20,6 +20,23 @@ export const CONFIG_FILE = "berrybench.config.ts";
 /** Project-relative file the vite plugin boots `virtual:berrybench-config` from. */
 export const RESOLVED_CONFIG_FILE = ".berrybench/resolved-config.json";
 
+/**
+ * True when the shell app is unreachable: the resolved shell dir does not
+ * exist and BERRYBENCH_SHELL_DIR was not set to point elsewhere. In compiled
+ * binaries import.meta.dirname points at the executable's extract dir, so the
+ * default repo-relative path is the compiled-binary failure case.
+ */
+export async function missingShellDir(shellDir: string): Promise<boolean> {
+  if (Deno.env.get("BERRYBENCH_SHELL_DIR") !== undefined) return false;
+  try {
+    await Deno.stat(shellDir);
+    return false;
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) return true;
+    throw error;
+  }
+}
+
 /** All workspace plugins, in canonical display order. */
 export const plugins: readonly WorkspacePlugin[] = [designPlugin, apiPlugin, dbPlugin];
 
@@ -85,7 +102,7 @@ export function defaultResolution(
       enabledBy: isDetected ? "auto" : "default",
     };
   }
-  return { workspaces };
+  return { workspaces, extra: {} };
 }
 
 export async function detectAll(
