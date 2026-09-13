@@ -15,7 +15,8 @@
     "@std/yaml": "jsr:@std/yaml@^1",
     "@std/path": "jsr:@std/path@^1",
     "@std/fs": "jsr:@std/fs@^1",
-    "pg": "npm:pg@^8"
+    "pg": "npm:pg@^8",
+    "vite": "npm:vite@^7"
   },
   "fmt": {
     "useTabs": false,

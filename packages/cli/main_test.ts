@@ -1,5 +1,7 @@
 import { run, VERSION } from './main.ts';
 import type { CliContext } from './main.ts';
+import { readFileConfig } from '../core/config.ts';
+import { listSnapshots, readSnapshot } from '../snapshot/mod.ts';
 
 function capturingCtx(cwd: string): {
   ctx: CliContext;
@@ -114,5 +116,168 @@ Deno.test('unknown command exits 1 with a message', async () => {
   if (code !== 1) throw new Error(`expected exit 1, got ${code}`);
   if (cap.stderr.join('\n').includes('unknown command: bogus') !== true) {
     throw new Error(`stderr missing unknown-command message: ${cap.stderr.join('\n')}`);
+  }
+});
+
+const FIXTURE_OPENAPI = await Deno.readTextFile(
+  new URL('../ws-api/fixtures/openapi.yaml', import.meta.url),
+);
+
+/** A project with package.json (design source) + openapi.yaml (api source). */
+async function scaffoldProject(root: string, openapi: string): Promise<void> {
+  await Deno.writeTextFile(`${root}/package.json`, '{"name":"fixture","version":"0.0.0"}\n');
+  await Deno.writeTextFile(`${root}/openapi.yaml`, openapi);
+}
+
+Deno.test('snapshot writes design+api snapshots and skips disabled db', async (t) => {
+  const tmp = await Deno.makeTempDir();
+  try {
+    await scaffoldProject(tmp, FIXTURE_OPENAPI);
+    await t.step('snapshot exits 0 with one line per workspace', async () => {
+      const cap = capturingCtx(tmp);
+      const code = await run(['snapshot', '.'], cap.ctx);
+      if (code !== 0) throw new Error(`snapshot exited ${code}: ${cap.stderr.join('\n')}`);
+      const stdout = cap.stdout.join('\n');
+      if (stdout.includes('db: off · skipped') !== true) {
+        throw new Error(`missing db skip line: ${stdout}`);
+      }
+      if (/api: on \(.*\) · ok/.test(stdout) !== true) {
+        throw new Error(`missing api ok line: ${stdout}`);
+      }
+    });
+    await t.step('api snapshot parses with the fixture data', async () => {
+      type ApiSnapshot = { endpointCount: number; title?: string };
+      const api = await readSnapshot<ApiSnapshot>(tmp, 'api');
+      if (api?.endpointCount !== 3 || api.title !== 'Fixture API') {
+        throw new Error(`api snapshot mismatch: ${JSON.stringify(api)}`);
+      }
+    });
+    await t.step('listSnapshots lists only enabled workspaces', async () => {
+      const ids = (await listSnapshots(tmp)).sort();
+      if (JSON.stringify(ids) !== JSON.stringify(['api', 'design'])) {
+        throw new Error(`snapshot ids: ${JSON.stringify(ids)}`);
+      }
+    });
+  } finally {
+    await Deno.remove(tmp, { recursive: true });
+  }
+});
+
+Deno.test('snapshot --strict exits 1 and reports a load error on stderr', async () => {
+  const tmp = await Deno.makeTempDir();
+  try {
+    await scaffoldProject(tmp, ':::not yaml');
+    const cap = capturingCtx(tmp);
+    const code = await run(['snapshot', '--strict', '.'], cap.ctx);
+    if (code !== 1) throw new Error(`expected exit 1, got ${code}`);
+    if (cap.stderr.join('\n').includes('error') !== true) {
+      throw new Error(`stderr missing error report: ${cap.stderr.join('\n')}`);
+    }
+  } finally {
+    await Deno.remove(tmp, { recursive: true });
+  }
+});
+
+Deno.test('build writes resolved-config.json and manifest.json', async (t) => {
+  const tmp = await Deno.makeTempDir();
+  try {
+    await scaffoldProject(tmp, FIXTURE_OPENAPI);
+    await t.step('build exits 0', async () => {
+      const cap = capturingCtx(tmp);
+      const code = await run(['build', '.'], cap.ctx);
+      if (code !== 0) throw new Error(`build exited ${code}: ${cap.stderr.join('\n')}`);
+    });
+    await t.step('resolved-config.json exists and parses', async () => {
+      const raw = await Deno.readTextFile(`${tmp}/.berrybench/resolved-config.json`);
+      const resolved = JSON.parse(raw) as { workspaces?: Record<string, { enabled?: boolean }> };
+      if (resolved.workspaces?.design?.enabled !== true) {
+        throw new Error(`design not enabled: ${raw}`);
+      }
+    });
+    await t.step('manifest.json has version and workspaces', async () => {
+      const raw = await Deno.readTextFile(`${tmp}/.berrybench/manifest.json`);
+      const manifest = JSON.parse(raw) as {
+        version?: string;
+        generatedAt?: string;
+        workspaces?: Record<string, unknown>;
+      };
+      if (manifest.version !== VERSION) {
+        throw new Error(`manifest version ${String(manifest.version)} != ${VERSION}`);
+      }
+      if (typeof manifest.workspaces !== 'object' || manifest.workspaces === null) {
+        throw new Error(`manifest workspaces missing: ${raw}`);
+      }
+      if ('design' in manifest.workspaces !== true || 'api' in manifest.workspaces !== true) {
+        throw new Error(`manifest workspaces: ${raw}`);
+      }
+      if (typeof manifest.generatedAt !== 'string') {
+        throw new Error(`manifest generatedAt missing: ${raw}`);
+      }
+    });
+  } finally {
+    await Deno.remove(tmp, { recursive: true });
+  }
+});
+
+Deno.test('config enable/disable toggles a workspace in the config file', async (t) => {
+  const tmp = await Deno.makeTempDir();
+  try {
+    await t.step('enable db prints db: on and persists it', async () => {
+      const cap = capturingCtx(tmp);
+      const code = await run(['config', 'enable', 'db', '.'], cap.ctx);
+      if (code !== 0) throw new Error(`enable exited ${code}: ${cap.stderr.join('\n')}`);
+      if (cap.stdout.join('\n').includes('db: on') !== true) {
+        throw new Error(`enable stdout: ${cap.stdout.join('\n')}`);
+      }
+      const file = await readFileConfig(tmp) as { workspaces?: Record<string, { enabled?: boolean }> };
+      if (file?.workspaces?.db?.enabled !== true) {
+        throw new Error(`db not enabled after enable: ${JSON.stringify(file)}`);
+      }
+    });
+    await t.step('disable db flips it back', async () => {
+      const cap = capturingCtx(tmp);
+      const code = await run(['config', 'disable', 'db', '.'], cap.ctx);
+      if (code !== 0) throw new Error(`disable exited ${code}: ${cap.stderr.join('\n')}`);
+      const file = await readFileConfig(tmp) as { workspaces?: Record<string, { enabled?: boolean }> };
+      if (file?.workspaces?.db?.enabled !== false) {
+        throw new Error(`db still enabled after disable: ${JSON.stringify(file)}`);
+      }
+    });
+    await t.step('unknown id exits 1 with a message', async () => {
+      const cap = capturingCtx(tmp);
+      const code = await run(['config', 'enable', 'nope', '.'], cap.ctx);
+      if (code !== 1) throw new Error(`expected exit 1, got ${code}`);
+      if (cap.stderr.join('\n').includes('unknown workspace: nope') !== true) {
+        throw new Error(`stderr missing unknown-workspace message: ${cap.stderr.join('\n')}`);
+      }
+    });
+  } finally {
+    await Deno.remove(tmp, { recursive: true });
+  }
+});
+
+Deno.test('snapshot with an absolute dir writes there, not to cwd', async (t) => {
+  const target = await Deno.makeTempDir();
+  const cwd = await Deno.makeTempDir();
+  try {
+    await scaffoldProject(target, FIXTURE_OPENAPI);
+    await t.step('snapshots land at the dir argument', async () => {
+      const cap = capturingCtx(cwd);
+      const code = await run(['snapshot', target], cap.ctx);
+      if (code !== 0) throw new Error(`snapshot exited ${code}: ${cap.stderr.join('\n')}`);
+      await Deno.stat(`${target}/.berrybench/snapshots/design.json`);
+      await Deno.stat(`${target}/.berrybench/snapshots/api.json`);
+    });
+    await t.step('cwd stays untouched', async () => {
+      try {
+        await Deno.stat(`${cwd}/.berrybench`);
+        throw new Error('snapshots unexpectedly written to cwd');
+      } catch (error) {
+        if ((error as Error).message.includes('unexpectedly written')) throw error;
+      }
+    });
+  } finally {
+    await Deno.remove(target, { recursive: true });
+    await Deno.remove(cwd, { recursive: true });
   }
 });

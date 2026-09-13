@@ -241,3 +241,19 @@ export async function readFileConfig(root: string): Promise<unknown | undefined>
   }
   return value;
 }
+
+/**
+ * Ensure `<root>` exists, then serialize `resolved` to `<root>/berrybench.config.ts`
+ * via formatConfigFile. This is the single settings writer: the CLI's
+ * `config enable|disable` and the future #/settings UI both persist through it,
+ * so every save is deterministic, key-sorted, and goes through the same
+ * serialization as `init`.
+ */
+export async function writeConfigFile(
+  root: string,
+  resolved: ResolvedConfig,
+  notes?: Record<string, string>,
+): Promise<void> {
+  await Deno.mkdir(root, { recursive: true });
+  await Deno.writeTextFile(join(root, 'berrybench.config.ts'), formatConfigFile(resolved, notes ?? {}));
+}
