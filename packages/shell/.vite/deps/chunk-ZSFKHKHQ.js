@@ -1,18 +1,16 @@
 import {
-  FILENAME,
   active_effect,
   active_reaction,
   define_property,
+  FILENAME,
   hydrating,
   queue_micro_task,
   set_active_effect,
   set_active_reaction,
   teardown,
-  without_reactive_context
+  without_reactive_context,
 } from "./chunk-4PRHFUDT.js";
-import {
-  event_handler_invalid
-} from "./chunk-PRVSSIY5.js";
+import { event_handler_invalid } from "./chunk-PRVSSIY5.js";
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/internal/client/dom/elements/events.js
 var event_symbol = /* @__PURE__ */ Symbol("events");
@@ -43,7 +41,9 @@ function create_event(event_name, dom, handler, options = {}) {
       });
     }
   }
-  if (event_name.startsWith("pointer") || event_name.startsWith("touch") || event_name === "wheel") {
+  if (
+    event_name.startsWith("pointer") || event_name.startsWith("touch") || event_name === "wheel"
+  ) {
     queue_micro_task(() => {
       dom.addEventListener(event_name, target_handler, options);
     });
@@ -61,10 +61,12 @@ function on(element, type, handler, options = {}) {
 function event(event_name, dom, handler, capture, passive) {
   var options = { capture, passive };
   var target_handler = create_event(event_name, dom, handler, options);
-  if (dom === document.body || // @ts-ignore
-  dom === window || // @ts-ignore
-  dom === document || // Firefox has quirky behavior, it can happen that we still get "canplay" events when the element is already removed
-  dom instanceof HTMLMediaElement) {
+  if (
+    dom === document.body || // @ts-ignore
+    dom === window || // @ts-ignore
+    dom === document || // Firefox has quirky behavior, it can happen that we still get "canplay" events when the element is already removed
+    dom instanceof HTMLMediaElement
+  ) {
     teardown(() => {
       dom.removeEventListener(event_name, target_handler, options);
     });
@@ -107,8 +109,10 @@ function handle_event_propagation(event2) {
   var handled_at = last_propagated_event === event2 && event2[event_symbol];
   if (handled_at) {
     var at_idx = path.indexOf(handled_at);
-    if (at_idx !== -1 && (handler_element === document || handler_element === /** @type {any} */
-    window)) {
+    if (
+      at_idx !== -1 && (handler_element === document || handler_element === /** @type {any} */
+          window)
+    ) {
       event2[event_symbol] = handler_element;
       return;
     }
@@ -121,13 +125,13 @@ function handle_event_propagation(event2) {
     }
   }
   current_target = /** @type {Element} */
-  path[path_idx] || event2.target;
+    path[path_idx] || event2.target;
   if (current_target === handler_element) return;
   define_property(event2, "currentTarget", {
     configurable: true,
     get() {
       return current_target || owner_document;
-    }
+    },
   });
   var previous_reaction = active_reaction;
   var previous_effect = active_effect;
@@ -140,10 +144,12 @@ function handle_event_propagation(event2) {
       if (current_target === handler_element) break;
       try {
         var delegated2 = current_target[event_symbol]?.[event_name];
-        if (delegated2 != null && (!/** @type {any} */
-        current_target.disabled || // DOM could've been updated already by the time this is reached, so we check this as well
-        // -> the target could not have been disabled because it emits the event in the first place
-        event2.target === current_target)) {
+        if (
+          delegated2 != null && (!/** @type {any} */
+          current_target.disabled || // DOM could've been updated already by the time this is reached, so we check this as well
+            // -> the target could not have been disabled because it emits the event in the first place
+            event2.target === current_target)
+        ) {
           delegated2.call(current_target, event2);
         }
       } catch (error) {
@@ -155,10 +161,12 @@ function handle_event_propagation(event2) {
       }
       if (event2.cancelBubble) break;
       path_idx++;
-      current_target = path_idx < path.length ? (
-        /** @type {Element} */
-        path[path_idx]
-      ) : null;
+      current_target = path_idx < path.length
+        ? (
+          /** @type {Element} */
+          path[path_idx]
+        )
+        : null;
     }
     if (throw_error) {
       for (let error of other_errors) {
@@ -175,7 +183,15 @@ function handle_event_propagation(event2) {
     set_active_effect(previous_effect);
   }
 }
-function apply(thunk, element, args, component, loc, has_side_effects = false, remove_parens = false) {
+function apply(
+  thunk,
+  element,
+  args,
+  component,
+  loc,
+  has_side_effects = false,
+  remove_parens = false,
+) {
   let handler;
   let error;
   try {
@@ -200,14 +216,14 @@ function apply(thunk, element, args, component, loc, has_side_effects = false, r
 
 export {
   all_registered_events,
-  root_event_handles,
-  replay_events,
+  apply,
   create_event,
-  on,
-  event,
-  delegated,
   delegate,
+  delegated,
+  event,
   handle_event_propagation,
-  apply
+  on,
+  replay_events,
+  root_event_handles,
 };
 //# sourceMappingURL=chunk-ZSFKHKHQ.js.map

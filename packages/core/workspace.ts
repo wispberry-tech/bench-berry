@@ -1,4 +1,4 @@
-export type WorkspaceId = 'design' | 'api' | 'db';
+export type WorkspaceId = "design" | "api" | "db";
 
 export interface ProjectContext {
   /** Absolute path to the project root — never Deno.cwd() inside core/plugins. */

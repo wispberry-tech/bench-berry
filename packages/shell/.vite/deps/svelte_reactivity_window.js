@@ -1,49 +1,38 @@
-import {
-  ReactiveValue
-} from "./chunk-DSTF3GBF.js";
+import { ReactiveValue } from "./chunk-DSTF3GBF.js";
 import "./chunk-T37U6M6V.js";
 import "./chunk-GRGQ3I6B.js";
 import "./chunk-NCXCYGJP.js";
 import "./chunk-FAHIXZFP.js";
-import {
-  on
-} from "./chunk-ZSFKHKHQ.js";
+import { on } from "./chunk-ZSFKHKHQ.js";
 import "./chunk-YJ56H3UW.js";
-import {
-  get2 as get,
-  set,
-  source,
-  tag
-} from "./chunk-4PRHFUDT.js";
-import {
-  true_default
-} from "./chunk-PRVSSIY5.js";
+import { get2 as get, set, source, tag } from "./chunk-4PRHFUDT.js";
+import { true_default } from "./chunk-PRVSSIY5.js";
 import "./chunk-EGK6ZIR3.js";
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/reactivity/window/index.js
 var scrollX = new ReactiveValue(
   true_default ? () => window.scrollX : () => void 0,
-  (update) => on(window, "scroll", update)
+  (update) => on(window, "scroll", update),
 );
 var scrollY = new ReactiveValue(
   true_default ? () => window.scrollY : () => void 0,
-  (update) => on(window, "scroll", update)
+  (update) => on(window, "scroll", update),
 );
 var innerWidth = new ReactiveValue(
   true_default ? () => window.innerWidth : () => void 0,
-  (update) => on(window, "resize", update)
+  (update) => on(window, "resize", update),
 );
 var innerHeight = new ReactiveValue(
   true_default ? () => window.innerHeight : () => void 0,
-  (update) => on(window, "resize", update)
+  (update) => on(window, "resize", update),
 );
 var outerWidth = new ReactiveValue(
   true_default ? () => window.outerWidth : () => void 0,
-  (update) => on(window, "resize", update)
+  (update) => on(window, "resize", update),
 );
 var outerHeight = new ReactiveValue(
   true_default ? () => window.outerHeight : () => void 0,
-  (update) => on(window, "resize", update)
+  (update) => on(window, "resize", update),
 );
 var screenLeft = new ReactiveValue(
   true_default ? () => window.screenLeft : () => void 0,
@@ -58,7 +47,7 @@ var screenLeft = new ReactiveValue(
     return () => {
       cancelAnimationFrame(frame);
     };
-  }
+  },
 );
 var screenTop = new ReactiveValue(
   true_default ? () => window.screenTop : () => void 0,
@@ -73,7 +62,7 @@ var screenTop = new ReactiveValue(
     return () => {
       cancelAnimationFrame(frame);
     };
-  }
+  },
 );
 var online = new ReactiveValue(
   true_default ? () => navigator.onLine : () => void 0,
@@ -84,7 +73,7 @@ var online = new ReactiveValue(
       unsub_online();
       unsub_offline();
     };
-  }
+  },
 );
 var devicePixelRatio = new class DevicePixelRatio {
   #dpr = source(true_default ? window.devicePixelRatio : void 0);
@@ -96,7 +85,7 @@ var devicePixelRatio = new class DevicePixelRatio {
         set(this.#dpr, window.devicePixelRatio);
         off();
         this.#update();
-      }
+      },
     );
   }
   constructor() {
@@ -122,6 +111,6 @@ export {
   screenLeft,
   screenTop,
   scrollX,
-  scrollY
+  scrollY,
 };
 //# sourceMappingURL=svelte_reactivity_window.js.map

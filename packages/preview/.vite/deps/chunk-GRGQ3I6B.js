@@ -1,13 +1,11 @@
-import {
-  clsx
-} from "./chunk-NCXCYGJP.js";
+import { clsx } from "./chunk-NCXCYGJP.js";
 import {
   append,
   assign_nodes,
   can_delegate_event,
-  createClassComponent,
   create_fragment_from_html,
   create_trusted_html,
+  createClassComponent,
   hash,
   is_capture_event,
   is_raw_text_element,
@@ -15,71 +13,28 @@ import {
   normalize_attribute,
   sanitize_location,
   set_should_intro,
-  should_intro
+  should_intro,
 } from "./chunk-FAHIXZFP.js";
+import { create_event, delegate, delegated } from "./chunk-ZSFKHKHQ.js";
 import {
-  create_event,
-  delegate,
-  delegated
-} from "./chunk-ZSFKHKHQ.js";
-import {
-  ATTACHMENT_KEY,
-  ATTRIBUTES_CACHE,
-  BLOCK_EFFECT,
-  BRANCH_EFFECT,
-  Batch,
-  CLASS_CACHE,
-  COMMENT_NODE,
-  DESTROYED,
-  DESTROYING,
-  DOCUMENT_FRAGMENT_NODE,
-  EACH_INDEX_REACTIVE,
-  EACH_IS_ANIMATED,
-  EACH_IS_CONTROLLED,
-  EACH_ITEM_IMMUTABLE,
-  EACH_ITEM_REACTIVE,
-  EFFECT_OFFSCREEN,
-  EFFECT_TRANSPARENT,
-  ELEMENT_NODE,
-  FILENAME,
-  FORM_RESET_HANDLER,
-  HEAD_EFFECT,
-  HMR,
-  HMR_ANCHOR,
-  HYDRATION_END,
-  HYDRATION_ERROR,
-  HYDRATION_START,
-  HYDRATION_START_ELSE,
-  INERT,
-  IS_XHTML,
-  LEGACY_PROPS,
-  LOADING_ATTR_SYMBOL,
-  NAMESPACE_HTML,
-  NAMESPACE_MATHML,
-  NAMESPACE_SVG,
-  PROPS_IS_BINDABLE,
-  PROPS_IS_IMMUTABLE,
-  PROPS_IS_LAZY_INITIAL,
-  PROPS_IS_RUNES,
-  PROPS_IS_UPDATED,
-  REACTION_RAN,
-  STATE_SYMBOL,
-  STYLE_CACHE,
-  TRANSITION_GLOBAL,
-  TRANSITION_IN,
-  TRANSITION_OUT,
-  UNINITIALIZED,
   active_effect,
   active_reaction,
   add_form_reset_listener,
   array_from,
+  ATTACHMENT_KEY,
+  ATTRIBUTES_CACHE,
   autofocus,
+  Batch,
   bind_invalid_checkbox_value,
   block,
+  BLOCK_EFFECT,
   branch,
+  BRANCH_EFFECT,
   capture,
   capture_store_binding,
+  CLASS_CACHE,
   clear_text_content,
+  COMMENT_NODE,
   component_api_changed,
   component_api_invalid_new,
   component_context,
@@ -92,17 +47,30 @@ import {
   derived2 as derived,
   derived_safe_equal,
   destroy_effect,
+  DESTROYED,
+  DESTROYING,
   dev_current_component_function,
   dev_stack,
+  DOCUMENT_FRAGMENT_NODE,
   dynamic_void_element_content,
+  EACH_INDEX_REACTIVE,
+  EACH_IS_ANIMATED,
+  EACH_IS_CONTROLLED,
+  EACH_ITEM_IMMUTABLE,
+  EACH_ITEM_REACTIVE,
   each_key_duplicate,
   each_key_volatile,
   eager_effect,
   effect,
+  EFFECT_OFFSCREEN,
   effect_root,
+  EFFECT_TRANSPARENT,
+  ELEMENT_NODE,
   experimental_async_required,
+  FILENAME,
   flatten,
   flushSync,
+  FORM_RESET_HANDLER,
   get2 as get,
   get_abort_signal_outside_reaction,
   get_descriptor,
@@ -112,10 +80,18 @@ import {
   get_next_sibling,
   get_prototype_of,
   has_own_property,
+  HEAD_EFFECT,
+  HMR,
+  HMR_ANCHOR,
   hydratable_missing_but_required,
   hydrate_next,
   hydrate_node,
   hydrating,
+  HYDRATION_END,
+  HYDRATION_ERROR,
+  HYDRATION_START,
+  HYDRATION_START_ELSE,
+  INERT,
   internal_set,
   invalid_snippet,
   invalid_snippet_arguments,
@@ -126,22 +102,34 @@ import {
   is_function,
   is_promise,
   is_runes,
+  IS_XHTML,
+  LEGACY_PROPS,
   lifecycle_legacy_only,
   lifecycle_outside_component,
   listen,
   listen_to_event_and_reset_event,
+  LOADING_ATTR_SYMBOL,
   managed,
   mark_as_component,
   move_effect,
   mutable_source,
+  NAMESPACE_HTML,
+  NAMESPACE_MATHML,
+  NAMESPACE_SVG,
   noop,
   object_keys,
   pause_effect,
   previous_batch,
   props_invalid_value,
+  PROPS_IS_BINDABLE,
+  PROPS_IS_IMMUTABLE,
+  PROPS_IS_LAZY_INITIAL,
+  PROPS_IS_RUNES,
+  PROPS_IS_UPDATED,
   props_rest_readonly,
   proxy,
   queue_micro_task,
+  REACTION_RAN,
   read_hydration_instruction,
   remove_effect_dom,
   render_effect,
@@ -163,19 +151,25 @@ import {
   snapshot,
   snippet_without_render_tag,
   source,
+  STATE_SYMBOL,
   store_invalid_shape,
+  STYLE_CACHE,
   svelte_element_invalid_this_value,
   tag,
   teardown,
   template_effect,
   tick,
+  TRANSITION_GLOBAL,
+  TRANSITION_IN,
+  TRANSITION_OUT,
+  UNINITIALIZED,
   unset_context,
   untrack,
   update,
   user_effect,
   user_pre_effect,
   validate_effect,
-  without_reactive_context
+  without_reactive_context,
 } from "./chunk-4PRHFUDT.js";
 import {
   assignment_value_stale,
@@ -189,12 +183,9 @@ import {
   ownership_invalid_binding,
   ownership_invalid_mutation,
   select_multiple_invalid_value,
-  true_default
+  true_default,
 } from "./chunk-PRVSSIY5.js";
-import {
-  async_mode_flag,
-  legacy_mode_flag
-} from "./chunk-EGK6ZIR3.js";
+import { async_mode_flag, legacy_mode_flag } from "./chunk-EGK6ZIR3.js";
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/internal/client/dev/assign.js
 function compare(a, b, property, location) {
@@ -202,25 +193,41 @@ function compare(a, b, property, location) {
     assignment_value_stale(
       property,
       /** @type {string} */
-      sanitize_location(location)
+      sanitize_location(location),
     );
   }
   return a;
 }
 function assign(object, property, operator, rhs, location) {
   return compare(
-    operator === "=" ? object[property] = rhs : operator === "&&=" ? object[property] &&= rhs() : operator === "||=" ? object[property] ||= rhs() : operator === "??=" ? object[property] ??= rhs() : null,
+    operator === "="
+      ? object[property] = rhs
+      : operator === "&&="
+      ? object[property] &&= rhs()
+      : operator === "||="
+      ? object[property] ||= rhs()
+      : operator === "??="
+      ? object[property] ??= rhs()
+      : null,
     untrack(() => object[property]),
     property,
-    location
+    location,
   );
 }
 async function assign_async(object, property, operator, rhs, location) {
   return compare(
-    operator === "=" ? object[property] = await rhs : operator === "&&=" ? object[property] &&= await rhs() : operator === "||=" ? object[property] ||= await rhs() : operator === "??=" ? object[property] ??= await rhs() : null,
+    operator === "="
+      ? object[property] = await rhs
+      : operator === "&&="
+      ? object[property] &&= await rhs()
+      : operator === "||="
+      ? object[property] ||= await rhs()
+      : operator === "??="
+      ? object[property] ??= await rhs()
+      : null,
     untrack(() => object[property]),
     property,
-    location
+    location,
   );
 }
 
@@ -255,7 +262,7 @@ function add_locations(fn, filename, locations) {
 function assign_location(element2, filename, location) {
   element2.__svelte_meta = {
     parent: dev_stack,
-    loc: { file: filename, line: location[0], column: location[1] }
+    loc: { file: filename, line: location[0], column: location[1] },
   };
   if (location[2]) {
     assign_locations(element2.firstChild, filename, location[2]);
@@ -278,7 +285,7 @@ function assign_locations(node, filename, locations) {
         /** @type {Element} */
         node,
         filename,
-        locations[i++]
+        locations[i++],
       );
     }
     node = node.nextSibling;
@@ -304,7 +311,7 @@ function hmr(fn) {
       }
       effect2 = branch(() => {
         anchor = /** @type {any} */
-        anchor[HMR_ANCHOR] ?? anchor;
+          anchor[HMR_ANCHOR] ?? anchor;
         if (ran) set_should_intro(false);
         var result = (
           // @ts-expect-error
@@ -342,7 +349,7 @@ function hmr(fn) {
     update: (incoming) => {
       set(wrapper[HMR].current, incoming[HMR].fn);
       incoming[HMR].current = wrapper[HMR].current;
-    }
+    },
   };
   return wrapper;
 }
@@ -386,15 +393,16 @@ function create_ownership_validator(props) {
           component2[FILENAME],
           key2,
           child_component[FILENAME],
-          parent[FILENAME]
+          parent[FILENAME],
         );
       }
-    }
+    },
   };
 }
 function is_bound_or_unset(props, prop_name) {
   const is_entry_props = STATE_SYMBOL in props || LEGACY_PROPS in props;
-  return !!get_descriptor(props, prop_name)?.set || is_entry_props && prop_name in props || !(prop_name in props);
+  return !!get_descriptor(props, prop_name)?.set || is_entry_props && prop_name in props ||
+    !(prop_name in props);
 }
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/internal/client/dev/legacy.js
@@ -411,7 +419,7 @@ function legacy_api() {
   return {
     $destroy: () => error("$destroy()"),
     $on: () => error("$on(...)"),
-    $set: () => error("$set(...)")
+    $set: () => error("$set(...)"),
   };
 }
 
@@ -629,7 +637,6 @@ var BranchManager = class {
     }
   };
   /**
-   *
    * @param {any} key
    * @param {null | ((target: TemplateNode) => void)} fn
    */
@@ -646,12 +653,12 @@ var BranchManager = class {
         fragment.append(target);
         this.#offscreen.set(key2, {
           effect: branch(() => fn(target)),
-          fragment
+          fragment,
         });
       } else {
         this.#onscreen.set(
           key2,
-          branch(() => fn(this.anchor))
+          branch(() => fn(this.anchor)),
         );
       }
     }
@@ -747,7 +754,7 @@ function await_block(node, get_input, pending_fn, then_fn, catch_fn) {
               throw error.v;
             }
           });
-        }
+        },
       );
       if (hydrating) {
         branches.ensure(PENDING, pending_fn);
@@ -786,7 +793,7 @@ function if_block(node, fn, elseif = false) {
     if (hydrating) {
       var data = read_hydration_instruction(
         /** @type {TemplateNode} */
-        marker
+        marker,
       );
       if (key2 !== parseInt(data.substring(1))) {
         var anchor = skip_nodes();
@@ -824,11 +831,11 @@ function key(node, get_key, render_fn) {
     var key2 = get_key();
     if (key2 !== key2) {
       key2 = /** @type {any} */
-      NAN;
+        NAN;
     }
     if (legacy && key2 !== null && typeof key2 === "object") {
       key2 = /** @type {V} */
-      {};
+        {};
     }
     branches.ensure(key2, render_fn);
   });
@@ -884,11 +891,12 @@ function pause_effects(state2, to_destroy, controlled_anchor) {
           remaining -= 1;
         }
       },
-      false
+      false,
     );
   }
   if (remaining === 0) {
-    var fast_path = transitions.length === 0 && controlled_anchor !== null && state2.pending.size === 0;
+    var fast_path = transitions.length === 0 && controlled_anchor !== null &&
+      state2.pending.size === 0;
     if (fast_path) {
       var anchor = (
         /** @type {Element} */
@@ -906,7 +914,7 @@ function pause_effects(state2, to_destroy, controlled_anchor) {
   } else {
     group = {
       pending: new Set(to_destroy),
-      done: /* @__PURE__ */ new Set()
+      done: /* @__PURE__ */ new Set(),
     };
     (state2.outrogroups ??= /* @__PURE__ */ new Set()).add(group);
   }
@@ -919,7 +927,7 @@ function destroy_effects(state2, to_destroy, remove_dom = true) {
       for (const key2 of keys) {
         preserved_effects.add(
           /** @type {EachItem} */
-          state2.items.get(key2).e
+          state2.items.get(key2).e,
         );
       }
     }
@@ -945,7 +953,9 @@ function each(node, flags, get_collection, get_key, render_fn, fallback_fn = nul
       /** @type {Element} */
       node
     );
-    anchor = hydrating ? set_hydrate_node(get_first_child(parent_node)) : parent_node.appendChild(create_text());
+    anchor = hydrating
+      ? set_hydrate_node(get_first_child(parent_node))
+      : parent_node.appendChild(create_text());
   }
   if (hydrating) {
     hydrate_next();
@@ -991,7 +1001,7 @@ function each(node, flags, get_collection, get_key, render_fn, fallback_fn = nul
   }
   var effect2 = block(() => {
     array = /** @type {V[]} */
-    get(each_array);
+      get(each_array);
     var length = array.length;
     let mismatch = false;
     if (hydrating) {
@@ -1010,10 +1020,12 @@ function each(node, flags, get_collection, get_key, render_fn, fallback_fn = nul
     );
     var defer = should_defer_append();
     for (var index2 = 0; index2 < length; index2 += 1) {
-      if (hydrating && hydrate_node.nodeType === COMMENT_NODE && /** @type {Comment} */
-      hydrate_node.data === HYDRATION_END) {
+      if (
+        hydrating && hydrate_node.nodeType === COMMENT_NODE && /** @type {Comment} */
+        hydrate_node.data === HYDRATION_END
+      ) {
         anchor = /** @type {Comment} */
-        hydrate_node;
+          hydrate_node;
         mismatch = true;
         set_hydrating(false);
       }
@@ -1041,7 +1053,7 @@ function each(node, flags, get_collection, get_key, render_fn, fallback_fn = nul
           index2,
           render_fn,
           flags,
-          get_collection
+          get_collection,
         );
         if (!first_run) {
           item.e.f |= EFFECT_OFFSCREEN;
@@ -1087,7 +1099,14 @@ function each(node, flags, get_collection, get_key, render_fn, fallback_fn = nul
     }
     get(each_array);
   });
-  var state2 = { effect: effect2, flags, items, pending: pending3, outrogroups: null, fallback: fallback2 };
+  var state2 = {
+    effect: effect2,
+    flags,
+    items,
+    pending: pending3,
+    outrogroups: null,
+    fallback: fallback2,
+  };
   first_run = false;
   if (hydrating) {
     anchor = hydrate_node;
@@ -1118,7 +1137,7 @@ function reconcile(state2, array, anchor, flags, get_key) {
       value = array[i];
       key2 = get_key(value, i);
       effect2 = /** @type {EachItem} */
-      items.get(key2).e;
+        items.get(key2).e;
       if ((effect2.f & EFFECT_OFFSCREEN) === 0) {
         effect2.nodes?.a?.measure();
         (to_animate ??= /* @__PURE__ */ new Set()).add(effect2);
@@ -1129,7 +1148,7 @@ function reconcile(state2, array, anchor, flags, get_key) {
     value = array[i];
     key2 = get_key(value, i);
     effect2 = /** @type {EachItem} */
-    items.get(key2).e;
+      items.get(key2).e;
     if (state2.outrogroups !== null) {
       for (const group of state2.outrogroups) {
         group.pending.delete(effect2);
@@ -1263,7 +1282,9 @@ function reconcile(state2, array, anchor, flags, get_key) {
   }
 }
 function create_item(items, anchor, value, key2, index2, render_fn, flags, get_collection) {
-  var v = (flags & EACH_ITEM_REACTIVE) !== 0 ? (flags & EACH_ITEM_IMMUTABLE) === 0 ? mutable_source(value, false, false) : source(value) : null;
+  var v = (flags & EACH_ITEM_REACTIVE) !== 0
+    ? (flags & EACH_ITEM_IMMUTABLE) === 0 ? mutable_source(value, false, false) : source(value)
+    : null;
   var i = (flags & EACH_INDEX_REACTIVE) !== 0 ? source(index2) : null;
   if (true_default && v) {
     v.trace = () => {
@@ -1278,17 +1299,19 @@ function create_item(items, anchor, value, key2, index2, render_fn, flags, get_c
       return () => {
         items.delete(key2);
       };
-    })
+    }),
   };
 }
 function move(effect2, next2, anchor) {
   if (!effect2.nodes) return;
   var node = effect2.nodes.start;
   var end = effect2.nodes.end;
-  var dest = next2 && (next2.f & EFFECT_OFFSCREEN) === 0 ? (
-    /** @type {EffectNodes} */
-    next2.nodes.start
-  ) : anchor;
+  var dest = next2 && (next2.f & EFFECT_OFFSCREEN) === 0
+    ? (
+      /** @type {EffectNodes} */
+      next2.nodes.start
+    )
+    : anchor;
   while (node !== null) {
     var next_node = (
       /** @type {TemplateNode} */
@@ -1341,7 +1364,14 @@ function check_hash(element2, server_hash, value) {
   }
   hydration_html_changed(sanitize_location(location));
 }
-function html(node, get_value, is_controlled = false, svg = false, mathml = false, skip_warning = false) {
+function html(
+  node,
+  get_value,
+  is_controlled = false,
+  svg = false,
+  mathml = false,
+  skip_warning = false,
+) {
   var anchor = node;
   var value = "";
   if (is_controlled) {
@@ -1365,13 +1395,13 @@ function html(node, get_value, is_controlled = false, svg = false, mathml = fals
     if (is_controlled && !hydrating) {
       effect2.nodes = null;
       parent_node.innerHTML = /** @type {string} */
-      value;
+        value;
       if (value !== "") {
         assign_nodes(
           /** @type {TemplateNode} */
           get_first_child(parent_node),
           /** @type {TemplateNode} */
-          parent_node.lastChild
+          parent_node.lastChild,
         );
       }
       return;
@@ -1380,7 +1410,7 @@ function html(node, get_value, is_controlled = false, svg = false, mathml = fals
       remove_effect_dom(
         effect2.nodes.start,
         /** @type {TemplateNode} */
-        effect2.nodes.end
+        effect2.nodes.end,
       );
       effect2.nodes = null;
     }
@@ -1392,8 +1422,10 @@ function html(node, get_value, is_controlled = false, svg = false, mathml = fals
       );
       var next2 = hydrate_next();
       var last = next2;
-      while (next2 !== null && (next2.nodeType !== COMMENT_NODE || /** @type {Comment} */
-      next2.data !== "")) {
+      while (
+        next2 !== null && (next2.nodeType !== COMMENT_NODE || /** @type {Comment} */
+          next2.data !== "")
+      ) {
         last = next2;
         next2 = get_next_sibling(next2);
       }
@@ -1406,7 +1438,7 @@ function html(node, get_value, is_controlled = false, svg = false, mathml = fals
           /** @type {Element} */
           next2.parentNode,
           hash2,
-          value
+          value,
         );
       }
       assign_nodes(hydrate_node, last);
@@ -1419,7 +1451,7 @@ function html(node, get_value, is_controlled = false, svg = false, mathml = fals
       create_element(svg ? "svg" : mathml ? "math" : "template", ns)
     );
     wrapper.innerHTML = /** @type {any} */
-    value;
+      value;
     var node2 = svg || mathml ? wrapper : (
       /** @type {HTMLTemplateElement} */
       wrapper.content
@@ -1428,13 +1460,13 @@ function html(node, get_value, is_controlled = false, svg = false, mathml = fals
       /** @type {TemplateNode} */
       get_first_child(node2),
       /** @type {TemplateNode} */
-      node2.lastChild
+      node2.lastChild,
     );
     if (svg || mathml) {
       while (get_first_child(node2)) {
         anchor.before(
           /** @type {TemplateNode} */
-          get_first_child(node2)
+          get_first_child(node2),
         );
       }
     } else {
@@ -1539,14 +1571,16 @@ function createRawSnippet(fn) {
     var element2;
     if (hydrating) {
       element2 = /** @type {Element} */
-      hydrate_node;
+        hydrate_node;
       hydrate_next();
     } else {
       var html2 = snippet2.render().trim();
       var fragment = create_fragment_from_html(html2);
       element2 = /** @type {Element} */
-      get_first_child(fragment);
-      if (true_default && (get_next_sibling(element2) !== null || element2.nodeType !== ELEMENT_NODE)) {
+        get_first_child(fragment);
+      if (
+        true_default && (get_next_sibling(element2) !== null || element2.nodeType !== ELEMENT_NODE)
+      ) {
         invalid_raw_snippet_render();
       }
       anchor.before(element2);
@@ -1572,7 +1606,7 @@ function component(node, get_component, render_fn) {
     if (hydrating) {
       var data = read_hydration_instruction(
         /** @type {TemplateNode} */
-        hydration_start_node
+        hydration_start_node,
       );
       var server_had_component = data === HYDRATION_START;
       var client_has_component = component2 !== null;
@@ -1601,7 +1635,7 @@ var raf = {
     (_) => (true_default ? requestAnimationFrame : noop)(_)
   ),
   now: () => now(),
-  tasks: /* @__PURE__ */ new Set()
+  tasks: /* @__PURE__ */ new Set(),
 };
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/internal/client/loop.js
@@ -1628,7 +1662,7 @@ function loop(callback) {
     }),
     abort() {
       raf.tasks.delete(task);
-    }
+    },
   };
 }
 
@@ -1646,7 +1680,7 @@ function css_property_to_camelcase(style) {
   if (parts.length === 1) return parts[0];
   return parts[0] + parts.slice(1).map(
     /** @param {any} word */
-    (word) => word[0].toUpperCase() + word.slice(1)
+    (word) => word[0].toUpperCase() + word.slice(1),
   ).join("");
 }
 function css_to_keyframe(css) {
@@ -1667,7 +1701,7 @@ function set_animation_effect_override(v) {
 }
 function animation(element2, get_fn, get_params) {
   var effect2 = animation_effect_override ?? /** @type {Effect} */
-  active_effect;
+    active_effect;
   var nodes = (
     /** @type {EffectNodes} */
     effect2.nodes
@@ -1684,7 +1718,10 @@ function animation(element2, get_fn, get_params) {
     apply() {
       animation2?.abort();
       to = this.element.getBoundingClientRect();
-      if (from.left !== to.left || from.right !== to.right || from.top !== to.top || from.bottom !== to.bottom) {
+      if (
+        from.left !== to.left || from.right !== to.right || from.top !== to.top ||
+        from.bottom !== to.bottom
+      ) {
         const options = get_fn()(this.element, { from, to }, get_params?.());
         animation2 = animate(
           this.element,
@@ -1696,7 +1733,7 @@ function animation(element2, get_fn, get_params) {
           () => {
             animation2?.abort();
             animation2 = void 0;
-          }
+          },
         );
       }
     },
@@ -1712,7 +1749,7 @@ function animation(element2, get_fn, get_params) {
           position: style.position,
           width: style.width,
           height: style.height,
-          transform: style.transform
+          transform: style.transform,
         };
         style.position = "absolute";
         style.width = width;
@@ -1735,7 +1772,7 @@ function animation(element2, get_fn, get_params) {
         style.height = original_styles.height;
         style.transform = original_styles.transform;
       }
-    }
+    },
   };
   nodes.a.element = element2;
 }
@@ -1752,10 +1789,14 @@ function transition(flags, element2, get_fn, get_params) {
   var outro;
   function get_options() {
     return without_reactive_context(() => {
-      return current_options ??= get_fn()(element2, get_params?.() ?? /** @type {P} */
-      {}, {
-        direction
-      });
+      return current_options ??= get_fn()(
+        element2,
+        get_params?.() ?? /** @type {P} */
+          {},
+        {
+          direction,
+        },
+      );
     });
   }
   var transition2 = {
@@ -1783,7 +1824,7 @@ function transition(flags, element2, get_fn, get_params) {
           intro?.abort();
           intro = current_options = void 0;
           element2.style.overflow = overflow;
-        }
+        },
       );
     },
     out(fn) {
@@ -1804,13 +1845,13 @@ function transition(flags, element2, get_fn, get_params) {
         () => {
           dispatch_event(element2, "outroend");
           fn?.();
-        }
+        },
       );
     },
     stop: () => {
       intro?.abort();
       outro?.abort();
-    }
+    },
   };
   var e = (
     /** @type {Effect & { nodes: EffectNodes }} */
@@ -1855,7 +1896,7 @@ function animate(element2, options, counterpart, t2, on_begin, on_finish) {
       },
       deactivate: () => a.deactivate(),
       reset: () => a.reset(),
-      t: () => a.t()
+      t: () => a.t(),
     };
   }
   counterpart?.deactivate();
@@ -1866,7 +1907,7 @@ function animate(element2, options, counterpart, t2, on_begin, on_finish) {
       abort: noop,
       deactivate: noop,
       reset: noop,
-      t: () => t2
+      t: () => t2,
     };
   }
   const { delay = 0, css, tick: tick2, easing = linear } = options;
@@ -1952,7 +1993,7 @@ function animate(element2, options, counterpart, t2, on_begin, on_finish) {
         tick2?.(1, 0);
       }
     },
-    t: () => get_t()
+    t: () => get_t(),
   };
 }
 
@@ -1966,7 +2007,7 @@ function element(node, get_tag, is_svg, render_fn, get_namespace, location) {
   var element2 = null;
   if (hydrating && hydrate_node.nodeType === ELEMENT_NODE) {
     element2 = /** @type {Element} */
-    hydrate_node;
+      hydrate_node;
     hydrate_next();
   }
   var anchor = (
@@ -1980,7 +2021,11 @@ function element(node, get_tag, is_svg, render_fn, get_namespace, location) {
   var branches = new BranchManager(anchor, false);
   block(() => {
     const next_tag = get_tag() || null;
-    var ns = get_namespace ? get_namespace() : is_svg || next_tag === "svg" ? NAMESPACE_SVG : void 0;
+    var ns = get_namespace
+      ? get_namespace()
+      : is_svg || next_tag === "svg"
+      ? NAMESPACE_SVG
+      : void 0;
     if (next_tag === null) {
       branches.ensure(null, null);
       set_should_intro(true);
@@ -1988,18 +2033,20 @@ function element(node, get_tag, is_svg, render_fn, get_namespace, location) {
     }
     branches.ensure(next_tag, (anchor2) => {
       if (next_tag) {
-        element2 = hydrating ? (
-          /** @type {Element} */
-          element2
-        ) : create_element(next_tag, ns);
+        element2 = hydrating
+          ? (
+            /** @type {Element} */
+            element2
+          )
+          : create_element(next_tag, ns);
         if (true_default && location) {
           element2.__svelte_meta = {
             parent: dev_stack,
             loc: {
               file: filename,
               line: location[0],
-              column: location[1]
-            }
+              column: location[1],
+            },
           };
         }
         assign_nodes(element2, element2);
@@ -2008,7 +2055,9 @@ function element(node, get_tag, is_svg, render_fn, get_namespace, location) {
           if (hydrating && is_raw_text_element(next_tag)) {
             element2.append(tmp_comment = document.createComment(""));
           }
-          var child_anchor = hydrating ? get_first_child(element2) : element2.appendChild(create_text());
+          var child_anchor = hydrating
+            ? get_first_child(element2)
+            : element2.appendChild(create_text());
           if (hydrating) {
             if (child_anchor === null) {
               set_hydrating(false);
@@ -2052,8 +2101,10 @@ function head(hash2, render_fn) {
   if (hydrating) {
     previous_hydrate_node = hydrate_node;
     var head_anchor = get_first_child(document.head);
-    while (head_anchor !== null && (head_anchor.nodeType !== COMMENT_NODE || /** @type {Comment} */
-    head_anchor.data !== hash2)) {
+    while (
+      head_anchor !== null && (head_anchor.nodeType !== COMMENT_NODE || /** @type {Comment} */
+        head_anchor.data !== hash2)
+    ) {
       head_anchor = get_next_sibling(head_anchor);
     }
     if (head_anchor === null) {
@@ -2087,7 +2138,7 @@ function head(hash2, render_fn) {
       set_hydrating(true);
       set_hydrate_node(
         /** @type {TemplateNode} */
-        previous_hydrate_node
+        previous_hydrate_node,
       );
     }
   }
@@ -2100,14 +2151,16 @@ function append_styles(anchor, css) {
     var root = anchor.getRootNode();
     var target = (
       /** @type {ShadowRoot} */
-      root.host ? (
-        /** @type {ShadowRoot} */
-        root
-      ) : (
-        /** @type {Document} */
-        root.head ?? /** @type {Document} */
-        root.ownerDocument.head
-      )
+      root.host
+        ? (
+          /** @type {ShadowRoot} */
+          root
+        )
+        : (
+          /** @type {Document} */
+          root.head ?? /** @type {Document} */
+            root.ownerDocument.head
+        )
     );
     if (!target.querySelector("#" + css.hash)) {
       const style = create_element("style");
@@ -2194,15 +2247,16 @@ function escape_html(value, is_attr) {
 var replacements = {
   translate: /* @__PURE__ */ new Map([
     [true, "yes"],
-    [false, "no"]
-  ])
+    [false, "no"],
+  ]),
 };
 function attr(name, value, is_boolean = false) {
   if (name === "hidden" && value !== "until-found") {
     is_boolean = true;
   }
   if (value == null || is_boolean && !value && value !== "") return "";
-  const normalized = has_own_property.call(replacements, name) && replacements[name].get(value) || value;
+  const normalized = has_own_property.call(replacements, name) && replacements[name].get(value) ||
+    value;
   const assignment = is_boolean ? `=""` : `="${escape_html(normalized, true)}"`;
   return ` ${name}${assignment}`;
 }
@@ -2228,7 +2282,10 @@ function to_class(value, hash2, directives) {
         var a = 0;
         while ((a = classname.indexOf(key2, a)) >= 0) {
           var b = a + len;
-          if ((a === 0 || whitespace.includes(classname[a - 1])) && (b === classname.length || whitespace.includes(classname[b]))) {
+          if (
+            (a === 0 || whitespace.includes(classname[a - 1])) &&
+            (b === classname.length || whitespace.includes(classname[b]))
+          ) {
             classname = (a === 0 ? "" : classname.substring(0, a)) + classname.substring(b + 1);
           } else {
             a = b;
@@ -2426,10 +2483,12 @@ function apply_default_select_value(select, preserve) {
     var option_value = get_option_value(option);
     set_selected(
       option,
-      multiple ? (
-        /** @type {any[]} */
-        values.includes(option_value)
-      ) : is(option_value, value)
+      multiple
+        ? (
+          /** @type {any[]} */
+          values.includes(option_value)
+        )
+        : is(option_value, value),
     );
   }
   if (!preserve) return;
@@ -2485,7 +2544,7 @@ function init_select(select) {
     // (doesn't get notified of select value changes,
     // because that property is not reflected as an attribute)
     attributes: true,
-    attributeFilter: ["value"]
+    attributeFilter: ["value"],
   });
   teardown(() => {
     observer.disconnect();
@@ -2501,7 +2560,7 @@ function bind_select_value(select, get2, set2 = get2) {
       value = [].map.call(select.querySelectorAll(query), get_option_value);
     } else {
       var selected_option = select.querySelector(query) ?? // will fall back to first non-disabled option if no option is selected
-      select.querySelector("option:not([disabled])");
+        select.querySelector("option:not([disabled])");
       value = selected_option && get_option_value(selected_option);
     }
     set2(value);
@@ -2587,18 +2646,22 @@ function remove_input_defaults(input) {
 }
 function set_value(element2, value) {
   var attributes = get_attributes(element2);
-  if (attributes.value === (attributes.value = // treat null and undefined the same for the initial value
-  value ?? void 0) || // @ts-expect-error
-  // `progress` elements always need their value set when it's `0`
-  element2.value === value && (value !== 0 || element2.nodeName !== PROGRESS_TAG)) {
+  if (
+    attributes.value === (attributes.value = // treat null and undefined the same for the initial value
+        value ?? void 0) || // @ts-expect-error
+    // `progress` elements always need their value set when it's `0`
+    element2.value === value && (value !== 0 || element2.nodeName !== PROGRESS_TAG)
+  ) {
     return;
   }
   element2.value = value ?? "";
 }
 function set_checked(element2, checked) {
   var attributes = get_attributes(element2);
-  if (attributes.checked === (attributes.checked = // treat null and undefined the same for the initial value
-  checked ?? void 0)) {
+  if (
+    attributes.checked === (attributes.checked = // treat null and undefined the same for the initial value
+      checked ?? void 0)
+  ) {
     return;
   }
   element2.checked = checked;
@@ -2617,7 +2680,10 @@ function set_attribute(element2, attribute, value, skip_warning) {
   var attributes = get_attributes(element2);
   if (hydrating) {
     attributes[attribute] = element2.getAttribute(attribute);
-    if (attribute === "src" || attribute === "srcset" || attribute === "href" && element2.nodeName === LINK_TAG) {
+    if (
+      attribute === "src" || attribute === "srcset" ||
+      attribute === "href" && element2.nodeName === LINK_TAG
+    ) {
       if (!skip_warning) {
         check_src_in_dev_hydration(element2, attribute, value ?? "");
       }
@@ -2655,7 +2721,10 @@ function set_custom_element_data(node, prop2, value) {
       // because during their upgrade/instantiation they might add more setters.
       // Instead, fall back to a simple "an object, then set as property" heuristic.
       (setters_cache.has(node.getAttribute("is") || node.nodeName) || // customElements may not be available in browser extension contexts
-      !customElements || customElements.get(node.getAttribute("is") || node.nodeName.toLowerCase()) ? get_setters(node).has(prop2) : value && typeof value === "object")
+          !customElements ||
+          customElements.get(node.getAttribute("is") || node.nodeName.toLowerCase())
+        ? get_setters(node).has(prop2)
+        : value && typeof value === "object")
     ) {
       node[prop2] = value;
     } else {
@@ -2669,12 +2738,19 @@ function set_custom_element_data(node, prop2, value) {
     }
   }
 }
-function set_attributes(element2, prev, next2, css_hash, should_remove_defaults = false, skip_warning = false) {
+function set_attributes(
+  element2,
+  prev,
+  next2,
+  css_hash,
+  should_remove_defaults = false,
+  skip_warning = false,
+) {
   if (hydrating && should_remove_defaults && element2.nodeName === INPUT_TAG) {
     if (!("defaultValue" in next2 || "defaultChecked" in next2)) {
       remove_input_defaults(
         /** @type {HTMLInputElement} */
-        element2
+        element2,
       );
     }
   }
@@ -2702,7 +2778,9 @@ function set_attributes(element2, prev, next2, css_hash, should_remove_defaults 
     next2.style ??= null;
   }
   var setters = get_setters(element2);
-  if (element2.nodeName === INPUT_TAG && "type" in next2 && ("value" in next2 || "__value" in next2)) {
+  if (
+    element2.nodeName === INPUT_TAG && "type" in next2 && ("value" in next2 || "__value" in next2)
+  ) {
     var type = next2.type;
     if (type !== current.type || type === void 0 && element2.hasAttribute("type")) {
       current.type = type;
@@ -2754,7 +2832,7 @@ function set_attributes(element2, prev, next2, css_hash, should_remove_defaults 
         delegated(event_name, element2, value);
         delegate([event_name]);
       } else if (value != null) {
-        let handle = function(evt) {
+        let handle = function (evt) {
           current[key3].call(this, evt);
         };
         current[event_handle_key] = create_event(event_name, element2, handle, opts);
@@ -2765,7 +2843,7 @@ function set_attributes(element2, prev, next2, css_hash, should_remove_defaults 
       autofocus(
         /** @type {HTMLElement} */
         element2,
-        Boolean(value)
+        Boolean(value),
       );
     } else if (!is_custom_element && (key3 === "__value" || key3 === "value" && value != null)) {
       element2.value = element2.__value = value;
@@ -2773,7 +2851,7 @@ function set_attributes(element2, prev, next2, css_hash, should_remove_defaults 
       set_selected(
         /** @type {HTMLOptionElement} */
         element2,
-        value
+        value,
       );
     } else {
       var name = key3;
@@ -2804,7 +2882,9 @@ function set_attributes(element2, prev, next2, css_hash, should_remove_defaults 
         } else {
           element2.removeAttribute(key3);
         }
-      } else if (is_default || (is_custom_element || typeof value !== "string") && setters.has(name)) {
+      } else if (
+        is_default || (is_custom_element || typeof value !== "string") && setters.has(name)
+      ) {
         element2[name] = value;
         if (name in attributes) attributes[name] = UNINITIALIZED;
       } else if (typeof value !== "function") {
@@ -2817,7 +2897,16 @@ function set_attributes(element2, prev, next2, css_hash, should_remove_defaults 
   }
   return current;
 }
-function attribute_effect(element2, fn, sync = [], async2 = [], blockers = [], css_hash, should_remove_defaults = false, skip_warning = false) {
+function attribute_effect(
+  element2,
+  fn,
+  sync = [],
+  async2 = [],
+  blockers = [],
+  css_hash,
+  should_remove_defaults = false,
+  skip_warning = false,
+) {
   flatten(blockers, sync, async2, (values) => {
     var prev = void 0;
     var effects = {};
@@ -2831,7 +2920,7 @@ function attribute_effect(element2, fn, sync = [], async2 = [], blockers = [], c
         next2,
         css_hash,
         should_remove_defaults,
-        skip_warning
+        skip_warning,
       );
       if (inited && is_select) {
         var select2 = (
@@ -2884,7 +2973,7 @@ function get_attributes(element2) {
     /** @type {any} */
     element2[ATTRIBUTES_CACHE] ??= {
       [IS_CUSTOM_ELEMENT]: element2.nodeName.includes("-"),
-      [IS_HTML]: element2.namespaceURI === NAMESPACE_HTML
+      [IS_HTML]: element2.namespaceURI === NAMESPACE_HTML,
     }
   );
 }
@@ -2900,8 +2989,10 @@ function get_setters(element2) {
   while (element_proto !== proto) {
     descriptors = get_descriptors(proto);
     for (var key2 in descriptors) {
-      if (descriptors[key2].set && // better safe than sorry, we don't want spread attributes to mess with HTML content
-      key2 !== "innerHTML" && key2 !== "textContent" && key2 !== "innerText") {
+      if (
+        descriptors[key2].set && // better safe than sorry, we don't want spread attributes to mess with HTML content
+        key2 !== "innerHTML" && key2 !== "textContent" && key2 !== "innerText"
+      ) {
         setters.add(key2);
       }
     }
@@ -2916,7 +3007,7 @@ function check_src_in_dev_hydration(element2, attribute, value) {
   hydration_attribute_changed(
     attribute,
     element2.outerHTML.replace(element2.innerHTML, element2.innerHTML && "..."),
-    String(value)
+    String(value),
   );
 }
 function src_url_equal(element_src, url) {
@@ -2930,12 +3021,13 @@ function srcset_url_equal(element2, srcset) {
   var element_urls = split_srcset(element2.srcset);
   var urls = split_srcset(srcset);
   return urls.length === element_urls.length && urls.every(
-    ([url, width], i) => width === element_urls[i][1] && // We need to test both ways because Vite will create an a full URL with
-    // `new URL(asset, import.meta.url).href` for the client when `base: './'`, and the
-    // relative URLs inside srcset are not automatically resolved to absolute URLs by
-    // browsers (in contrast to img.src). This means both SSR and DOM code could
-    // contain relative or absolute URLs.
-    (src_url_equal(element_urls[i][0], url) || src_url_equal(url, element_urls[i][0]))
+    ([url, width], i) =>
+      width === element_urls[i][1] && // We need to test both ways because Vite will create an a full URL with
+      // `new URL(asset, import.meta.url).href` for the client when `base: './'`, and the
+      // relative URLs inside srcset are not automatically resolved to absolute URLs by
+      // browsers (in contrast to img.src). This means both SSR and DOM code could
+      // contain relative or absolute URLs.
+      (src_url_equal(element_urls[i][0], url) || src_url_equal(url, element_urls[i][0])),
   );
 }
 
@@ -2946,7 +3038,7 @@ function is_supported() {
     var select = create_element("select");
     select.innerHTML = create_trusted_html("<option><span>t</span></option>");
     supported = /** @type {Element} */
-    select.firstChild?.firstChild?.nodeType === 1;
+      select.firstChild?.firstChild?.nodeType === 1;
   }
   return supported;
 }
@@ -2964,15 +3056,17 @@ function selectedcontent(element2, update_element) {
         selected ||= !!entry.target.parentElement?.closest("option")?.selected;
       }
       if (selected) {
-        element2.replaceWith(element2 = /** @type {HTMLElement} */
-        element2.cloneNode(true));
+        element2.replaceWith(
+          element2 = /** @type {HTMLElement} */
+            element2.cloneNode(true),
+        );
         update_element(element2);
       }
     });
     observer.observe(select, {
       childList: true,
       characterData: true,
-      subtree: true
+      subtree: true,
     });
     return () => {
       observer.disconnect();
@@ -3003,8 +3097,10 @@ function customizable_select(element2, rich_fn) {
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/internal/client/dom/elements/bindings/document.js
 function bind_active_element(update2) {
   listen(document, ["focusin", "focusout"], (event2) => {
-    if (event2 && event2.type === "focusout" && /** @type {FocusEvent} */
-    event2.relatedTarget) {
+    if (
+      event2 && event2.type === "focusout" && /** @type {FocusEvent} */
+      event2.relatedTarget
+    ) {
       return;
     }
     update2(document.activeElement);
@@ -3101,7 +3197,7 @@ function bind_group(inputs, group_index, input, get2, set2 = get2) {
       set2(value);
     },
     // TODO better default value handling
-    () => set2(is_checkbox ? [] : null)
+    () => set2(is_checkbox ? [] : null),
   );
   render_effect(() => {
     var value = get2();
@@ -3220,10 +3316,12 @@ function bind_current_time(media, get2, set2 = get2) {
   media.addEventListener("timeupdate", callback);
   render_effect(() => {
     var next_value = Number(get2());
-    if (value !== next_value && !isNaN(
-      /** @type {any} */
-      next_value
-    )) {
+    if (
+      value !== next_value && !isNaN(
+        /** @type {any} */
+        next_value,
+      )
+    ) {
       media.currentTime = value = next_value;
     }
   });
@@ -3236,7 +3334,10 @@ function bind_buffered(media, set2) {
   var current;
   listen(media, ["loadedmetadata", "progress", "timeupdate", "seeking"], () => {
     var ranges = media.buffered;
-    if (!current || current.length !== ranges.length || current.some((range, i) => ranges.start(i) !== range.start || ranges.end(i) !== range.end)) {
+    if (
+      !current || current.length !== ranges.length ||
+      current.some((range, i) => ranges.start(i) !== range.start || ranges.end(i) !== range.end)
+    ) {
       current = time_ranges_to_array(ranges);
       set2(current);
     }
@@ -3258,7 +3359,7 @@ function bind_ready_state(media, set2) {
   listen(
     media,
     ["loadedmetadata", "loadeddata", "canplay", "canplaythrough", "playing", "waiting", "emptied"],
-    () => set2(media.readyState)
+    () => set2(media.readyState),
   );
 }
 function bind_playback_rate(media, get2, set2 = get2) {
@@ -3384,25 +3485,29 @@ var ResizeObserverSingleton = class _ResizeObserverSingleton {
             listener(entry);
           }
         }
-      }
+      },
     ));
   }
 };
 var resize_observer_content_box = new ResizeObserverSingleton({
-  box: "content-box"
+  box: "content-box",
 });
 var resize_observer_border_box = new ResizeObserverSingleton({
-  box: "border-box"
+  box: "border-box",
 });
 var resize_observer_device_pixel_content_box = new ResizeObserverSingleton({
-  box: "device-pixel-content-box"
+  box: "device-pixel-content-box",
 });
 function bind_resize_observer(element2, type, set2) {
-  var observer = type === "contentRect" || type === "contentBoxSize" ? resize_observer_content_box : type === "borderBoxSize" ? resize_observer_border_box : resize_observer_device_pixel_content_box;
+  var observer = type === "contentRect" || type === "contentBoxSize"
+    ? resize_observer_content_box
+    : type === "borderBoxSize"
+    ? resize_observer_border_box
+    : resize_observer_device_pixel_content_box;
   var unsub = observer.observe(
     element2,
     /** @param {any} entry */
-    (entry) => set2(entry[type])
+    (entry) => set2(entry[type]),
   );
   teardown(unsub);
 }
@@ -3416,7 +3521,8 @@ function bind_element_size(element2, type, set2) {
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/internal/client/dom/elements/bindings/this.js
 function is_bound_this(bound_value, element_or_component) {
-  return bound_value === element_or_component || bound_value?.[STATE_SYMBOL] === element_or_component;
+  return bound_value === element_or_component ||
+    bound_value?.[STATE_SYMBOL] === element_or_component;
 }
 function bind_this(element_or_component = mark_as_component(), update2, get_value, get_parts) {
   var component_effect = (
@@ -3506,14 +3612,15 @@ function bind_focused(element2, set2) {
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/internal/client/dom/elements/bindings/window.js
 function bind_window_scroll(type, get2, set2 = get2) {
   var is_scrolling_x = type === "x";
-  var target_handler = () => without_reactive_context(() => {
-    scrolling = true;
-    clearTimeout(timeout);
-    timeout = setTimeout(clear, 100);
-    set2(window[is_scrolling_x ? "scrollX" : "scrollY"]);
-  });
+  var target_handler = () =>
+    without_reactive_context(() => {
+      scrolling = true;
+      clearTimeout(timeout);
+      timeout = setTimeout(clear, 100);
+      set2(window[is_scrolling_x ? "scrollX" : "scrollY"]);
+    });
   addEventListener("scroll", target_handler, {
-    passive: true
+    passive: true,
   });
   var scrolling = false;
   var timeout;
@@ -3607,7 +3714,7 @@ function observe_all(context, props) {
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/internal/client/dom/legacy/misc.js
 function reactive_import(fn) {
   var s = source(0);
-  return function() {
+  return function () {
     if (arguments.length === 1) {
       set(s, get(s) + 1);
       return arguments[0];
@@ -3668,7 +3775,7 @@ var rest_props_handler = {
       return {
         enumerable: true,
         configurable: true,
-        value: target.props[key2]
+        value: target.props[key2],
       };
     }
   },
@@ -3678,10 +3785,13 @@ var rest_props_handler = {
   },
   ownKeys(target) {
     return Reflect.ownKeys(target.props).filter((key2) => !target.exclude.has(key2));
-  }
+  },
 };
 function rest_props(props, exclude, name) {
-  return new Proxy(true_default ? { props, exclude, name } : { props, exclude }, rest_props_handler);
+  return new Proxy(
+    true_default ? { props, exclude, name } : { props, exclude },
+    rest_props_handler,
+  );
 }
 var legacy_rest_props_handler = {
   get(target, key2) {
@@ -3698,11 +3808,11 @@ var legacy_rest_props_handler = {
           {
             get [key2]() {
               return target.props[key2];
-            }
+            },
           },
           /** @type {string} */
           key2,
-          PROPS_IS_UPDATED
+          PROPS_IS_UPDATED,
         );
       } finally {
         set_active_effect(previous_effect);
@@ -3718,7 +3828,7 @@ var legacy_rest_props_handler = {
       return {
         enumerable: true,
         configurable: true,
-        value: target.props[key2]
+        value: target.props[key2],
       };
     }
   },
@@ -3734,7 +3844,7 @@ var legacy_rest_props_handler = {
   },
   ownKeys(target) {
     return Reflect.ownKeys(target.props).filter((key2) => !target.exclude.includes(key2));
-  }
+  },
 };
 function legacy_rest_props(props, exclude) {
   return new Proxy(
@@ -3749,9 +3859,9 @@ function legacy_rest_props(props, exclude) {
       parent_effect: (
         /** @type {Effect} */
         active_effect
-      )
+      ),
     },
-    legacy_rest_props_handler
+    legacy_rest_props_handler,
   );
 }
 var spread_props_handler = {
@@ -3811,7 +3921,7 @@ var spread_props_handler = {
       }
     }
     return keys;
-  }
+  },
 };
 function spread_props(...props) {
   return new Proxy({ props }, spread_props_handler);
@@ -3833,26 +3943,29 @@ function prop(props, key2, flags, fallback2) {
     if (lazy && runes) {
       fallback_signal ??= derived(
         /** @type {() => V} */
-        fallback2
+        fallback2,
       );
       return get(fallback_signal);
     }
     if (fallback_dirty) {
       fallback_dirty = false;
-      fallback_value = lazy ? untrack(
-        /** @type {() => V} */
-        fallback2
-      ) : (
-        /** @type {V} */
-        fallback2
-      );
+      fallback_value = lazy
+        ? untrack(
+          /** @type {() => V} */
+          fallback2,
+        )
+        : (
+          /** @type {V} */
+          fallback2
+        );
     }
     return fallback_value;
   };
   let setter;
   if (bindable) {
     var is_entry_props = STATE_SYMBOL in props || LEGACY_PROPS in props;
-    setter = get_descriptor(props, key2)?.set ?? (is_entry_props && key2 in props ? (v) => props[key2] = v : void 0);
+    setter = get_descriptor(props, key2)?.set ??
+      (is_entry_props && key2 in props ? (v) => props[key2] = v : void 0);
   }
   var initial_value;
   var is_store_sub = false;
@@ -3863,7 +3976,7 @@ function prop(props, key2, flags, fallback2) {
     ));
   } else {
     initial_value = /** @type {V} */
-    props[key2];
+      props[key2];
   }
   if (initial_value === void 0 && fallback2 !== void 0) {
     initial_value = get_fallback();
@@ -3891,7 +4004,7 @@ function prop(props, key2, flags, fallback2) {
       );
       if (value !== void 0) {
         fallback_value = /** @type {V} */
-        void 0;
+          void 0;
       }
       return value === void 0 ? fallback_value : value;
     };
@@ -3903,7 +4016,7 @@ function prop(props, key2, flags, fallback2) {
     var legacy_parent = props.$$legacy;
     return (
       /** @type {() => V} */
-      (function(value, mutation) {
+      (function (value, mutation) {
         if (arguments.length > 0) {
           if (!runes || !mutation || legacy_parent || is_store_sub) {
             setter(mutation ? getter() : value);
@@ -3929,7 +4042,7 @@ function prop(props, key2, flags, fallback2) {
   );
   return (
     /** @type {() => V} */
-    (function(value, mutation) {
+    (function (value, mutation) {
       if (arguments.length > 0) {
         const new_value = mutation ? get(d) : runes && bindable ? proxy(value) : value;
         set(d, new_value);
@@ -4043,7 +4156,7 @@ if (typeof HTMLElement === "function") {
     async connectedCallback() {
       this.$$cn = true;
       if (!this.$$c) {
-        let create_slot = function(name) {
+        let create_slot = function (name) {
           return (anchor) => {
             const slot2 = create_element("slot");
             if (name !== "default") slot2.name = name;
@@ -4084,8 +4197,8 @@ if (typeof HTMLElement === "function") {
           props: {
             ...this.$$d,
             $$slots,
-            $$host: this
-          }
+            $$host: this,
+          },
         });
         this.$$me = effect_root(() => {
           render_effect(() => {
@@ -4097,7 +4210,7 @@ if (typeof HTMLElement === "function") {
                 key2,
                 this.$$d[key2],
                 this.$$p_d,
-                "toAttribute"
+                "toAttribute",
               );
               if (attribute_value == null) {
                 this.removeAttribute(this.$$p_d[key2].attribute || key2);
@@ -4145,7 +4258,9 @@ if (typeof HTMLElement === "function") {
      */
     $$g_p(attribute_name) {
       return object_keys(this.$$p_d).find(
-        (key2) => this.$$p_d[key2].attribute === attribute_name || !this.$$p_d[key2].attribute && key2.toLowerCase() === attribute_name
+        (key2) =>
+          this.$$p_d[key2].attribute === attribute_name ||
+          !this.$$p_d[key2].attribute && key2.toLowerCase() === attribute_name,
       ) || attribute_name;
     }
   };
@@ -4192,7 +4307,14 @@ function get_custom_elements_slots(element2) {
   });
   return result;
 }
-function create_custom_element(Component, props_definition, slots, exports, shadow_root_init, extend) {
+function create_custom_element(
+  Component,
+  props_definition,
+  slots,
+  exports,
+  shadow_root_init,
+  extend,
+) {
   let Class = class extends SvelteElement {
     constructor() {
       super(Component, slots, shadow_root_init);
@@ -4200,7 +4322,7 @@ function create_custom_element(Component, props_definition, slots, exports, shad
     }
     static get observedAttributes() {
       return object_keys(props_definition).map(
-        (key2) => (props_definition[key2].attribute || key2).toLowerCase()
+        (key2) => (props_definition[key2].attribute || key2).toLowerCase(),
       );
     }
   };
@@ -4221,21 +4343,21 @@ function create_custom_element(Component, props_definition, slots, exports, shad
             component2.$set({ [prop2]: value });
           }
         }
-      }
+      },
     });
   });
   exports.forEach((property) => {
     define_property(Class.prototype, property, {
       get() {
         return this.$$c?.[property];
-      }
+      },
     });
   });
   if (extend) {
     Class = extend(Class);
   }
   Component.element = /** @type {any} */
-  Class;
+    Class;
   return Class;
 }
 
@@ -4287,7 +4409,7 @@ function hydratable(key2, fn) {
 
 // node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/index-client.js
 if (true_default) {
-  let throw_rune_error = function(rune) {
+  let throw_rune_error = function (rune) {
     if (!(rune in globalThis)) {
       let value;
       Object.defineProperty(globalThis, rune, {
@@ -4301,7 +4423,7 @@ if (true_default) {
         },
         set: (v) => {
           value = v;
-        }
+        },
       });
     }
   };
@@ -4327,10 +4449,12 @@ function onMount(fn) {
   } else {
     user_effect(() => {
       const cleanup = untrack(fn);
-      if (typeof cleanup === "function") return (
-        /** @type {() => void} */
-        cleanup
-      );
+      if (typeof cleanup === "function") {
+        return (
+          /** @type {() => void} */
+          cleanup
+        );
+      }
     });
   }
 }
@@ -4362,7 +4486,7 @@ function createEventDispatcher() {
         /** @type {string} */
         type,
         detail,
-        options
+        options,
       );
       for (const fn of callbacks) {
         fn.call(active_component_context.x, event2);
@@ -4402,10 +4526,13 @@ function init_update_callbacks(context) {
 function createAttachmentKey() {
   return Symbol(ATTACHMENT_KEY);
 }
-function fromAction(action2, fn = (
-  /** @type {() => T} */
-  noop
-)) {
+function fromAction(
+  action2,
+  fn = (
+    /** @type {() => T} */
+    noop
+  ),
+) {
   return (element2) => {
     const { update: update2, destroy } = untrack(() => action2(element2, fn()) ?? {});
     if (update2) {
@@ -4423,113 +4550,113 @@ function fromAction(action2, fn = (
 }
 
 export {
-  createAttachmentKey,
-  fromAction,
+  action,
+  add_legacy_event_listener,
+  add_locations,
+  afterUpdate,
+  animation,
+  append_styles,
   assign,
   assign_async,
-  cleanup_styles,
-  add_locations,
-  hmr,
-  create_ownership_validator,
-  check_target,
-  legacy_api,
-  inspect,
   async,
-  validate_snippet_args,
-  await_block,
-  if_block,
-  key,
-  css_props,
-  index,
-  each,
-  html,
-  slot,
-  sanitize_slots,
-  validate_void_dynamic_element,
-  validate_dynamic_element_tag,
-  validate_store,
-  prevent_snippet_stringification,
-  snippet,
-  wrap_snippet,
-  createRawSnippet,
-  component,
-  raf,
-  loop,
-  animation,
-  transition,
-  element,
-  head,
-  append_styles,
-  action,
   attach,
   attr,
-  clsx2 as clsx,
-  set_class,
-  set_style,
-  set_selected,
-  set_default_select_value,
-  select_option,
-  init_select,
-  bind_select_value,
-  CLASS,
-  STYLE,
-  remove_input_defaults,
-  set_value,
-  set_checked,
-  set_default_checked,
-  set_default_value,
-  set_attribute,
-  set_xlink_attribute,
-  set_custom_element_data,
   attribute_effect,
-  selectedcontent,
-  customizable_select,
+  await_block,
+  beforeUpdate,
   bind_active_element,
-  bind_value,
-  bind_group,
-  bind_checked,
-  bind_files,
-  bind_current_time,
   bind_buffered,
-  bind_seekable,
-  bind_played,
-  bind_seeking,
+  bind_checked,
+  bind_content_editable,
+  bind_current_time,
+  bind_element_size,
   bind_ended,
-  bind_ready_state,
-  bind_playback_rate,
-  bind_paused,
-  bind_volume,
+  bind_files,
+  bind_focused,
+  bind_group,
   bind_muted,
   bind_online,
+  bind_paused,
+  bind_playback_rate,
+  bind_played,
   bind_prop,
-  bind_resize_observer,
-  bind_element_size,
-  bind_this,
-  bind_content_editable,
   bind_property,
-  bind_focused,
+  bind_ready_state,
+  bind_resize_observer,
+  bind_seekable,
+  bind_seeking,
+  bind_select_value,
+  bind_this,
+  bind_value,
+  bind_volume,
   bind_window_scroll,
   bind_window_size,
-  init,
-  reactive_import,
   bubble_event,
-  add_legacy_event_listener,
-  update_legacy_props,
-  update_prop,
-  update_pre_prop,
-  rest_props,
-  legacy_rest_props,
-  spread_props,
-  prop,
-  validate_binding,
+  check_target,
+  CLASS,
+  cleanup_styles,
+  clsx2 as clsx,
+  component,
   create_custom_element,
-  log_if_contains_state,
-  hydratable,
-  getAbortSignal,
-  onMount,
-  onDestroy,
+  create_ownership_validator,
+  createAttachmentKey,
   createEventDispatcher,
-  beforeUpdate,
-  afterUpdate
+  createRawSnippet,
+  css_props,
+  customizable_select,
+  each,
+  element,
+  fromAction,
+  getAbortSignal,
+  head,
+  hmr,
+  html,
+  hydratable,
+  if_block,
+  index,
+  init,
+  init_select,
+  inspect,
+  key,
+  legacy_api,
+  legacy_rest_props,
+  log_if_contains_state,
+  loop,
+  onDestroy,
+  onMount,
+  prevent_snippet_stringification,
+  prop,
+  raf,
+  reactive_import,
+  remove_input_defaults,
+  rest_props,
+  sanitize_slots,
+  select_option,
+  selectedcontent,
+  set_attribute,
+  set_checked,
+  set_class,
+  set_custom_element_data,
+  set_default_checked,
+  set_default_select_value,
+  set_default_value,
+  set_selected,
+  set_style,
+  set_value,
+  set_xlink_attribute,
+  slot,
+  snippet,
+  spread_props,
+  STYLE,
+  transition,
+  update_legacy_props,
+  update_pre_prop,
+  update_prop,
+  validate_binding,
+  validate_dynamic_element_tag,
+  validate_snippet_args,
+  validate_store,
+  validate_void_dynamic_element,
+  wrap_snippet,
 };
 //# sourceMappingURL=chunk-GRGQ3I6B.js.map

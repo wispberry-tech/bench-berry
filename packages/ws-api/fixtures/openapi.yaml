@@ -10,14 +10,14 @@ paths:
         table: issues
         comp: badge
       responses:
-        '200':
+        "200":
           description: A list of issues
     post:
       description: |
         Create a new issue.
         The description's second line must not leak into the summary.
       responses:
-        '201':
+        "201":
           description: Created
   /issues/{id}:
     parameters:
@@ -33,7 +33,7 @@ paths:
       description: |
         Returns a single issue by id.
       responses:
-        '200':
+        "200":
           description: OK
 components:
   schemas:

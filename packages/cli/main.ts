@@ -1,6 +1,6 @@
-import { dispatch } from './commands.ts';
+import { dispatch } from "./commands.ts";
 
-export { VERSION } from './commands.ts';
+export { VERSION } from "./commands.ts";
 
 /** Runtime context handed to every command; output defaults to the console. */
 export interface CliContext {

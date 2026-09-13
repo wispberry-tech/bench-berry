@@ -5,10 +5,10 @@
 // deno-checkable anywhere. The shell mirrors the same union in
 // packages/shell/src/lib/types.ts (it must not import from this package).
 export type PreviewMessage =
-  | { type: 'ready' }
-  | { type: 'error'; message: string }
-  | { type: 'setProps'; props: Record<string, unknown> }
-  | { type: 'setStory'; storyId: string };
+  | { type: "ready" }
+  | { type: "error"; message: string }
+  | { type: "setProps"; props: Record<string, unknown> }
+  | { type: "setStory"; storyId: string };
 
 /**
  * Validate unknown postMessage data as a PreviewMessage. Returns null for
@@ -17,20 +17,23 @@ export type PreviewMessage =
  * fields are tolerated on shell->preview messages for forward compatibility).
  */
 export function parsePreviewMessage(data: unknown): PreviewMessage | null {
-  if (data === null || typeof data !== 'object' || Array.isArray(data)) return null;
+  if (data === null || typeof data !== "object" || Array.isArray(data)) return null;
   const record = data as Record<string, unknown>;
-  if (typeof record.type !== 'string') return null;
+  if (typeof record.type !== "string") return null;
   switch (record.type) {
-    case 'ready':
-      return Object.keys(record).length === 1 ? { type: 'ready' } : null;
-    case 'error':
-      return typeof record.message === 'string' ? { type: 'error', message: record.message } : null;
-    case 'setProps':
-      return record.props !== null && typeof record.props === 'object' && !Array.isArray(record.props)
-        ? { type: 'setProps', props: record.props as Record<string, unknown> }
+    case "ready":
+      return Object.keys(record).length === 1 ? { type: "ready" } : null;
+    case "error":
+      return typeof record.message === "string" ? { type: "error", message: record.message } : null;
+    case "setProps":
+      return record.props !== null && typeof record.props === "object" &&
+          !Array.isArray(record.props)
+        ? { type: "setProps", props: record.props as Record<string, unknown> }
         : null;
-    case 'setStory':
-      return typeof record.storyId === 'string' ? { type: 'setStory', storyId: record.storyId } : null;
+    case "setStory":
+      return typeof record.storyId === "string"
+        ? { type: "setStory", storyId: record.storyId }
+        : null;
     default:
       return null;
   }

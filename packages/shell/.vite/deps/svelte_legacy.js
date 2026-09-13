@@ -11,7 +11,7 @@ import {
   self,
   stopImmediatePropagation,
   stopPropagation,
-  trusted
+  trusted,
 } from "./chunk-FAHIXZFP.js";
 import "./chunk-ZSFKHKHQ.js";
 import "./chunk-YJ56H3UW.js";
@@ -31,5 +31,5 @@ export {
   self,
   stopImmediatePropagation,
   stopPropagation,
-  trusted
+  trusted,
 };

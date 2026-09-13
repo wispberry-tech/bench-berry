@@ -6,29 +6,29 @@
 //   virtual:berrybench-env               -> { dev, preview: { base } } (dev vs build)
 // Missing or unparseable files degrade to a safe module instead of failing the
 // build (load failures are warnings, never build errors — see §5 of the plan).
-import type { IncomingMessage, ServerResponse } from 'node:http';
-import type { Plugin } from 'vite';
-import { isAbsolute, join, relative } from '@std/path';
-import { resolveConfig, writeConfigFile } from '../core/config.ts';
-import type { ResolvedConfig } from '../core/config.ts';
-import type { WorkspaceId } from '../core/workspace.ts';
-import { apiPlugin } from '../ws-api/mod.ts';
-import { dbPlugin } from '../ws-db/mod.ts';
-import { designPlugin } from '../ws-design/mod.ts';
-import { resolvePreviewBase } from '../preview/config.ts';
+import type { IncomingMessage, ServerResponse } from "node:http";
+import type { Plugin } from "vite";
+import { isAbsolute, join, relative } from "@std/path";
+import { resolveConfig, writeConfigFile } from "../core/config.ts";
+import type { ResolvedConfig } from "../core/config.ts";
+import type { WorkspaceId } from "../core/workspace.ts";
+import { apiPlugin } from "../ws-api/mod.ts";
+import { dbPlugin } from "../ws-db/mod.ts";
+import { designPlugin } from "../ws-design/mod.ts";
+import { resolvePreviewBase } from "../preview/config.ts";
 
-export const CONFIG_MODULE = 'virtual:berrybench-config';
-export const SNAPSHOTS_MODULE = 'virtual:berrybench-snapshots';
-export const SNAPSHOTS_PREFIX = 'virtual:berrybench-snapshots/';
+export const CONFIG_MODULE = "virtual:berrybench-config";
+export const SNAPSHOTS_MODULE = "virtual:berrybench-snapshots";
+export const SNAPSHOTS_PREFIX = "virtual:berrybench-snapshots/";
 /** Env module consumed by the shell: `{ dev, preview: { base } }`. */
-export const ENV_MODULE = 'virtual:berrybench-env';
+export const ENV_MODULE = "virtual:berrybench-env";
 /** Project-relative snapshot directory; mirrors packages/snapshot/mod.ts. */
-export const SNAPSHOT_DIR = '.berrybench/snapshots';
+export const SNAPSHOT_DIR = ".berrybench/snapshots";
 
-const CONFIG_FILE = '.berrybench/resolved-config.json';
-const CONFIG_FILE_NAME = 'berrybench.config.ts';
-const BERRYBENCH_DIR = '.berrybench';
-const SNAPSHOT_IDS = ['design', 'api', 'db'] as const;
+const CONFIG_FILE = ".berrybench/resolved-config.json";
+const CONFIG_FILE_NAME = "berrybench.config.ts";
+const BERRYBENCH_DIR = ".berrybench";
+const SNAPSHOT_IDS = ["design", "api", "db"] as const;
 
 /**
  * The workspace plugins whose ids appear in a resolved config; mirrors
@@ -46,7 +46,7 @@ function snapshotIdOf(id: string): string | undefined {
 /** Validated delta body for POST /__berrybench/config (absent keys are unchanged). */
 interface ConfigDelta {
   workspaces?: Record<string, { enabled: boolean }>;
-  theme?: { accent?: string; defaultTheme?: 'light' | 'dark' };
+  theme?: { accent?: string; defaultTheme?: "light" | "dark" };
 }
 
 /** Parse + validate the settings write-back body; throws Error with a user-facing message. */
@@ -55,31 +55,31 @@ function parseConfigDelta(raw: string): ConfigDelta {
   try {
     body = JSON.parse(raw);
   } catch {
-    throw new Error('invalid JSON body');
+    throw new Error("invalid JSON body");
   }
-  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
-    throw new Error('body must be a JSON object');
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    throw new Error("body must be a JSON object");
   }
   const delta = body as Record<string, unknown>;
   const parsed: ConfigDelta = {};
 
   if (delta.workspaces !== undefined) {
     if (
-      typeof delta.workspaces !== 'object' || delta.workspaces === null ||
+      typeof delta.workspaces !== "object" || delta.workspaces === null ||
       Array.isArray(delta.workspaces)
     ) {
-      throw new Error('workspaces must be an object');
+      throw new Error("workspaces must be an object");
     }
     parsed.workspaces = {};
     for (const [id, cfg] of Object.entries(delta.workspaces as Record<string, unknown>)) {
       if (!(SNAPSHOT_IDS as readonly string[]).includes(id)) {
         throw new Error(`unknown workspace id: ${id}`);
       }
-      if (typeof cfg !== 'object' || cfg === null || Array.isArray(cfg)) {
+      if (typeof cfg !== "object" || cfg === null || Array.isArray(cfg)) {
         throw new Error(`workspace ${id}: expected an object`);
       }
       const enabled = (cfg as Record<string, unknown>).enabled;
-      if (typeof enabled !== 'boolean') {
+      if (typeof enabled !== "boolean") {
         throw new Error(`workspace ${id}: enabled must be a boolean`);
       }
       parsed.workspaces[id] = { enabled };
@@ -87,17 +87,17 @@ function parseConfigDelta(raw: string): ConfigDelta {
   }
 
   if (delta.theme !== undefined) {
-    if (typeof delta.theme !== 'object' || delta.theme === null || Array.isArray(delta.theme)) {
-      throw new Error('theme must be an object');
+    if (typeof delta.theme !== "object" || delta.theme === null || Array.isArray(delta.theme)) {
+      throw new Error("theme must be an object");
     }
     const theme = delta.theme as Record<string, unknown>;
     parsed.theme = {};
     if (theme.accent !== undefined) {
-      if (typeof theme.accent !== 'string') throw new Error('theme.accent must be a string');
+      if (typeof theme.accent !== "string") throw new Error("theme.accent must be a string");
       parsed.theme.accent = theme.accent;
     }
     if (theme.defaultTheme !== undefined) {
-      if (theme.defaultTheme !== 'light' && theme.defaultTheme !== 'dark') {
+      if (theme.defaultTheme !== "light" && theme.defaultTheme !== "dark") {
         throw new Error("theme.defaultTheme must be 'light' or 'dark'");
       }
       parsed.theme.defaultTheme = theme.defaultTheme;
@@ -133,11 +133,11 @@ function mergeConfigDelta(current: ResolvedConfig, delta: ConfigDelta): Resolved
     merged.workspaces[workspaceId] = {
       ...merged.workspaces[workspaceId],
       enabled: cfg.enabled,
-      enabledBy: 'ui',
+      enabledBy: "ui",
     };
   }
   if (delta.theme !== undefined) {
-    const theme = { ...(merged.theme ?? {}) as NonNullable<ResolvedConfig['theme']> };
+    const theme = { ...(merged.theme ?? {}) as NonNullable<ResolvedConfig["theme"]> };
     if (delta.theme.accent !== undefined) theme.accent = delta.theme.accent;
     if (delta.theme.defaultTheme !== undefined) theme.defaultTheme = delta.theme.defaultTheme;
     merged.theme = theme;
@@ -147,18 +147,18 @@ function mergeConfigDelta(current: ResolvedConfig, delta: ConfigDelta): Resolved
 
 function readRequestBody(req: IncomingMessage): Promise<string> {
   const { promise, resolve, reject } = Promise.withResolvers<string>();
-  let data = '';
-  req.setEncoding('utf8');
-  req.on('data', (chunk: string) => {
+  let data = "";
+  req.setEncoding("utf8");
+  req.on("data", (chunk: string) => {
     data += chunk;
   });
-  req.on('end', () => resolve(data));
-  req.on('error', reject);
+  req.on("end", () => resolve(data));
+  req.on("error", reject);
   return promise;
 }
 
 function respondJson(res: ServerResponse, status: number, body: unknown): void {
-  res.writeHead(status, { 'Content-Type': 'application/json' });
+  res.writeHead(status, { "Content-Type": "application/json" });
   res.end(JSON.stringify(body));
 }
 
@@ -172,13 +172,13 @@ export function berrybench(opts: { root: string }): Plugin {
   let envState = { dev: false };
 
   return {
-    name: 'berrybench',
+    name: "berrybench",
 
     configResolved(config) {
       envState = {
         // 'serve' + a non-production mode is the dev server; anything else
         // (build, production-ish serve) emits the static relative base.
-        dev: config.command === 'serve' && config.mode !== 'production',
+        dev: config.command === "serve" && config.mode !== "production",
       };
     },
 
@@ -192,10 +192,12 @@ export function berrybench(opts: { root: string }): Plugin {
 
     async load(id) {
       if (id === ENV_MODULE) {
-        return `export default ${JSON.stringify({
-          dev: envState.dev,
-          preview: { base: envState.dev ? resolvePreviewBase(true) : './preview/' },
-        })};`;
+        return `export default ${
+          JSON.stringify({
+            dev: envState.dev,
+            preview: { base: envState.dev ? resolvePreviewBase(true) : "./preview/" },
+          })
+        };`;
       }
       if (id === CONFIG_MODULE) {
         try {
@@ -203,7 +205,7 @@ export function berrybench(opts: { root: string }): Plugin {
           return `export default ${JSON.stringify(JSON.parse(text))};`;
         } catch {
           // Missing or unparseable resolved config: boot with an empty object.
-          return 'export default {};';
+          return "export default {};";
         }
       }
       if (id === SNAPSHOTS_MODULE) {
@@ -226,7 +228,7 @@ export function berrybench(opts: { root: string }): Plugin {
           return `export default ${JSON.stringify(enabled)};`;
         } catch {
           // No resolved config on disk: no workspace is enabled.
-          return 'export default {};';
+          return "export default {};";
         }
       }
       const snapshot = snapshotIdOf(id);
@@ -250,31 +252,33 @@ export function berrybench(opts: { root: string }): Plugin {
       server.watcher.add(watchRoot);
       const invalidate = (file: string): void => {
         const rel = relative(watchRoot, file);
-        const underBerrybench = rel === '' || (!rel.startsWith('..') && !isAbsolute(rel));
+        const underBerrybench = rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
         if (!underBerrybench) return;
         // Any change under .berrybench may affect every virtual module; mark
         // them stale (harmless when a module was never imported yet).
-        for (const id of [
-          CONFIG_MODULE,
-          SNAPSHOTS_MODULE,
-          ENV_MODULE,
-          ...SNAPSHOT_IDS.map((name) => SNAPSHOTS_PREFIX + name),
-        ]) {
+        for (
+          const id of [
+            CONFIG_MODULE,
+            SNAPSHOTS_MODULE,
+            ENV_MODULE,
+            ...SNAPSHOT_IDS.map((name) => SNAPSHOTS_PREFIX + name),
+          ]
+        ) {
           const mod = server.moduleGraph.getModuleById(id);
           if (mod !== undefined) server.moduleGraph.invalidateModule(mod);
         }
         // Virtual-module content cannot be diffed by HMR; force a page reload
         // so the shell re-imports the refreshed snapshots/config.
-        server.hot.send({ type: 'full-reload', path: '*' });
+        server.hot.send({ type: "full-reload", path: "*" });
       };
-      server.watcher.on('change', invalidate);
-      server.watcher.on('add', invalidate);
-      server.watcher.on('unlink', invalidate);
+      server.watcher.on("change", invalidate);
+      server.watcher.on("add", invalidate);
+      server.watcher.on("unlink", invalidate);
 
       // Settings write-back: merge the delta onto the current resolved config
       // and persist through the canonical writer (berrybench.config.ts).
       server.middlewares.use(async (req, res, next) => {
-        if (req.method !== 'POST' || (req.url?.split('?')[0] ?? '') !== '/__berrybench/config') {
+        if (req.method !== "POST" || (req.url?.split("?")[0] ?? "") !== "/__berrybench/config") {
           next();
           return;
         }

@@ -1,25 +1,24 @@
-import { ConfigError, readFileConfig, resolveConfig, writeConfigFile } from '../../core/mod.ts';
-import type { ProjectContext, ResolvedConfig, WorkspaceId } from '../../core/mod.ts';
-import type { CliContext } from '../main.ts';
-import {
-  plugins,
-  projectDir,
-  registry,
-  usage,
-  type Out,
-} from './shared.ts';
+import { ConfigError, readFileConfig, resolveConfig, writeConfigFile } from "../../core/mod.ts";
+import type { ProjectContext, ResolvedConfig, WorkspaceId } from "../../core/mod.ts";
+import type { CliContext } from "../main.ts";
+import { type Out, plugins, projectDir, registry, usage } from "./shared.ts";
 
-export async function cmdConfig(rest: string[], ctx: CliContext, out: Out, err: Out): Promise<number> {
+export async function cmdConfig(
+  rest: string[],
+  ctx: CliContext,
+  out: Out,
+  err: Out,
+): Promise<number> {
   const [sub, ...more] = rest;
-  if (sub === 'enable' || sub === 'disable') {
+  if (sub === "enable" || sub === "disable") {
     return cmdConfigSet(sub, more, ctx, out, err);
   }
 
   // Existing --print [--json] behavior, unchanged.
   let json = false;
   for (const arg of rest) {
-    if (arg === '--print') continue;
-    if (arg === '--json') {
+    if (arg === "--print") continue;
+    if (arg === "--json") {
       json = true;
       continue;
     }
@@ -46,7 +45,7 @@ export async function cmdConfig(rest: string[], ctx: CliContext, out: Out, err: 
 
   for (const id of registry.workspaceIds()) {
     const r = resolved.workspaces[id as WorkspaceId];
-    out(`${id}: ${r.enabled ? 'on' : 'off'} (${r.enabledBy})`);
+    out(`${id}: ${r.enabled ? "on" : "off"} (${r.enabledBy})`);
   }
   if (resolved.theme !== undefined) {
     const parts: string[] = [];
@@ -54,13 +53,13 @@ export async function cmdConfig(rest: string[], ctx: CliContext, out: Out, err: 
     if (resolved.theme.defaultTheme !== undefined) {
       parts.push(`default=${resolved.theme.defaultTheme}`);
     }
-    if (parts.length > 0) out(`theme: ${parts.join(' ')}`);
+    if (parts.length > 0) out(`theme: ${parts.join(" ")}`);
   }
   return 0;
 }
 
 async function cmdConfigSet(
-  verb: 'enable' | 'disable',
+  verb: "enable" | "disable",
   more: string[],
   ctx: CliContext,
   out: Out,
@@ -81,7 +80,7 @@ async function cmdConfigSet(
     return 1;
   }
   const id = idArg as WorkspaceId;
-  const enabled = verb === 'enable';
+  const enabled = verb === "enable";
 
   const projectCtx: ProjectContext = { root: projectDir(ctx, dirArg), env: ctx.env };
 
@@ -109,13 +108,16 @@ async function cmdConfigSet(
     // last one. Re-resolve with the target temporarily enabled so the merge
     // succeeds uncorrupted, then apply the real toggle below.
     const fileObj = file as Record<string, unknown>;
-    const workspaces = (typeof fileObj.workspaces === 'object' && fileObj.workspaces !== null)
+    const workspaces = (typeof fileObj.workspaces === "object" && fileObj.workspaces !== null)
       ? fileObj.workspaces as Record<string, unknown>
       : {};
-    const existing = (typeof workspaces[id] === 'object' && workspaces[id] !== null)
+    const existing = (typeof workspaces[id] === "object" && workspaces[id] !== null)
       ? workspaces[id] as Record<string, unknown>
       : {};
-    const bootFile = { ...fileObj, workspaces: { ...workspaces, [id]: { ...existing, enabled: true } } };
+    const bootFile = {
+      ...fileObj,
+      workspaces: { ...workspaces, [id]: { ...existing, enabled: true } },
+    };
     try {
       resolved = await resolveConfig(projectCtx, plugins, bootFile);
     } catch (second) {
@@ -128,8 +130,8 @@ async function cmdConfigSet(
   }
 
   const target = resolved.workspaces[id];
-  resolved.workspaces[id] = { ...target, enabled, enabledBy: 'config' };
+  resolved.workspaces[id] = { ...target, enabled, enabledBy: "config" };
   await writeConfigFile(projectCtx.root, resolved);
-  out(`${id}: ${enabled ? 'on' : 'off'}`);
+  out(`${id}: ${enabled ? "on" : "off"}`);
   return 0;
 }

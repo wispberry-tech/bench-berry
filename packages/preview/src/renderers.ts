@@ -3,12 +3,12 @@
 // component with the current props. All three frameworks are imported
 // statically (repo-wide deps); the active framework is chosen at runtime by
 // src/main.ts from the host package.json.
-import { createElement, type ComponentType } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
-import { createApp, h, type Component } from 'vue';
-import { mount, unmount, type Component as SvelteComponent } from 'svelte';
+import { type ComponentType, createElement } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { type Component, createApp, h } from "vue";
+import { type Component as SvelteComponent, mount, unmount } from "svelte";
 
-export type PreviewFramework = 'svelte' | 'react' | 'vue';
+export type PreviewFramework = "svelte" | "react" | "vue";
 
 interface SvelteComponentLike {
   new (options: { target: HTMLElement; props: Record<string, unknown> }): unknown;
@@ -39,17 +39,19 @@ export function renderStory(
   props: Record<string, unknown>,
 ): void {
   const Ctor = mod.default;
-  if (Ctor === null || Ctor === undefined || (typeof Ctor !== 'function' && typeof Ctor !== 'object')) {
-    throw new Error('story module has no usable default export');
+  if (
+    Ctor === null || Ctor === undefined || (typeof Ctor !== "function" && typeof Ctor !== "object")
+  ) {
+    throw new Error("story module has no usable default export");
   }
   switch (framework) {
-    case 'svelte':
+    case "svelte":
       svelteUnmounts.get(el)?.();
       el.replaceChildren();
       const svelteInstance = mount(Ctor as SvelteComponent, { target: el, props });
       svelteUnmounts.set(el, () => unmount(svelteInstance));
       break;
-    case 'react': {
+    case "react": {
       // React owns its container once created — never clear it manually or the
       // mount/fiber bookkeeping breaks (deletion of already-detached nodes).
       let root = reactRoots.get(el);
@@ -62,7 +64,7 @@ export function renderStory(
       root.render(createElement(Ctor as ComponentType, { ...props, key: reactKey }));
       break;
     }
-    case 'vue':
+    case "vue":
       vueApps.get(el)?.unmount();
       el.replaceChildren();
       const vueApp = createApp(h(Ctor as Component, props));

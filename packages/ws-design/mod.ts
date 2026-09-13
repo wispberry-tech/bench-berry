@@ -1,6 +1,6 @@
-import type { ProjectContext, WorkspacePlugin } from '../core/workspace.ts';
-import { expandGlob } from '@std/fs';
-import { join, relative, resolve } from '@std/path';
+import type { ProjectContext, WorkspacePlugin } from "../core/workspace.ts";
+import { expandGlob } from "@std/fs";
+import { join, relative, resolve } from "@std/path";
 
 /** One scenario of a story: a named props override (contract §4.6). */
 export type StoryScenario = { name: string; props: Record<string, unknown> };
@@ -19,10 +19,33 @@ export interface DesignStory {
 export interface DesignSnapshot {
   packageName?: string;
   version?: string;
+  /** Design package dir relative to the project root ('.' for root, else 'frontend' & co). */
+  srcRoot?: string;
   stories: DesignStory[];
 }
 
-const STORY_PATTERNS = ['src/**/*.story.svelte', 'src/**/*.story.tsx'] as const;
+const STORY_PATTERNS = ["src/**/*.story.svelte", "src/**/*.story.tsx"] as const;
+
+/** Candidate dirs for the design package, probed in order (root first). */
+const DESIGN_DIRS = [".", "frontend", "web", "ui", "app", "client"] as const;
+
+/**
+ * Where the design package lives: the first DESIGN_DIRS entry holding a
+ * package.json, else undefined. Lets monorepos (Go backend + frontend/ web
+ * app) get their component library found without forcing a root package.json.
+ */
+export async function designRootOf(root: string): Promise<string | undefined> {
+  for (const dir of DESIGN_DIRS) {
+    const candidate = join(root, dir);
+    try {
+      const stat = await Deno.stat(join(candidate, "package.json"));
+      if (stat.isFile) return candidate;
+    } catch {
+      // Absent package.json: keep probing.
+    }
+  }
+  return undefined;
+}
 
 /** First `title:` literal found in the first 2000 chars of a story file. */
 const TITLE_RE = /title:\s*['"]([^'"]+)['"]/;
@@ -35,7 +58,7 @@ const CODE_MAX = 8000;
 
 /** Plain-object guard; no canonical export exists in this package's graph. */
 function isPlainRecord(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
+  return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 /** Best-effort JSON.parse; undefined on any failure (never throws). */
@@ -57,10 +80,10 @@ function quotedValue(text: string, key: string): string | undefined {
   const m = new RegExp(`["']?${key}["']?\\s*:\\s*(['"\`])`).exec(text);
   if (m === null) return undefined;
   const quote = m[1]!;
-  let out = '';
+  let out = "";
   for (let i = m.index + m[0].length; i < text.length; i++) {
     const ch = text[i]!;
-    if (ch === '\\') {
+    if (ch === "\\") {
       const next = text[i + 1];
       if (next === quote) {
         out += quote;
@@ -87,20 +110,20 @@ function literalAfter(text: string, keyRe: RegExp): string | undefined {
   let i = m.index + m[0].length;
   while (i < text.length && /\s/.test(text[i]!)) i++;
   const open = text[i];
-  if (open !== '{' && open !== '[') return undefined;
-  const close = open === '{' ? '}' : ']';
+  if (open !== "{" && open !== "[") return undefined;
+  const close = open === "{" ? "}" : "]";
   let depth = 0;
   for (; i < text.length; i++) {
     const ch = text[i]!;
-    if (ch === '\\') {
+    if (ch === "\\") {
       i++;
       continue;
     }
-    if (ch === "'" || ch === '"' || ch === '`') {
+    if (ch === "'" || ch === '"' || ch === "`") {
       const q = ch;
       let j = i + 1;
       while (j < text.length) {
-        if (text[j] === '\\') {
+        if (text[j] === "\\") {
           j += 2;
           continue;
         }
@@ -129,29 +152,29 @@ function parseRecordLiteral(text: string, keyRe: RegExp): Record<string, unknown
 
 /** Split a balanced array/object literal into its depth-0 comma-separated segments. */
 function topLevelSegments(lit: string): string[] {
-  const open = lit[0] ?? '';
-  const close = open === '{' ? '}' : ']';
-  const start = open === '{' || open === '[' ? 1 : 0;
+  const open = lit[0] ?? "";
+  const close = open === "{" ? "}" : "]";
+  const start = open === "{" || open === "[" ? 1 : 0;
   const end = lit.length > 0 && lit[lit.length - 1] === close ? lit.length - 1 : lit.length;
   const segments: string[] = [];
   let depth = 0;
-  let cur = '';
+  let cur = "";
   for (let i = start; i < end; i++) {
     const ch = lit[i]!;
-    if (ch === '\\') {
-      cur += ch + (lit[i + 1] ?? '');
+    if (ch === "\\") {
+      cur += ch + (lit[i + 1] ?? "");
       i++;
       continue;
     }
-    if (ch === "'" || ch === '"' || ch === '`') {
+    if (ch === "'" || ch === '"' || ch === "`") {
       const q = ch;
       cur += q;
       i++;
       while (i < end) {
         const c = lit[i]!;
         cur += c;
-        if (c === '\\') {
-          cur += lit[i + 1] ?? '';
+        if (c === "\\") {
+          cur += lit[i + 1] ?? "";
           i += 2;
           continue;
         }
@@ -160,21 +183,21 @@ function topLevelSegments(lit: string): string[] {
       }
       continue;
     }
-    if (ch === '{' || ch === '[') depth++;
-    else if (ch === '}' || ch === ']') depth--;
-    else if (ch === ',' && depth === 0) {
+    if (ch === "{" || ch === "[") depth++;
+    else if (ch === "}" || ch === "]") depth--;
+    else if (ch === "," && depth === 0) {
       segments.push(cur.trim());
-      cur = '';
+      cur = "";
       continue;
     }
     cur += ch;
   }
-  if (cur.trim() !== '') segments.push(cur.trim());
+  if (cur.trim() !== "") segments.push(cur.trim());
   return segments;
 }
 
 function isStoryScenario(v: unknown): v is StoryScenario {
-  return isPlainRecord(v) && typeof v.name === 'string' && isPlainRecord(v.props);
+  return isPlainRecord(v) && typeof v.name === "string" && isPlainRecord(v.props);
 }
 
 /**
@@ -184,7 +207,7 @@ function isStoryScenario(v: unknown): v is StoryScenario {
  * JSON.parse. Items whose props are not JSON-parseable are dropped, keeping the
  * emitted array shape-valid (item props are required by the contract).
  */
-function extractScenarios(text: string): DesignStory['scenarios'] {
+function extractScenarios(text: string): DesignStory["scenarios"] {
   // Canonical form is `export const scenarios = [...]` (assignment); the
   // in-object `scenarios: [...]` form also occurs, so accept both.
   const lit = literalAfter(text, /scenarios\s*[:=]\s*/);
@@ -193,7 +216,7 @@ function extractScenarios(text: string): DesignStory['scenarios'] {
   if (Array.isArray(parsed)) return parsed.filter(isStoryScenario);
   const items: StoryScenario[] = [];
   for (const segment of topLevelSegments(lit)) {
-    const name = quotedValue(segment, 'name');
+    const name = quotedValue(segment, "name");
     const props = parseRecordLiteral(segment, /["']?props["']?\s*:\s*/);
     if (name !== undefined && props !== undefined) items.push({ name, props });
   }
@@ -210,24 +233,24 @@ export function extractStoryMeta(fileText: string, file: string): DesignStory {
   return {
     file,
     title: fileText.slice(0, 2000).match(TITLE_RE)?.[1],
-    description: quotedValue(fileText, 'description')?.slice(0, DESCRIPTION_MAX),
+    description: quotedValue(fileText, "description")?.slice(0, DESCRIPTION_MAX),
     props: parseRecordLiteral(fileText, /["']?props["']?\s*:\s*/),
     schema: parseRecordLiteral(fileText, /["']?schema["']?\s*:\s*/),
-    code: quotedValue(fileText, 'code')?.slice(0, CODE_MAX),
+    code: quotedValue(fileText, "code")?.slice(0, CODE_MAX),
     scenarios: extractScenarios(fileText),
   };
 }
 
 async function loadPackageMeta(
-  ctx: ProjectContext,
-): Promise<Pick<DesignSnapshot, 'packageName' | 'version'>> {
+  root: string,
+): Promise<Pick<DesignSnapshot, "packageName" | "version">> {
   try {
     const parsed = JSON.parse(
-      await Deno.readTextFile(join(ctx.root, 'package.json')),
+      await Deno.readTextFile(join(root, "package.json")),
     ) as Record<string, unknown>;
     return {
-      packageName: typeof parsed.name === 'string' ? parsed.name : undefined,
-      version: typeof parsed.version === 'string' ? parsed.version : undefined,
+      packageName: typeof parsed.name === "string" ? parsed.name : undefined,
+      version: typeof parsed.version === "string" ? parsed.version : undefined,
     };
   } catch {
     // Missing or unreadable package.json -> empty metadata, never throw.
@@ -235,11 +258,10 @@ async function loadPackageMeta(
   }
 }
 
-async function loadStories(ctx: ProjectContext): Promise<DesignStory[]> {
-  const root = resolve(ctx.root);
+async function loadStories(root: string): Promise<DesignStory[]> {
   let srcStat: Deno.FileInfo;
   try {
-    srcStat = await Deno.stat(join(root, 'src'));
+    srcStat = await Deno.stat(join(root, "src"));
   } catch {
     return [];
   }
@@ -256,20 +278,20 @@ async function loadStories(ctx: ProjectContext): Promise<DesignStory[]> {
 }
 
 export const designPlugin: WorkspacePlugin<DesignSnapshot> = {
-  id: 'design',
-  label: 'Design System',
-  icon: 'i-cube',
+  id: "design",
+  label: "Design System",
+  icon: "i-cube",
   defaultEnabled: true,
-  requiredDeps: ['package.json'],
+  requiredDeps: ["package.json"],
   async detect(ctx) {
-    try {
-      await Deno.stat(join(ctx.root, 'package.json'));
-      return true;
-    } catch {
-      return false;
-    }
+    return (await designRootOf(ctx.root)) !== undefined;
   },
   async load(ctx) {
-    return { ...(await loadPackageMeta(ctx)), stories: await loadStories(ctx) };
+    const root = (await designRootOf(ctx.root)) ?? resolve(ctx.root);
+    return {
+      srcRoot: relative(resolve(ctx.root), root) || ".",
+      ...(await loadPackageMeta(root)),
+      stories: await loadStories(root),
+    };
   },
 };

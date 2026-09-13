@@ -1,4 +1,4 @@
-import type { WorkspaceId, WorkspacePlugin } from './workspace.ts';
+import type { WorkspaceId, WorkspacePlugin } from "./workspace.ts";
 
 export interface WorkspaceRegistry {
   plugins(): readonly WorkspacePlugin[];

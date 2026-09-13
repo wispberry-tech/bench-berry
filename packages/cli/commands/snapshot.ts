@@ -1,13 +1,13 @@
-import { ConfigError } from '../../core/mod.ts';
-import type { CliContext } from '../main.ts';
+import { ConfigError } from "../../core/mod.ts";
+import type { CliContext } from "../main.ts";
 import {
+  type Out,
   printSnapshotLines,
   projectDir,
+  type SnapshotWrite,
   usage,
   writeProjectSnapshots,
-  type Out,
-  type SnapshotWrite,
-} from './shared.ts';
+} from "./shared.ts";
 
 export async function cmdSnapshot(
   rest: string[],
@@ -18,11 +18,11 @@ export async function cmdSnapshot(
   let strict = false;
   let dirArg: string | undefined;
   for (const arg of rest) {
-    if (arg === '--strict') {
+    if (arg === "--strict") {
       strict = true;
       continue;
     }
-    if (arg.startsWith('-')) {
+    if (arg.startsWith("-")) {
       err(`unknown command: ${arg}`);
       err(usage());
       return 1;

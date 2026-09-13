@@ -1,15 +1,14 @@
-import { ConfigError, resolveConfig } from '../../core/mod.ts';
-import type { ProjectContext, ResolvedConfig, WorkspaceId } from '../../core/mod.ts';
-import type { CliContext } from '../main.ts';
-import {
-  detectAll,
-  plugins,
-  registry,
-  usage,
-  type Out,
-} from './shared.ts';
+import { ConfigError, resolveConfig } from "../../core/mod.ts";
+import type { ProjectContext, ResolvedConfig, WorkspaceId } from "../../core/mod.ts";
+import type { CliContext } from "../main.ts";
+import { detectAll, type Out, plugins, registry, usage } from "./shared.ts";
 
-export async function cmdDetect(rest: string[], ctx: CliContext, out: Out, err: Out): Promise<number> {
+export async function cmdDetect(
+  rest: string[],
+  ctx: CliContext,
+  out: Out,
+  err: Out,
+): Promise<number> {
   if (rest.length > 0) {
     err(`unknown command: ${rest[0]}`);
     err(usage());
@@ -30,7 +29,7 @@ export async function cmdDetect(rest: string[], ctx: CliContext, out: Out, err: 
     throw error;
   }
 
-  const header = ['id', 'label', 'defaultEnabled', 'detected', 'enabled', 'enabledBy'];
+  const header = ["id", "label", "defaultEnabled", "detected", "enabled", "enabledBy"];
   const rows = registry.workspaceIds().map((id) => {
     const plugin = registry.byId(id as WorkspaceId)!;
     const r = resolved.workspaces[id as WorkspaceId];
@@ -39,7 +38,7 @@ export async function cmdDetect(rest: string[], ctx: CliContext, out: Out, err: 
       plugin.label,
       String(plugin.defaultEnabled),
       String(detected.get(id) ?? false),
-      r.enabled ? 'on' : 'off',
+      r.enabled ? "on" : "off",
       r.enabledBy,
     ];
   });
@@ -47,7 +46,7 @@ export async function cmdDetect(rest: string[], ctx: CliContext, out: Out, err: 
     Math.max(header[col].length, ...rows.map((row) => row[col].length))
   );
   const formatRow = (cells: readonly string[]) =>
-    cells.map((cell, col) => cell.padEnd(widths[col])).join('  ').replace(/\s+$/, '');
+    cells.map((cell, col) => cell.padEnd(widths[col])).join("  ").replace(/\s+$/, "");
 
   out(formatRow(header));
   for (const row of rows) out(formatRow(row));

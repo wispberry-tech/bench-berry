@@ -8,20 +8,20 @@
 // runes — a plain `.ts` file is not compiled (runes would be undefined at
 // runtime). The `// @ts-ignore` comments keep `deno check` green on the
 // virtual-module imports, which vite resolves at dev/build time.
-import type { Component } from 'svelte';
-import type { ResolvedConfig, WorkspaceId } from './types.ts';
-import { WORKSPACE_IDS } from './types.ts';
+import type { Component } from "svelte";
+import type { ResolvedConfig, WorkspaceId } from "./types.ts";
+import { WORKSPACE_IDS } from "./types.ts";
 
 // @ts-ignore — resolved by the berrybench vite plugin
-import configModule from 'virtual:berrybench-config';
+import configModule from "virtual:berrybench-config";
 // @ts-ignore — resolved by the berrybench vite plugin
-import snapshotsModule from 'virtual:berrybench-snapshots';
+import snapshotsModule from "virtual:berrybench-snapshots";
 // @ts-ignore — resolved by the berrybench vite plugin
-import envModule from 'virtual:berrybench-env';
+import envModule from "virtual:berrybench-env";
 
-const CONFIG_MODULE = 'virtual:berrybench-config';
-const SNAPSHOTS_MODULE = 'virtual:berrybench-snapshots';
-const ENV_MODULE = 'virtual:berrybench-env';
+const CONFIG_MODULE = "virtual:berrybench-config";
+const SNAPSHOTS_MODULE = "virtual:berrybench-snapshots";
+const ENV_MODULE = "virtual:berrybench-env";
 
 /** Live preview environment: `dev` flag + the preview base URL (see §4.6). */
 export interface PreviewEnv {
@@ -30,18 +30,18 @@ export interface PreviewEnv {
 }
 
 /** Dev fallback for the preview server (BERRYBENCH_PREVIEW_PORT ?? 5174). */
-const DEV_PREVIEW_BASE = 'http://localhost:5174/preview/';
+const DEV_PREVIEW_BASE = "http://localhost:5174/preview/";
 
 interface ViteHot {
   accept(deps: string[], cb: (mods: unknown[]) => void): void;
 }
 
 /** Degraded boot state: everything disabled until the config module loads. */
-function initialWorkspaces(): ResolvedConfig['workspaces'] {
+function initialWorkspaces(): ResolvedConfig["workspaces"] {
   return {
-    design: { enabled: false, enabledBy: 'default' },
-    api: { enabled: false, enabledBy: 'default' },
-    db: { enabled: false, enabledBy: 'default' },
+    design: { enabled: false, enabledBy: "default" },
+    api: { enabled: false, enabledBy: "default" },
+    db: { enabled: false, enabledBy: "default" },
   };
 }
 
@@ -62,7 +62,9 @@ function applyConfig(raw: unknown): void {
   for (const id of WORKSPACE_IDS) {
     const w = (workspaces as Record<string, unknown>)[id];
     config.workspaces[id] =
-      (w && typeof w === 'object' ? w : { enabled: false, enabledBy: 'default' }) as ResolvedConfig['workspaces'][WorkspaceId];
+      (w && typeof w === "object" ? w : { enabled: false, enabledBy: "default" }) as ResolvedConfig[
+        "workspaces"
+      ][WorkspaceId];
   }
   config.theme = next.theme;
 }
@@ -82,8 +84,8 @@ function applySnapshots(raw: unknown): void {
 /** Sync the preview env from the virtual module (keeps the dev/build defaults). */
 function applyEnv(raw: unknown): void {
   const r = raw as Partial<PreviewEnv> | undefined;
-  if (typeof r?.dev === 'boolean') env.dev = r.dev;
-  if (typeof r?.preview?.base === 'string') env.preview.base = r.preview.base;
+  if (typeof r?.dev === "boolean") env.dev = r.dev;
+  if (typeof r?.preview?.base === "string") env.preview.base = r.preview.base;
 }
 
 applyConfig(configModule);
@@ -108,4 +110,4 @@ export type {
   SnapshotError,
   ThemeConfig,
   WorkspaceId,
-} from './types.ts';
+} from "./types.ts";

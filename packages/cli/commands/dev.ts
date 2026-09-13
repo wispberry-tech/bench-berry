@@ -1,19 +1,20 @@
-import { join, SEPARATOR } from '@std/path';
-import { createServer, type ViteDevServer } from 'vite';
-import { svelte } from '@sveltejs/vite-plugin-svelte';
-import { ConfigError } from '../../core/mod.ts';
-import { SNAPSHOT_DIR } from '../../snapshot/mod.ts';
-import { berrybench } from '../../vite-plugin/mod.ts';
-import { previewViteConfig } from '../../preview/config.ts';
-import type { CliContext } from '../main.ts';
+import { join, SEPARATOR } from "@std/path";
+import { createServer, type ViteDevServer } from "vite";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { ConfigError } from "../../core/mod.ts";
+import { SNAPSHOT_DIR } from "../../snapshot/mod.ts";
+import { berrybench } from "../../vite-plugin/mod.ts";
+import { previewViteConfig } from "../../preview/config.ts";
+import type { CliContext } from "../main.ts";
 import {
+  designPreviewAliases,
+  type Out,
   printSnapshotLines,
   projectDir,
+  RESOLVED_CONFIG_FILE,
   usage,
   writeProjectSnapshots,
-  RESOLVED_CONFIG_FILE,
-  type Out,
-} from './shared.ts';
+} from "./shared.ts";
 
 export async function cmdDev(
   rest: string[],
@@ -25,8 +26,8 @@ export async function cmdDev(
   for (const arg of rest) {
     // `--watch` is accepted for backwards compatibility; the snapshot loop now
     // always runs so settings/snapshot rewrites reach the dev server.
-    if (arg === '--watch') continue;
-    if (arg.startsWith('-')) {
+    if (arg === "--watch") continue;
+    if (arg.startsWith("-")) {
       err(`unknown command: ${arg}`);
       err(usage());
       return 1;
@@ -50,20 +51,21 @@ export async function cmdDev(
     throw error;
   }
 
-  const shellDir = Deno.env.get('BERRYBENCH_SHELL_DIR') ?? join(import.meta.dirname!, '../../shell');
+  const shellDir = Deno.env.get("BERRYBENCH_SHELL_DIR") ??
+    join(import.meta.dirname!, "../../shell");
   if (await missingShellDir(shellDir)) {
     err(
       `Shell app not found at ${shellDir}; run from a berry-bench checkout or set BERRYBENCH_SHELL_DIR to a berry-bench checkout/packages/shell`,
     );
     return 1;
   }
-  const port = Number(Deno.env.get('BERRYBENCH_PORT') ?? 5173);
+  const port = Number(Deno.env.get("BERRYBENCH_PORT") ?? 5173);
 
   let server: ViteDevServer;
   try {
     server = await createServer({
       root: shellDir,
-      base: '/',
+      base: "/",
       server: {
         port,
         fs: { strict: false },
@@ -95,11 +97,14 @@ export async function cmdDev(
   // It serves the preview app at '/preview/' and reads story files from the
   // project's src via the @stories alias — outside the preview app's own
   // vite root, hence the relaxed fs strictness.
-  const previewPort = Number(Deno.env.get('BERRYBENCH_PREVIEW_PORT') ?? 5174);
+  const previewPort = Number(Deno.env.get("BERRYBENCH_PREVIEW_PORT") ?? 5174);
   let previewServer: ViteDevServer;
   try {
     previewServer = await createServer({
-      ...previewViteConfig(root, join(root, 'dist/preview'), { base: '/preview/' }),
+      ...previewViteConfig(root, join(root, "dist/preview"), {
+        base: "/preview/",
+        ...designPreviewAliases(root),
+      }),
       server: {
         port: previewPort,
         fs: { strict: false },
@@ -116,8 +121,9 @@ export async function cmdDev(
     return 1;
   }
   const address = previewServer.httpServer?.address();
-  const actualPreviewPort =
-    typeof address === 'object' && address !== null ? address.port : previewPort;
+  const actualPreviewPort = typeof address === "object" && address !== null
+    ? address.port
+    : previewPort;
   out(`berrybench preview: http://localhost:${actualPreviewPort}/preview/`);
   await loop;
   return 0; // unreachable: watchLoop never resolves
@@ -130,7 +136,7 @@ export async function cmdDev(
  * default repo-relative path is the compiled-binary failure case.
  */
 async function missingShellDir(shellDir: string): Promise<boolean> {
-  if (Deno.env.get('BERRYBENCH_SHELL_DIR') !== undefined) return false;
+  if (Deno.env.get("BERRYBENCH_SHELL_DIR") !== undefined) return false;
   try {
     await Deno.stat(shellDir);
     return false;
@@ -148,7 +154,7 @@ async function writeOnce(
   err: Out,
 ): Promise<void> {
   const { resolved, results } = await writeProjectSnapshots(root, env);
-  out('snapshots ready: .berrybench/snapshots/*.json');
+  out("snapshots ready: .berrybench/snapshots/*.json");
   printSnapshotLines(out, resolved, results);
 }
 

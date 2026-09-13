@@ -1,7 +1,9 @@
 {
   "name": "berry-bench",
   "version": "0.1.0",
-  "workspace": ["./packages/*"],
+  "workspace": [
+    "./packages/*"
+  ],
   "exports": {
     ".": "./packages/core/mod.ts"
   },
@@ -31,5 +33,10 @@
     "indentWidth": 2,
     "lineWidth": 100
   },
-  "exclude": ["dist", "node_modules", ".berrybench"]
+  "exclude": [
+    "dist",
+    "node_modules",
+    ".berrybench",
+    "**/.vite"
+  ]
 }

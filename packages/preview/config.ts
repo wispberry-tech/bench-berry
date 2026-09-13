@@ -3,11 +3,11 @@
 // The frame always bundles all three runtimes (svelte/react/vue): framework
 // detection happens at runtime inside the frame from the project's
 // package.json, so every plugin is registered unconditionally here.
-import { join } from '@std/path';
-import type { UserConfig } from 'vite';
-import { svelte } from '@sveltejs/vite-plugin-svelte';
-import react from '@vitejs/plugin-react';
-import vue from '@vitejs/plugin-vue';
+import { join } from "@std/path";
+import type { UserConfig } from "vite";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
+import react from "@vitejs/plugin-react";
+import vue from "@vitejs/plugin-vue";
 
 /**
  * The preview app's own directory (its index.html + src/main.ts). This is the
@@ -22,17 +22,20 @@ const APP_ROOT = import.meta.dirname!;
  * root; story discovery and framework detection resolve against it:
  *   @stories -> <root>/src          (story files for the import.meta.glob)
  *   @pkg     -> <root>/package.json (framework detection: vue/react/svelte)
- * Callers may override `base` (dev: '/preview/', build: './preview/') and
- * `emptyOutDir` via `opts`.
+ * Callers may override `base` (dev: '/preview/', build: './preview/'),
+ * `emptyOutDir`, and — when the design package lives in a subdir (monorepos)
+ * — `storiesRoot`/`packageJsonPath` so the glob root and framework detection
+ * resolve against the true component package, not the project root.
  */
 export function previewViteConfig(
   root: string,
   outDir: string,
-  opts: { base?: string; emptyOutDir?: boolean } = {},
+  opts: { base?: string; emptyOutDir?: boolean; storiesRoot?: string; packageJsonPath?: string } =
+    {},
 ): UserConfig {
   return {
     root: APP_ROOT,
-    base: opts.base ?? '/preview/',
+    base: opts.base ?? "/preview/",
     plugins: [
       svelte(),
       react(),
@@ -44,11 +47,11 @@ export function previewViteConfig(
       // omit CORS headers, which blocks the whole module graph there, so
       // stamp ACAO on every response ahead of all other middleware.
       {
-        name: 'berrybench-preview-cors',
+        name: "berrybench-preview-cors",
         configureServer(server) {
           server.middlewares.use((_req, res, next) => {
-            res.setHeader('Access-Control-Allow-Origin', '*');
-            res.setHeader('Access-Control-Allow-Headers', '*');
+            res.setHeader("Access-Control-Allow-Origin", "*");
+            res.setHeader("Access-Control-Allow-Headers", "*");
             next();
           });
         },
@@ -56,8 +59,8 @@ export function previewViteConfig(
     ],
     resolve: {
       alias: {
-        '@stories': join(root, 'src'),
-        '@pkg': join(root, 'package.json'),
+        "@stories": opts.storiesRoot ?? join(root, "src"),
+        "@pkg": opts.packageJsonPath ?? join(root, "package.json"),
       },
     },
     build: {
@@ -73,6 +76,6 @@ export function previewViteConfig(
  */
 export function resolvePreviewBase(dev: boolean): string {
   return dev
-    ? `http://localhost:${Deno.env.get('BERRYBENCH_PREVIEW_PORT') ?? 5174}/preview/`
-    : './preview/';
+    ? `http://localhost:${Deno.env.get("BERRYBENCH_PREVIEW_PORT") ?? 5174}/preview/`
+    : "./preview/";
 }

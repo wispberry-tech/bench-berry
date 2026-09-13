@@ -2,8 +2,9 @@
 // Database workspace plugin: Postgres introspection via `npm:pg`.
 // Ownership lives in the berry-bench monorepo; see packages/core/workspace.ts
 // for the plugin contract and packages/core/config.ts for resolution rules.
-import { Client } from 'pg';
-import type { WorkspacePlugin } from '../core/workspace.ts';
+import { Client } from "pg";
+import { join } from "@std/path";
+import type { WorkspacePlugin } from "../core/workspace.ts";
 
 export interface DbTable {
   name: string;
@@ -32,25 +33,32 @@ const TABLES_QUERY = `
 `;
 
 export const dbPlugin: WorkspacePlugin<DbSnapshot> = {
-  id: 'db',
-  label: 'Database',
-  icon: 'i-db',
+  id: "db",
+  label: "Database",
+  icon: "i-db",
   defaultEnabled: false,
-  requiredDeps: ['BERRYBENCH_DATABASE_URL'],
+  requiredDeps: ["BERRYBENCH_DATABASE_URL"],
 
-  // Cheap: pure env check, no I/O.
-  detect(ctx) {
-    return Promise.resolve(Boolean(ctx.env['BERRYBENCH_DATABASE_URL']));
+  // Detection: a configured URL, or a repo-shaped db/ dir (migrations/
+  // schema SQL). A db/-only repo loads into the documented no-connection
+  // error state until BERRYBENCH_DATABASE_URL points at a live database.
+  async detect(ctx) {
+    if (ctx.env["BERRYBENCH_DATABASE_URL"]) return true;
+    try {
+      return (await Deno.stat(join(ctx.root, "db"))).isDirectory;
+    } catch {
+      return false;
+    }
   },
 
   // load() NEVER throws: every failure path resolves to a snapshot carrying an
   // `error` string (documented §5 "missing data source" state).
   async load(ctx) {
-    const conn = ctx.env['BERRYBENCH_DATABASE_URL'];
+    const conn = ctx.env["BERRYBENCH_DATABASE_URL"];
     if (!conn) {
       return {
         tables: [],
-        error: 'no database connection configured (set BERRYBENCH_DATABASE_URL)',
+        error: "no database connection configured (set BERRYBENCH_DATABASE_URL)",
       };
     }
 
@@ -59,7 +67,7 @@ export const dbPlugin: WorkspacePlugin<DbSnapshot> = {
       client = new Client({ connectionString: conn });
       // Swallow connection-level error events (backend drop mid-query) so a
       // failing session can never crash the process with an uncaught 'error'.
-      client.on('error', () => {});
+      client.on("error", () => {});
       await client.connect();
 
       const res = await client.query(TABLES_QUERY);
@@ -70,15 +78,15 @@ export const dbPlugin: WorkspacePlugin<DbSnapshot> = {
       const params = client.connectionParameters;
       return {
         connection: {
-          host: params.host ?? '',
-          database: params.database ?? '',
+          host: params.host ?? "",
+          database: params.database ?? "",
         },
         tables: res.rows.map((row: TableRow) => ({ name: row.name, columns: row.columns })),
       };
     } catch (err) {
       return {
         tables: [],
-        error: 'database connection failed: ' + (err as Error).message,
+        error: "database connection failed: " + (err as Error).message,
       };
     } finally {
       // Close on every path that may hold an open connection; if teardown

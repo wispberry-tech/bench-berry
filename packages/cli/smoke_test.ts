@@ -9,21 +9,21 @@
 // Env hygiene: the compiled-binary dev error only triggers when
 // BERRYBENCH_SHELL_DIR is unset; clear it for this file's whole process so
 // in-process builds use the repo shell and child commands are deterministic.
-Deno.env.delete('BERRYBENCH_SHELL_DIR');
+Deno.env.delete("BERRYBENCH_SHELL_DIR");
 
-import { join } from '@std/path';
-import { run } from './main.ts';
-import type { CliContext } from './main.ts';
-import { readSnapshot } from '../snapshot/mod.ts';
+import { join } from "@std/path";
+import { run } from "./main.ts";
+import type { CliContext } from "./main.ts";
+import { readSnapshot } from "../snapshot/mod.ts";
 
 /** The deno binary for `deno compile` (task env provides DENO, else the known path). */
-const DENO = Deno.env.get('DENO') ?? '/home/theo/.deno/bin/deno';
+const DENO = Deno.env.get("DENO") ?? "/home/theo/.deno/bin/deno";
 
 /** Repo root: smoke_test.ts lives at packages/cli/. */
-const REPO_ROOT = join(import.meta.dirname!, '../..');
+const REPO_ROOT = join(import.meta.dirname!, "../..");
 
 const FIXTURE_OPENAPI = await Deno.readTextFile(
-  new URL('../ws-api/fixtures/openapi.yaml', import.meta.url),
+  new URL("../ws-api/fixtures/openapi.yaml", import.meta.url),
 );
 
 interface DesignSnapshotLike {
@@ -55,9 +55,12 @@ function capturingCtx(cwd: string): {
 
 /** A design source (package.json) plus an optional api source (openapi.yaml). */
 async function fixtureProject(root: string, withOpenapi: boolean): Promise<void> {
-  await Deno.writeTextFile(join(root, 'package.json'), '{"name":"smoke-fixture","version":"0.0.0"}\n');
+  await Deno.writeTextFile(
+    join(root, "package.json"),
+    '{"name":"smoke-fixture","version":"0.0.0"}\n',
+  );
   if (withOpenapi) {
-    await Deno.writeTextFile(join(root, 'openapi.yaml'), FIXTURE_OPENAPI);
+    await Deno.writeTextFile(join(root, "openapi.yaml"), FIXTURE_OPENAPI);
   }
 }
 
@@ -76,7 +79,7 @@ async function readAllText(dir: string): Promise<string> {
     }
   }
   await walk(dir);
-  return chunks.join('\n');
+  return chunks.join("\n");
 }
 
 /** Process env without BERRYBENCH_SHELL_DIR, so child commands hit the default path. */
@@ -87,65 +90,65 @@ function envWithoutShellDir(): Record<string, string> {
 }
 
 Deno.test(
-  'smoke: design+api fixture init → snapshot → build end to end',
+  "smoke: design+api fixture init → snapshot → build end to end",
   { timeout: 180_000 },
   async (t) => {
     const tmp = await Deno.makeTempDir();
     try {
       await fixtureProject(tmp, true);
 
-      await t.step('init writes the config and scaffolds the story convention', async () => {
+      await t.step("init writes the config and scaffolds the story convention", async () => {
         const cap = capturingCtx(tmp);
-        const code = await run(['init', '.'], cap.ctx);
-        if (code !== 0) throw new Error(`init exited ${code}: ${cap.stderr.join('\n')}`);
-        await Deno.stat(join(tmp, 'berrybench.config.ts'));
-        await Deno.stat(join(tmp, 'src/components/button.svelte'));
-        await Deno.stat(join(tmp, 'src/components/button.story.svelte'));
+        const code = await run(["init", "."], cap.ctx);
+        if (code !== 0) throw new Error(`init exited ${code}: ${cap.stderr.join("\n")}`);
+        await Deno.stat(join(tmp, "berrybench.config.ts"));
+        await Deno.stat(join(tmp, "src/components/button.svelte"));
+        await Deno.stat(join(tmp, "src/components/button.story.svelte"));
         if (
-          cap.stdout.join('\n').includes(
-            'scaffolded src/components/button.story.svelte (story convention)',
+          cap.stdout.join("\n").includes(
+            "scaffolded src/components/button.story.svelte (story convention)",
           ) !== true
         ) {
-          throw new Error(`scaffold line missing: ${cap.stdout.join('\n')}`);
+          throw new Error(`scaffold line missing: ${cap.stdout.join("\n")}`);
         }
       });
 
-      await t.step('snapshot writes design story meta with schema + api ops', async () => {
+      await t.step("snapshot writes design story meta with schema + api ops", async () => {
         const cap = capturingCtx(tmp);
-        const code = await run(['snapshot', '.'], cap.ctx);
-        if (code !== 0) throw new Error(`snapshot exited ${code}: ${cap.stderr.join('\n')}`);
-        const design = await readSnapshot<DesignSnapshotLike>(tmp, 'design');
+        const code = await run(["snapshot", "."], cap.ctx);
+        if (code !== 0) throw new Error(`snapshot exited ${code}: ${cap.stderr.join("\n")}`);
+        const design = await readSnapshot<DesignSnapshotLike>(tmp, "design");
         if (design?.stories.length !== 1) {
           throw new Error(`design stories: ${JSON.stringify(design)}`);
         }
         const story = design.stories[0]!;
-        if (story.file !== 'src/components/button.story.svelte') {
+        if (story.file !== "src/components/button.story.svelte") {
           throw new Error(`story file: ${story.file}`);
         }
-        if (story.title !== 'Button') throw new Error(`story title: ${String(story.title)}`);
+        if (story.title !== "Button") throw new Error(`story title: ${String(story.title)}`);
         if (story.schema === undefined) {
-          throw new Error('design story meta missing schema key');
+          throw new Error("design story meta missing schema key");
         }
-        const api = await readSnapshot<ApiSnapshotLike>(tmp, 'api');
-        if (api?.endpointCount !== 3 || api.ops.some((op) => op.id === 'issues-get') !== true) {
+        const api = await readSnapshot<ApiSnapshotLike>(tmp, "api");
+        if (api?.endpointCount !== 3 || api.ops.some((op) => op.id === "issues-get") !== true) {
           throw new Error(`api ops: ${JSON.stringify(api)}`);
         }
       });
 
-      await t.step('build emits dist, preview and .berrybench artifacts', async () => {
+      await t.step("build emits dist, preview and .berrybench artifacts", async () => {
         const cap = capturingCtx(tmp);
-        const code = await run(['build', '.'], cap.ctx);
-        if (code !== 0) throw new Error(`build exited ${code}: ${cap.stderr.join('\n')}`);
-        await Deno.stat(join(tmp, 'dist/index.html'));
-        await Deno.stat(join(tmp, 'dist/preview/index.html'));
+        const code = await run(["build", "."], cap.ctx);
+        if (code !== 0) throw new Error(`build exited ${code}: ${cap.stderr.join("\n")}`);
+        await Deno.stat(join(tmp, "dist/index.html"));
+        await Deno.stat(join(tmp, "dist/preview/index.html"));
         const resolved = JSON.parse(
-          await Deno.readTextFile(join(tmp, '.berrybench/resolved-config.json')),
+          await Deno.readTextFile(join(tmp, ".berrybench/resolved-config.json")),
         ) as { workspaces?: Record<string, { enabled?: boolean }> };
         if (resolved.workspaces?.design?.enabled !== true) {
           throw new Error(`resolved config: ${JSON.stringify(resolved)}`);
         }
         const manifest = JSON.parse(
-          await Deno.readTextFile(join(tmp, '.berrybench/manifest.json')),
+          await Deno.readTextFile(join(tmp, ".berrybench/manifest.json")),
         ) as { workspaces?: Record<string, { ok?: boolean }> };
         if (manifest.workspaces?.design?.ok !== true) {
           throw new Error(`manifest: ${JSON.stringify(manifest)}`);
@@ -158,34 +161,34 @@ Deno.test(
 );
 
 Deno.test(
-  'smoke: design-only build excludes api op ids from dist',
+  "smoke: design-only build excludes api op ids from dist",
   { timeout: 180_000 },
   async (t) => {
     const tmp = await Deno.makeTempDir();
     try {
       await fixtureProject(tmp, false);
       let cap = capturingCtx(tmp);
-      let code = await run(['init', '.'], cap.ctx);
-      if (code !== 0) throw new Error(`init exited ${code}: ${cap.stderr.join('\n')}`);
+      let code = await run(["init", "."], cap.ctx);
+      if (code !== 0) throw new Error(`init exited ${code}: ${cap.stderr.join("\n")}`);
       // init enables api by default; fixture B is design-only, so switch it off.
       cap = capturingCtx(tmp);
-      code = await run(['config', 'disable', 'api', '.'], cap.ctx);
-      if (code !== 0) throw new Error(`config disable exited ${code}: ${cap.stderr.join('\n')}`);
+      code = await run(["config", "disable", "api", "."], cap.ctx);
+      if (code !== 0) throw new Error(`config disable exited ${code}: ${cap.stderr.join("\n")}`);
 
-      await t.step('build succeeds with api disabled', async () => {
+      await t.step("build succeeds with api disabled", async () => {
         cap = capturingCtx(tmp);
-        code = await run(['build', '.'], cap.ctx);
-        if (code !== 0) throw new Error(`build exited ${code}: ${cap.stderr.join('\n')}`);
-        await Deno.stat(join(tmp, 'dist/index.html'));
+        code = await run(["build", "."], cap.ctx);
+        if (code !== 0) throw new Error(`build exited ${code}: ${cap.stderr.join("\n")}`);
+        await Deno.stat(join(tmp, "dist/index.html"));
       });
 
-      await t.step('dist JS has the design story id but no api op id', async () => {
-        const text = await readAllText(join(tmp, 'dist'));
-        if (text.includes('button.story') !== true) {
-          throw new Error('built assets missing design story id (button.story)');
+      await t.step("dist JS has the design story id but no api op id", async () => {
+        const text = await readAllText(join(tmp, "dist"));
+        if (text.includes("button.story") !== true) {
+          throw new Error("built assets missing design story id (button.story)");
         }
-        if (text.includes('issues-get') === true) {
-          throw new Error('built assets contain api op id (issues-get) with api disabled');
+        if (text.includes("issues-get") === true) {
+          throw new Error("built assets contain api op id (issues-get) with api disabled");
         }
       });
     } finally {
@@ -195,25 +198,25 @@ Deno.test(
 );
 
 Deno.test(
-  'smoke: compiled binary resolves config standalone and dev fails with the missing-shell error',
+  "smoke: compiled binary resolves config standalone and dev fails with the missing-shell error",
   { timeout: 600_000 },
   async (t) => {
     const tmp = await Deno.makeTempDir();
-    const binPath = join(tmp, 'berrybench');
+    const binPath = join(tmp, "berrybench");
     try {
       await fixtureProject(tmp, true);
       const initCap = capturingCtx(tmp);
-      const initCode = await run(['init', '.'], initCap.ctx);
+      const initCode = await run(["init", "."], initCap.ctx);
       if (initCode !== 0) {
-        throw new Error(`init exited ${initCode}: ${initCap.stderr.join('\n')}`);
+        throw new Error(`init exited ${initCode}: ${initCap.stderr.join("\n")}`);
       }
 
-      await t.step('deno compile produces the binary', async () => {
+      await t.step("deno compile produces the binary", async () => {
         const res = await new Deno.Command(DENO, {
-          args: ['compile', '-A', '--output', binPath, join(REPO_ROOT, 'packages/cli/main.ts')],
+          args: ["compile", "-A", "--output", binPath, join(REPO_ROOT, "packages/cli/main.ts")],
           cwd: REPO_ROOT,
-          stdout: 'piped',
-          stderr: 'piped',
+          stdout: "piped",
+          stderr: "piped",
         }).output();
         if (res.code !== 0) {
           const stderr = new TextDecoder().decode(res.stderr);
@@ -222,13 +225,13 @@ Deno.test(
         await Deno.stat(binPath);
       });
 
-      await t.step('config --print --json from the binary resolves the project', async () => {
+      await t.step("config --print --json from the binary resolves the project", async () => {
         const res = await new Deno.Command(binPath, {
-          args: ['config', '--print', '--json'],
+          args: ["config", "--print", "--json"],
           cwd: tmp,
           env: envWithoutShellDir(),
-          stdout: 'piped',
-          stderr: 'piped',
+          stdout: "piped",
+          stderr: "piped",
         }).output();
         if (res.code !== 0) {
           throw new Error(
@@ -243,28 +246,31 @@ Deno.test(
         }
       });
 
-      await t.step('dev from the binary exits 1 with the actionable missing-shell error', async () => {
-        const res = await new Deno.Command(binPath, {
-          args: ['dev', '.'],
-          cwd: tmp,
-          env: envWithoutShellDir(),
-          stdout: 'piped',
-          stderr: 'piped',
-        }).output();
-        if (res.code !== 1) {
-          throw new Error(`expected dev exit 1, got ${res.code}`);
-        }
-        const stderr = new TextDecoder().decode(res.stderr);
-        if (stderr.includes('Shell app not found at') !== true) {
-          throw new Error(`dev stderr missing shell path: ${stderr}`);
-        }
-        if (
-          stderr.includes('set BERRYBENCH_SHELL_DIR to a berry-bench checkout/packages/shell') !==
-          true
-        ) {
-          throw new Error(`dev stderr missing shell hint: ${stderr}`);
-        }
-      });
+      await t.step(
+        "dev from the binary exits 1 with the actionable missing-shell error",
+        async () => {
+          const res = await new Deno.Command(binPath, {
+            args: ["dev", "."],
+            cwd: tmp,
+            env: envWithoutShellDir(),
+            stdout: "piped",
+            stderr: "piped",
+          }).output();
+          if (res.code !== 1) {
+            throw new Error(`expected dev exit 1, got ${res.code}`);
+          }
+          const stderr = new TextDecoder().decode(res.stderr);
+          if (stderr.includes("Shell app not found at") !== true) {
+            throw new Error(`dev stderr missing shell path: ${stderr}`);
+          }
+          if (
+            stderr.includes("set BERRYBENCH_SHELL_DIR to a berry-bench checkout/packages/shell") !==
+              true
+          ) {
+            throw new Error(`dev stderr missing shell hint: ${stderr}`);
+          }
+        },
+      );
     } finally {
       await Deno.remove(tmp, { recursive: true });
     }

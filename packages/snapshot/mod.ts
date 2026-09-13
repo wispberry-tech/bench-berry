@@ -1,18 +1,13 @@
-import { z } from 'zod';
-import { join } from '@std/path';
-import type {
-  ProjectContext,
-  ResolvedConfig,
-  WorkspaceId,
-  WorkspacePlugin,
-} from '../core/mod.ts';
+import { z } from "zod";
+import { join } from "@std/path";
+import type { ProjectContext, ResolvedConfig, WorkspaceId, WorkspacePlugin } from "../core/mod.ts";
 
 /** Project-relative directory (under `root`) holding workspace snapshots. */
-export const SNAPSHOT_DIR = '.berrybench/snapshots';
+export const SNAPSHOT_DIR = ".berrybench/snapshots";
 
 /** Canonical type guard for this package. */
 export function isRecord(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
+  return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 /** Snapshot written when a workspace's load/validation fails — the DB-unreachable contract (§5). */
@@ -48,6 +43,7 @@ export const apiSnapshotSchema = z.object({
 export const designSnapshotSchema = z.object({
   packageName: z.string().optional(),
   version: z.string().optional(),
+  srcRoot: z.string().optional(),
   stories: z.array(z.object({
     file: z.string(),
     title: z.string().optional(),
@@ -80,7 +76,7 @@ export const errorSnapshotSchema = z.object({
   error: z.string(),
 });
 
-const WORKSPACE_IDS: readonly WorkspaceId[] = ['design', 'api', 'db'];
+const WORKSPACE_IDS: readonly WorkspaceId[] = ["design", "api", "db"];
 
 const SNAPSHOT_SCHEMAS: Record<WorkspaceId, z.ZodTypeAny> = {
   api: apiSnapshotSchema,
@@ -133,7 +129,7 @@ async function writeOne(
           const detail = issue === undefined
             ? parsed.error.message
             : issue.path.length > 0
-            ? `${issue.path.join('.')}: ${issue.message}`
+            ? `${issue.path.join(".")}: ${issue.message}`
             : issue.message;
           data = { error: `snapshot validation failed: ${detail}` };
         }
@@ -144,8 +140,12 @@ async function writeOne(
     // Deterministic content: pretty-printed JSON + trailing newline.
     await Deno.writeTextFile(filePath, `${JSON.stringify(data, null, 2)}\n`, { create: true });
     // Error snapshots carry `error` on the result so consumers (e.g. `snapshot --strict`) can see them.
-    const error = isRecord(data) && typeof data.error === 'string' ? data.error : undefined;
-    return { ok: true, file: join(SNAPSHOT_DIR, `${id}.json`), ...(error === undefined ? {} : { error }) };
+    const error = isRecord(data) && typeof data.error === "string" ? data.error : undefined;
+    return {
+      ok: true,
+      file: join(SNAPSHOT_DIR, `${id}.json`),
+      ...(error === undefined ? {} : { error }),
+    };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
@@ -201,8 +201,8 @@ export async function listSnapshots(root: string): Promise<WorkspaceId[]> {
   const present = new Set<WorkspaceId>(); // dynamic: entries come from the directory listing
   try {
     for await (const entry of Deno.readDir(join(root, SNAPSHOT_DIR))) {
-      if (!entry.isFile || !entry.name.endsWith('.json')) continue;
-      const base = entry.name.slice(0, -'.json'.length) as WorkspaceId;
+      if (!entry.isFile || !entry.name.endsWith(".json")) continue;
+      const base = entry.name.slice(0, -".json".length) as WorkspaceId;
       if (WORKSPACE_IDS.includes(base)) present.add(base);
     }
   } catch (err) {
