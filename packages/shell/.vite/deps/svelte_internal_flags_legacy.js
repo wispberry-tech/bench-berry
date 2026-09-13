@@ -1,7 +1,0 @@
-import {
-  enable_legacy_mode_flag
-} from "./chunk-EGK6ZIR3.js";
-
-// node_modules/.deno/svelte@5.57.0/node_modules/svelte/src/internal/flags/legacy.js
-enable_legacy_mode_flag();
-//# sourceMappingURL=svelte_internal_flags_legacy.js.map
