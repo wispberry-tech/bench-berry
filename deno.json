@@ -1,0 +1,26 @@
+{
+  "name": "berry-bench",
+  "version": "0.1.0",
+  "workspace": ["./packages/*"],
+  "exports": {
+    ".": "./packages/core/mod.ts"
+  },
+  "tasks": {
+    "check": "deno check $(find packages -name '*.ts' -not -path '*/fixtures/*')",
+    "test": "deno test -A packages/",
+    "cli": "deno run -A packages/cli/main.ts"
+  },
+  "imports": {
+    "zod": "npm:zod@^3.24.1",
+    "@std/yaml": "jsr:@std/yaml@^1",
+    "@std/path": "jsr:@std/path@^1",
+    "@std/fs": "jsr:@std/fs@^1",
+    "pg": "npm:pg@^8"
+  },
+  "fmt": {
+    "useTabs": false,
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "exclude": ["dist", "node_modules", ".berrybench"]
+}

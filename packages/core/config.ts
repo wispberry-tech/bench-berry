@@ -1,0 +1,243 @@
+import { z } from 'zod';
+import { join, toFileUrl } from '@std/path';
+import type { ProjectContext, WorkspaceId, WorkspacePlugin } from './workspace.ts';
+
+/** Thrown for any config problem: malformed file, unknown workspace ids, or an invalid final resolution. */
+export class ConfigError extends Error {}
+
+export interface WorkspaceResolution {
+  enabled: boolean;
+  enabledBy: 'default' | 'auto' | 'config' | 'ui' | 'env';
+  source?: Record<string, unknown>;
+}
+
+export interface ResolvedConfig {
+  workspaces: Record<WorkspaceId, WorkspaceResolution>;
+  theme?: { accent?: string; defaultTheme?: 'light' | 'dark' };
+}
+
+const WORKSPACE_IDS = ['design', 'api', 'db'] as const;
+const KNOWN_IDS: Record<string, true> = {
+  design: true,
+  api: true,
+  db: true,
+};
+const WorkspaceIdSchema = z.enum(WORKSPACE_IDS);
+
+const WorkspaceConfigSchema = z.object({
+  enabled: z.boolean().optional(),
+  enabledBy: z.enum(['config', 'ui', 'auto']).optional(),
+  source: z.record(z.string(), z.unknown()).optional(),
+});
+
+// `.passthrough()` only at the top level: unknown top-level keys survive a
+// rewrite, but the workspaces record rejects unknown workspace ids.
+const FileConfigSchema = z.object({
+  workspaces: z.record(WorkspaceIdSchema, WorkspaceConfigSchema).optional(),
+  theme: z.object({
+    accent: z.string().optional(),
+    defaultTheme: z.enum(['light', 'dark']).optional(),
+  }).optional(),
+}).passthrough();
+
+/**
+ * Resolve workspace enablement by merging, lowest to highest precedence:
+ * plugin defaults → auto-detection → config file → BERRYBENCH_WORKSPACES env override.
+ * Throws ConfigError when the file/env references an unknown workspace id or
+ * when no workspace ends up enabled.
+ */
+export async function resolveConfig(
+  ctx: ProjectContext,
+  plugins: readonly WorkspacePlugin[],
+  fileConfig?: unknown, // provided -> use instead of reading disk
+): Promise<ResolvedConfig> {
+  const current = new Map<WorkspaceId, WorkspaceResolution>();
+
+  for (const plugin of plugins) {
+    current.set(plugin.id, { enabled: plugin.defaultEnabled, enabledBy: 'default' });
+  }
+
+  for (const plugin of plugins) {
+    const detected = await plugin.detect(ctx);
+    if (detected !== plugin.defaultEnabled) {
+      current.set(plugin.id, { enabled: detected, enabledBy: 'auto' });
+    }
+  }
+
+  let theme: ResolvedConfig['theme'];
+  let file = fileConfig;
+  if (file === undefined) {
+    file = await readFileConfig(ctx.root);
+  }
+  if (file !== undefined) {
+    assertKnownWorkspaceIds(file);
+    const parsed = FileConfigSchema.safeParse(file);
+    if (!parsed.success) {
+      throw new ConfigError(`invalid berrybench.config.ts: ${describeZodError(parsed.error)}`);
+    }
+    for (const [id, cfg] of Object.entries(parsed.data.workspaces ?? {})) {
+      const workspaceId = id as WorkspaceId;
+      const resolution = current.get(workspaceId);
+      if (resolution === undefined) continue; // valid id, but no plugin registered
+      const enabled = cfg.enabled ?? resolution.enabled;
+      const enabledBy = cfg.enabled !== undefined
+        ? (cfg.enabledBy === 'ui' ? 'ui' : 'config')
+        : resolution.enabledBy;
+      const source = cfg.source ?? resolution.source;
+      current.set(workspaceId, {
+        enabled,
+        enabledBy,
+        ...(source !== undefined ? { source } : {}),
+      });
+    }
+    theme = parsed.data.theme;
+  }
+
+  const envValue = ctx.env['BERRYBENCH_WORKSPACES'];
+  if (envValue !== undefined && envValue.trim() !== '') {
+    const ids = envValue.split(',').map((s) => s.trim()).filter((s) => s.length > 0);
+    for (const id of ids) {
+      if (!KNOWN_IDS[id]) throw new ConfigError(`unknown workspace id: ${id}`);
+    }
+    const enabledIds = new Set(ids);
+    for (const plugin of plugins) {
+      current.set(plugin.id, { enabled: enabledIds.has(plugin.id), enabledBy: 'env' });
+    }
+  }
+
+  const workspaces = {} as Record<WorkspaceId, WorkspaceResolution>;
+  for (const plugin of plugins) {
+    workspaces[plugin.id] = current.get(plugin.id)!;
+  }
+  const anyEnabled = Object.values(workspaces).some((w) => w.enabled);
+  if (!anyEnabled) {
+    throw new ConfigError('enable at least one workspace (hint: berrybench config --enable design)');
+  }
+  return { workspaces, ...(theme !== undefined ? { theme } : {}) };
+}
+
+function assertKnownWorkspaceIds(file: unknown): void {
+  if (typeof file !== 'object' || file === null || Array.isArray(file)) return;
+  const workspaces = (file as Record<string, unknown>).workspaces;
+  if (typeof workspaces !== 'object' || workspaces === null || Array.isArray(workspaces)) return;
+  for (const key of Object.keys(workspaces)) {
+    if (!KNOWN_IDS[key]) throw new ConfigError(`unknown workspace id: ${key}`);
+  }
+}
+
+function describeZodError(error: z.ZodError): string {
+  return error.issues
+    .map((issue) =>
+      `${issue.path.length > 0 ? issue.path.join('.') : 'root'}: ${issue.message}`
+    )
+    .join('; ');
+}
+
+const CONFIG_HEADER = '// Generated by BerryBench. Edit freely; the CLI merges your edits.';
+
+/** Serialize the resolved config to a deterministic, key-sorted TypeScript config file. */
+export function formatConfigFile(
+  resolved: ResolvedConfig,
+  detectedNotes: Record<string, string>,
+): string {
+  const lines = [CONFIG_HEADER, 'export default {', '  workspaces: {'];
+  const ORDER: readonly WorkspaceId[] = ['design', 'api', 'db'];
+  const ids = [
+    ...ORDER.filter((id) => id in resolved.workspaces),
+    ...Object.keys(resolved.workspaces).filter((id) =>
+      !ORDER.includes(id as WorkspaceId)
+    ).sort(),
+  ];
+  for (const id of ids) {
+    const note = detectedNotes[id];
+    if (note !== undefined) lines.push(`    // ${id}: ${note}`);
+    const workspace = resolved.workspaces[id as WorkspaceId];
+    let entry = `    ${id}: { enabled: ${workspace.enabled}`;
+    if (workspace.source !== undefined) {
+      entry += `, source: ${serializeValue(workspace.source)}`;
+    }
+    lines.push(`${entry} },`);
+  }
+  lines.push('  },');
+  if (resolved.theme !== undefined) {
+    const parts: string[] = [];
+    if (resolved.theme.accent !== undefined) {
+      parts.push(`accent: ${serializeValue(resolved.theme.accent)}`);
+    }
+    if (resolved.theme.defaultTheme !== undefined) {
+      parts.push(`defaultTheme: ${serializeValue(resolved.theme.defaultTheme)}`);
+    }
+    lines.push(`  theme: { ${parts.join(', ')} },`);
+  }
+  lines.push('};');
+  return `${lines.join('\n')}\n`;
+}
+
+// Serialize an arbitrary (JSON-ish) value as a single-line TS expression.
+function serializeValue(value: unknown): string {
+  if (value === null) return 'null';
+  switch (typeof value) {
+    case 'string':
+      return quote(value);
+    case 'boolean':
+      return String(value);
+    case 'number':
+      return Number.isFinite(value) ? String(value) : 'null';
+    case 'bigint':
+      return String(value);
+  }
+  if (Array.isArray(value)) return `[${value.map(serializeValue).join(', ')}]`;
+  if (typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>)
+      .sort(([a], [b]) => a.localeCompare(b));
+    if (entries.length === 0) return '{}';
+    return `{ ${
+      entries.map(([k, v]) => `${isIdentifier(k) ? k : quote(k)}: ${serializeValue(v)}`).join(', ')
+    } }`;
+  }
+  return 'null';
+}
+
+function quote(value: string): string {
+  return `'${value
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t')}'`;
+}
+
+function isIdentifier(value: string): boolean {
+  return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(value);
+}
+
+/**
+ * Read `<root>/berrybench.config.ts` via dynamic import, cache-busted by file
+ * mtime. Returns undefined when the file does not exist; throws ConfigError
+ * when it exists but cannot be imported or does not default-export an object.
+ */
+export async function readFileConfig(root: string): Promise<unknown | undefined> {
+  const filePath = join(root, 'berrybench.config.ts');
+  let mtimeMs: number;
+  try {
+    mtimeMs = (await Deno.stat(filePath)).mtime?.getTime() ?? 0;
+  } catch {
+    return undefined;
+  }
+  const url = `${toFileUrl(filePath).href}?mtime=${mtimeMs}`;
+  // The config file is user-authored and only known at runtime, so a dynamic
+  // import is required here; the `?mtime=` query busts Deno's module cache so
+  // edits are picked up on the next read.
+  let mod: Record<string, unknown>;
+  try {
+    mod = await import(url);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new ConfigError(`failed to load config file ${filePath}: ${detail}`);
+  }
+  const value = mod['default'];
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new ConfigError(`config file ${filePath} must default-export a plain object`);
+  }
+  return value;
+}

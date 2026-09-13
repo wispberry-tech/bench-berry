@@ -1,0 +1,58 @@
+openapi: 3.0.3
+info:
+  title: Fixture API
+  version: 1.2.3
+paths:
+  /issues:
+    get:
+      summary: List issues
+      responses:
+        '200':
+          description: A list of issues
+    post:
+      description: |
+        Create a new issue.
+        The description's second line must not leak into the summary.
+      responses:
+        '201':
+          description: Created
+  /issues/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    summary: Issue operations
+    description: Operations on a single issue.
+    get:
+      summary: Get issue
+      description: |
+        Returns a single issue by id.
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    Issue:
+      type: object
+      required:
+        - id
+        - title
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        state:
+          type: string
+          enum:
+            - open
+            - closed
+    NewIssue:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
