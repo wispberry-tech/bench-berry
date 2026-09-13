@@ -1,0 +1,1351 @@
+<style>
+/* ============ v-ds-* design-system view styles (prefixed only) ============ */
+.v-ds-pane{display:none}
+.v-ds-pane.active{display:block}
+.v-ds-docs-title{font-size:16px;font-weight:650;letter-spacing:-.015em}
+.v-ds-docs-sub{font-size:12.5px;color:var(--text-2);margin:2px 0 18px;max-width:720px;line-height:1.55}
+.v-ds-section{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin:26px 0 10px}
+.v-ds-note{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text-2);background:var(--accent-faint);border:1px solid var(--accent-border);border-radius:var(--r-m);padding:10px 12px;margin-top:14px;line-height:1.5}
+.v-ds-note .icon{width:14px;height:14px;color:var(--accent);margin-top:2px;flex:none}
+.v-ds-grid{display:grid;gap:10px}
+.v-ds-sw-grid{grid-template-columns:repeat(auto-fill,minmax(198px,1fr))}
+.v-ds-swatch{border:1px solid var(--border);border-radius:var(--r-m);background:var(--surface);overflow:hidden}
+.v-ds-swatch-color{height:52px}
+.v-ds-swatch-body{padding:8px 10px;border-top:1px solid var(--border-faint)}
+.v-ds-swatch-name{font-size:12px;font-weight:500;color:var(--text)}
+.v-ds-swatch-meta{font-family:var(--mono);font-size:10.5px;color:var(--text-3);margin-top:2px}
+.v-ds-swatch-use{font-size:11px;color:var(--text-3);margin-top:2px}
+.v-ds-status-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.v-ds-type-row{display:flex;align-items:baseline;gap:18px;padding:11px 0;border-bottom:1px solid var(--border-faint)}
+.v-ds-type-row:last-child{border-bottom:none}
+.v-ds-type-sample{color:var(--text);letter-spacing:-.01em;white-space:nowrap}
+.v-ds-type-meta{font-size:11px;color:var(--text-3);font-family:var(--mono);white-space:nowrap}
+.v-ds-type-use{font-size:11px;color:var(--text-3);margin-left:auto;white-space:nowrap}
+.v-ds-sp-row{display:flex;align-items:center;gap:12px;padding:6px 0}
+.v-ds-sp-bar{height:18px;border-radius:4px;background:var(--accent-500);opacity:.92}
+.v-ds-sp-meta{font-family:var(--mono);font-size:11px;color:var(--text-3);width:72px;flex:none}
+.v-ds-sp-name{font-size:11.5px;color:var(--text-2);width:150px;flex:none}
+.v-ds-radius-row,.v-ds-elev-row{display:flex;gap:20px;flex-wrap:wrap}
+.v-ds-radius-item,.v-ds-elev-item{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:11px;color:var(--text-3)}
+.v-ds-radius-box{width:56px;height:56px;background:var(--surface-3);border:1px solid var(--border-strong)}
+.v-ds-radius-meta{font-family:var(--mono);font-size:10.5px}
+.v-ds-elev-box{width:150px;height:80px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-m)}
+.v-ds-elev-use{text-align:center;font-size:10.5px;color:var(--text-4);max-width:150px;line-height:1.4}
+.v-ds-icon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px}
+.v-ds-icon-cell{display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 4px;border:1px solid var(--border);border-radius:var(--r-m);background:var(--surface);color:var(--text-2);font-size:10px;font-family:var(--mono);cursor:pointer;transition:border-color .12s,color .12s}
+.v-ds-icon-cell:hover{border-color:var(--accent-border);color:var(--accent)}
+.v-ds-preview{display:flex;flex-direction:column;gap:16px}
+.v-ds-preview-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.v-ds-preview-label{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-4);min-width:72px;flex:none}
+.v-ds-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:620px}
+.v-ds-stage{position:relative;min-height:120px;display:flex;flex-direction:column;justify-content:flex-end}
+.v-ds-toast{position:absolute;right:0;bottom:0;display:flex;align-items:center;gap:9px;background:var(--text);color:var(--bg);font-size:12.5px;padding:10px 14px;border-radius:var(--r-m);box-shadow:var(--shadow-3);opacity:0;transform:translateY(8px);transition:opacity .18s,transform .18s;pointer-events:none;max-width:100%}
+.v-ds-toast.in{opacity:1;transform:none}
+.v-ds-toast .icon{width:14px;height:14px;color:var(--success)}
+.v-ds-toast strong{font-weight:600}
+.v-ds-issue-row{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--border-faint)}
+.v-ds-issue-row:last-child{border-bottom:none}
+.v-ds-tabpane{display:none}
+.v-ds-tabpane.active{display:block}
+.v-ds-docs-tabs{margin-bottom:14px}
+.v-ds-demo-tabpane{display:none}
+.v-ds-demo-tabpane.active{display:block}
+.v-ds-demo-card{border:1px solid var(--border);border-radius:var(--r-m);background:var(--surface);padding:6px 14px}
+.v-ds-switch-row{display:flex;align-items:center;gap:10px}
+.v-ds-skel{height:10px;border-radius:5px;background:var(--surface-3)}
+.v-ds-xref{display:flex;gap:12px;flex-wrap:wrap;margin-top:36px}
+.v-ds-xref-card{flex:1;min-width:230px;display:flex;flex-direction:column;gap:6px;padding:14px 16px}
+.v-ds-xref-title{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;letter-spacing:-.01em}
+.v-ds-xref-title .icon{width:14px;height:14px;color:var(--accent)}
+.v-ds-filter-empty{display:none;padding:10px 16px 12px;font-size:12px;color:var(--text-3)}
+.v-ds-filter-empty.on{display:block}
+</style>
+
+<section class="view" id="view-design" data-view="design">
+  <div class="view-body">
+    <aside class="rail">
+      <div class="rail-head">
+        <div class="rail-title">@helix/ui</div>
+      </div>
+      <div class="rail-search">
+        <svg class="icon"><use href="#i-search"/></svg>
+        <input id="v-ds-rail-filter" type="text" placeholder="Filter tokens &amp; components…" autocomplete="off">
+      </div>
+      <div class="rail-group">Foundations</div>
+      <button class="rail-item" data-ds="colors"><svg class="icon"><use href="#i-dot-grid"/></svg>Colors</button>
+      <button class="rail-item" data-ds="typography"><svg class="icon"><use href="#i-dot-grid"/></svg>Typography</button>
+      <button class="rail-item" data-ds="spacing"><svg class="icon"><use href="#i-dot-grid"/></svg>Spacing</button>
+      <button class="rail-item" data-ds="radii"><svg class="icon"><use href="#i-dot-grid"/></svg>Radii</button>
+      <button class="rail-item" data-ds="elevation"><svg class="icon"><use href="#i-dot-grid"/></svg>Elevation</button>
+      <button class="rail-item" data-ds="icons"><svg class="icon"><use href="#i-dot-grid"/></svg>Icons<span class="rail-count">42 glyphs</span></button>
+      <div class="rail-group">Components</div>
+      <button class="rail-item" data-ds="button"><svg class="icon"><use href="#i-cube"/></svg>Button</button>
+      <button class="rail-item" data-ds="badge"><svg class="icon"><use href="#i-cube"/></svg>Badge</button>
+      <button class="rail-item" data-ds="avatar"><svg class="icon"><use href="#i-cube"/></svg>Avatar</button>
+      <button class="rail-item" data-ds="card"><svg class="icon"><use href="#i-cube"/></svg>Card</button>
+      <button class="rail-item" data-ds="input"><svg class="icon"><use href="#i-cube"/></svg>Input</button>
+      <button class="rail-item" data-ds="select"><svg class="icon"><use href="#i-cube"/></svg>Select</button>
+      <button class="rail-item" data-ds="tabs"><svg class="icon"><use href="#i-cube"/></svg>Tabs</button>
+      <button class="rail-item" data-ds="switch"><svg class="icon"><use href="#i-cube"/></svg>Switch</button>
+      <button class="rail-item" data-ds="dialog"><svg class="icon"><use href="#i-cube"/></svg>Dialog</button>
+      <button class="rail-item" data-ds="toast"><svg class="icon"><use href="#i-cube"/></svg>Toast</button>
+      <button class="rail-item" data-ds="tooltip"><svg class="icon"><use href="#i-cube"/></svg>Tooltip</button>
+      <button class="rail-item" data-ds="table"><svg class="icon"><use href="#i-cube"/></svg>Table</button>
+      <button class="rail-item" data-ds="skeleton"><svg class="icon"><use href="#i-cube"/></svg>Skeleton</button>
+      <button class="rail-item" data-ds="emptystate"><svg class="icon"><use href="#i-cube"/></svg>EmptyState</button>
+      <div class="v-ds-filter-empty" id="v-ds-filter-empty">No components match your filter</div>
+    </aside>
+
+    <div class="view-content">
+      <div class="view-head">
+        <div>
+          <div class="vh-title">Design System</div>
+          <div class="vh-sub">@helix/ui v2.4.0 — tokens and components rendered live from the source of truth.</div>
+        </div>
+      </div>
+
+      <!-- ================= FOUNDATIONS ================= -->
+
+      <section class="v-ds-pane" data-ds-pane="colors">
+        <div class="v-ds-docs-title">Colors</div>
+        <div class="v-ds-docs-sub">Two neutral ramps for structure and text, a live accent scale, and semantic roles for statuses. All swatches render actual <span class="mono">var(--…)</span> tokens — what you see is what ships.</div>
+
+        <div class="v-ds-section">Neutral scale</div>
+        <div class="v-ds-grid v-ds-sw-grid">
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--bg)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">bg</div><div class="v-ds-swatch-meta">#f6f6f7 · #0f0f11</div><div class="v-ds-swatch-use">App canvas</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--surface)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">surface</div><div class="v-ds-swatch-meta">#ffffff · #17171a</div><div class="v-ds-swatch-use">Cards, panels, inputs</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--surface-2)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">surface-2</div><div class="v-ds-swatch-meta">#fbfbfc · #1c1c20</div><div class="v-ds-swatch-use">Rails, table headers, stripes</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--surface-3)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">surface-3</div><div class="v-ds-swatch-meta">#f1f1f3 · #232328</div><div class="v-ds-swatch-use">Segmented controls, skeletons</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--border)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">border</div><div class="v-ds-swatch-meta">#e5e5e8 · #26262b</div><div class="v-ds-swatch-use">Outlines, dividers</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--border-strong)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">border-strong</div><div class="v-ds-swatch-meta">#d9d9de · #36363d</div><div class="v-ds-swatch-use">Input borders, popovers</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--border-faint)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">border-faint</div><div class="v-ds-swatch-meta">#ededf0 · #1e1e22</div><div class="v-ds-swatch-use">Row separators</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--text)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">text</div><div class="v-ds-swatch-meta">#1b1b1f · #f3f3f5</div><div class="v-ds-swatch-use">Headings, primary copy</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--text-2)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">text-2</div><div class="v-ds-swatch-meta">#5c5c66 · #a6a6b0</div><div class="v-ds-swatch-use">Body, labels</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--text-3)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">text-3</div><div class="v-ds-swatch-meta">#94949e · #71717b</div><div class="v-ds-swatch-use">Hints, placeholders</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--text-4)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">text-4</div><div class="v-ds-swatch-meta">#b6b6be · #4e4e57</div><div class="v-ds-swatch-use">Disabled, group labels</div></div></div>
+        </div>
+
+        <div class="v-ds-section">Accent scale</div>
+        <div class="v-ds-grid v-ds-sw-grid">
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--accent-50)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">accent-50</div><div class="v-ds-swatch-meta">var(--accent-50)</div><div class="v-ds-swatch-use">Hover tints, focus rings</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--accent-100)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">accent-100</div><div class="v-ds-swatch-meta">var(--accent-100)</div><div class="v-ds-swatch-use">Selected chip fill</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--accent-200)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">accent-200</div><div class="v-ds-swatch-meta">var(--accent-200)</div><div class="v-ds-swatch-use">Soft button active</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--accent-300)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">accent-300</div><div class="v-ds-swatch-meta">var(--accent-300)</div><div class="v-ds-swatch-use">Charts, secondary marks</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--accent-400)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">accent-400</div><div class="v-ds-swatch-meta">var(--accent-400)</div><div class="v-ds-swatch-use">Icons on subtle fills</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--accent-500)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">accent-500</div><div class="v-ds-swatch-meta">var(--accent-500)</div><div class="v-ds-swatch-use">Primary actions, links, active rail</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--accent-600)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">accent-600</div><div class="v-ds-swatch-meta">var(--accent-600)</div><div class="v-ds-swatch-use">Button hover fill</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--accent-700)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">accent-700</div><div class="v-ds-swatch-meta">var(--accent-700)</div><div class="v-ds-swatch-use">Pressed state, logo mark</div></div></div>
+        </div>
+        <div class="v-ds-note"><svg class="icon"><use href="#i-spark"/></svg><span>The accent scale is a live token: switch <span class="mono">data-accent</span> in the top bar (violet · blue · green · rose) and every swatch above, plus all components on this page, re-render instantly.</span></div>
+
+        <div class="v-ds-section">Semantic</div>
+        <div class="v-ds-grid v-ds-sw-grid">
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--success)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">success</div><div class="v-ds-swatch-meta">#16a34a · #4cc38a</div><div class="v-ds-swatch-use">Done, synced, healthy</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--success-bg)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">success-bg</div><div class="v-ds-swatch-meta">#eafaf0 · #11301f</div><div class="v-ds-swatch-use">Badge fill</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--success-border)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">success-border</div><div class="v-ds-swatch-meta">#c4ecd4 · #1f5236</div><div class="v-ds-swatch-use">Badge edge</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--warning)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">warning</div><div class="v-ds-swatch-meta">#b45309 · #e0a458</div><div class="v-ds-swatch-use">In review, drift, high prio</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--warning-bg)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">warning-bg</div><div class="v-ds-swatch-meta">#fdf5e7 · #33240f</div><div class="v-ds-swatch-use">Badge fill</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--warning-border)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">warning-border</div><div class="v-ds-swatch-meta">#f3ddb9 · #54401c</div><div class="v-ds-swatch-use">Badge edge</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--danger)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">danger</div><div class="v-ds-swatch-meta">#dc2626 · #ef6d6d</div><div class="v-ds-swatch-use">Destructive, urgent, errors</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--danger-bg)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">danger-bg</div><div class="v-ds-swatch-meta">#fdefee · #381515</div><div class="v-ds-swatch-use">Badge fill</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--danger-border)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">danger-border</div><div class="v-ds-swatch-meta">#f5cccc · #5d2323</div><div class="v-ds-swatch-use">Badge edge</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--info)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">info</div><div class="v-ds-swatch-meta">#0369a1 · #5aa9d8</div><div class="v-ds-swatch-use">Todo, medium prio, links</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--info-bg)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">info-bg</div><div class="v-ds-swatch-meta">#eaf5fb · #10283a</div><div class="v-ds-swatch-use">Badge fill</div></div></div>
+          <div class="v-ds-swatch"><div class="v-ds-swatch-color" style="background:var(--info-border)"></div><div class="v-ds-swatch-body"><div class="v-ds-swatch-name">info-border</div><div class="v-ds-swatch-meta">#c4e2f0 · #1d435f</div><div class="v-ds-swatch-use">Badge edge</div></div></div>
+        </div>
+
+        <div class="v-ds-section">Status → color mapping</div>
+        <div class="v-ds-status-row">
+          <span class="badge badge-neutral"><span class="dot dot-neutral"></span>backlog</span>
+          <span class="badge badge-info"><span class="dot dot-info"></span>todo</span>
+          <span class="badge badge-accent"><span class="dot dot-accent"></span>in_progress</span>
+          <span class="badge badge-warning"><span class="dot dot-warning"></span>in_review</span>
+          <span class="badge badge-success"><span class="dot dot-success"></span>done</span>
+        </div>
+        <div class="v-ds-section" style="margin-top:18px">Priority → color mapping</div>
+        <div class="v-ds-status-row">
+          <span class="badge badge-danger"><span class="dot dot-danger"></span>urgent</span>
+          <span class="badge badge-warning"><span class="dot dot-warning"></span>high</span>
+          <span class="badge badge-info"><span class="dot dot-info"></span>medium</span>
+          <span class="badge badge-neutral"><span class="dot dot-neutral"></span>low</span>
+          <span class="badge badge-neutral"><span class="dot dot-neutral"></span>none</span>
+        </div>
+        <div class="v-ds-note"><svg class="icon"><use href="#i-info"/></svg><span>These mappings drive the <span class="mono">status</span> and <span class="mono">priority</span> enums from the shared data model — the same badges render in the API explorer responses and the database row previews.</span></div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="typography">
+        <div class="v-ds-docs-title">Typography</div>
+        <div class="v-ds-docs-sub">Inter is the product face (system fallbacks included), with a mono ramp for identifiers, paths, and code. Scale steps stay on the 8px grid.</div>
+        <div class="v-ds-type-row"><span class="v-ds-type-sample" style="font-size:28px;font-weight:700">The quick brown fox</span><span class="v-ds-type-meta">28 / 700 · -0.02em</span><span class="v-ds-type-use">H1 · page titles</span></div>
+        <div class="v-ds-type-row"><span class="v-ds-type-sample" style="font-size:22px;font-weight:650">The quick brown fox</span><span class="v-ds-type-meta">22 / 650 · -0.02em</span><span class="v-ds-type-use">H2 · view &amp; dialog titles</span></div>
+        <div class="v-ds-type-row"><span class="v-ds-type-sample" style="font-size:18px;font-weight:600">The quick brown fox</span><span class="v-ds-type-meta">18 / 600 · -0.01em</span><span class="v-ds-type-use">H3 · section headings</span></div>
+        <div class="v-ds-type-row"><span class="v-ds-type-sample" style="font-size:15px;font-weight:500">The quick brown fox</span><span class="v-ds-type-meta">15 / 500</span><span class="v-ds-type-use">Body large · lead text</span></div>
+        <div class="v-ds-type-row"><span class="v-ds-type-sample" style="font-size:13px;font-weight:400">The quick brown fox</span><span class="v-ds-type-meta">13 / 400 · 1.5</span><span class="v-ds-type-use">Body · default</span></div>
+        <div class="v-ds-type-row"><span class="v-ds-type-sample" style="font-size:12px;font-weight:400">The quick brown fox</span><span class="v-ds-type-meta">12 / 400</span><span class="v-ds-type-use">Secondary · labels, hints</span></div>
+        <div class="v-ds-type-row"><span class="v-ds-type-sample" style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em">The quick fox</span><span class="v-ds-type-meta">11 / 500 · caps +.06em</span><span class="v-ds-type-use">Caption · table headers, group labels</span></div>
+        <div class="v-ds-type-row"><span class="v-ds-type-sample mono" style="font-size:12px">iss_9f2c1a · api.helix.dev</span><span class="v-ds-type-meta">mono 12 · ui-mono</span><span class="v-ds-type-use">IDs, paths, code</span></div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="spacing">
+        <div class="v-ds-docs-title">Spacing</div>
+        <div class="v-ds-docs-sub">A 4px quantum on an 8px grid. Rows below are scaled 2× for legibility; the number column is the real token value.</div>
+        <div class="v-ds-sp-row"><span class="v-ds-sp-name">2px · hairline gaps</span><span class="v-ds-sp-meta">--space-1</span><div class="v-ds-sp-bar" style="width:4px"></div></div>
+        <div class="v-ds-sp-row"><span class="v-ds-sp-name">4px · icon gaps</span><span class="v-ds-sp-meta">--space-2</span><div class="v-ds-sp-bar" style="width:8px"></div></div>
+        <div class="v-ds-sp-row"><span class="v-ds-sp-name">8px · field &amp; rail gaps</span><span class="v-ds-sp-meta">--space-3</span><div class="v-ds-sp-bar" style="width:16px"></div></div>
+        <div class="v-ds-sp-row"><span class="v-ds-sp-name">12px · compact card padding</span><span class="v-ds-sp-meta">--space-4</span><div class="v-ds-sp-bar" style="width:24px"></div></div>
+        <div class="v-ds-sp-row"><span class="v-ds-sp-name">16px · card padding, table cells</span><span class="v-ds-sp-meta">--space-5</span><div class="v-ds-sp-bar" style="width:32px"></div></div>
+        <div class="v-ds-sp-row"><span class="v-ds-sp-name">24px · pane gutters</span><span class="v-ds-sp-meta">--space-6</span><div class="v-ds-sp-bar" style="width:48px"></div></div>
+        <div class="v-ds-sp-row"><span class="v-ds-sp-name">32px · section rhythm</span><span class="v-ds-sp-meta">--space-7</span><div class="v-ds-sp-bar" style="width:64px"></div></div>
+        <div class="v-ds-sp-row"><span class="v-ds-sp-name">48px · page breathing room</span><span class="v-ds-sp-meta">--space-8</span><div class="v-ds-sp-bar" style="width:96px"></div></div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="radii">
+        <div class="v-ds-docs-title">Radii</div>
+        <div class="v-ds-docs-sub">Squircle-leaning corners scale with component size. Full radius is reserved for pills, switches, and avatars.</div>
+        <div class="v-ds-radius-row">
+          <div class="v-ds-radius-item"><div class="v-ds-radius-box" style="border-radius:var(--r-s)"></div><div class="v-ds-radius-meta">s · 6px</div><div class="v-ds-radius-use hint">Buttons, inputs, badges, rail items</div></div>
+          <div class="v-ds-radius-item"><div class="v-ds-radius-box" style="border-radius:var(--r-m)"></div><div class="v-ds-radius-meta">m · 10px</div><div class="v-ds-radius-use hint">Cards, panels, tables, popovers</div></div>
+          <div class="v-ds-radius-item"><div class="v-ds-radius-box" style="border-radius:var(--r-l)"></div><div class="v-ds-radius-meta">l · 14px</div><div class="v-ds-radius-use hint">Dialogs, palette, command menu</div></div>
+          <div class="v-ds-radius-item"><div class="v-ds-radius-box" style="border-radius:var(--r-full)"></div><div class="v-ds-radius-meta">full · 999px</div><div class="v-ds-radius-use hint">Pills, switches, avatars, dots</div></div>
+        </div>
+        <div class="v-ds-note"><svg class="icon"><use href="#i-info"/></svg><span>Radii are theme-independent, but shadows and fills that pair with them switch with <span class="mono">data-theme</span> — flip light/dark in the icon rail to compare.</span></div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="elevation">
+        <div class="v-ds-docs-title">Elevation</div>
+        <div class="v-ds-docs-sub">Three shadow steps. Dark mode deepens opacity and spread so surfaces lift off the near-black canvas consistently.</div>
+        <div class="v-ds-elev-row">
+          <div class="v-ds-elev-item"><div class="v-ds-elev-box" style="box-shadow:var(--shadow-1)"></div><div class="v-ds-radius-meta">shadow-1</div><div class="v-ds-elev-use hint">Resting cards, buttons, table wraps</div></div>
+          <div class="v-ds-elev-item"><div class="v-ds-elev-box" style="box-shadow:var(--shadow-2)"></div><div class="v-ds-radius-meta">shadow-2</div><div class="v-ds-elev-use hint">Hover states, popovers, tooltips</div></div>
+          <div class="v-ds-elev-item"><div class="v-ds-elev-box" style="box-shadow:var(--shadow-3)"></div><div class="v-ds-radius-meta">shadow-3</div><div class="v-ds-elev-use hint">Dialogs, command palette, toasts</div></div>
+        </div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="icons">
+        <div class="v-ds-docs-title">Icons</div>
+        <div class="v-ds-docs-sub">42 glyphs on a 16×16 grid, 1.3px stroke, <span class="mono">currentColor</span>. Render with <span class="mono">&lt;svg class="icon"&gt;&lt;use href="#i-…"/&gt;&lt;/svg&gt;</span> — they inherit the surrounding text color in both themes.</div>
+        <div class="v-ds-icon-grid">
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-search"/></svg>search</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-command"/></svg>command</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-code"/></svg>code</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-cube"/></svg>cube</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-plug"/></svg>plug</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-db"/></svg>db</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-layers"/></svg>layers</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-send"/></svg>send</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-copy"/></svg>copy</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-check"/></svg>check</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-plus"/></svg>plus</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-x"/></svg>x</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-refresh"/></svg>refresh</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-filter"/></svg>filter</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-key"/></svg>key</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-link"/></svg>link</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-arrow-right"/></svg>arrow-right</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-pencil"/></svg>pencil</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-trash"/></svg>trash</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-clock"/></svg>clock</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-users"/></svg>users</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-star"/></svg>star</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-spark"/></svg>spark</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-home"/></svg>home</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-doc"/></svg>doc</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-settings"/></svg>settings</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-warn"/></svg>warn</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-info"/></svg>info</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-external"/></svg>external</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-table"/></svg>table</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-schema"/></svg>schema</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-branch"/></svg>branch</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-comment"/></svg>comment</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-list"/></svg>list</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-dot-grid"/></svg>dot-grid</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-gauge"/></svg>gauge</div>
+          <div class="v-ds-icon-cell" data-copy="self"><svg class="icon"><use href="#i-shield"/></svg>shield</div>
+        </div>
+      </section>
+
+      <!-- ================= COMPONENTS ================= -->
+
+      <section class="v-ds-pane" data-ds-pane="button">
+        <div class="v-ds-docs-title">Button</div>
+        <div class="v-ds-docs-sub">The workhorse. Five variants, three sizes, loading and icon-only states. Buttons sit on the accent ramp and re-theme with <span class="mono">data-accent</span>.</div>
+        <div class="tabs v-ds-docs-tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="props">Props</button>
+        </div>
+        <div class="v-ds-tabpane active" data-tabpane="preview">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Preview</span><span class="panel-sub">interactive — try “Create issue”</span></div>
+            <div class="panel-body v-ds-preview">
+              <div class="v-ds-preview-row">
+                <span class="v-ds-preview-label">Variants</span>
+                <button class="btn btn-primary"><svg class="icon"><use href="#i-plus"/></svg>Primary</button>
+                <button class="btn btn-soft">Soft</button>
+                <button class="btn btn-ghost">Ghost</button>
+                <button class="btn btn-outline">Outline</button>
+                <button class="btn btn-danger"><svg class="icon"><use href="#i-trash"/></svg>Danger</button>
+              </div>
+              <div class="v-ds-preview-row">
+                <span class="v-ds-preview-label">Sizes</span>
+                <button class="btn btn-primary btn-sm">Small</button>
+                <button class="btn btn-primary">Medium</button>
+                <button class="btn btn-primary btn-lg">Large</button>
+              </div>
+              <div class="v-ds-preview-row">
+                <span class="v-ds-preview-label">States</span>
+                <button class="btn btn-primary" disabled>Disabled</button>
+                <button class="btn btn-outline" id="v-ds-loading-btn"><svg class="icon"><use href="#i-plus"/></svg>Create issue</button>
+                <button class="btn btn-ghost btn-icon" title="Copy"><svg class="icon"><use href="#i-copy"/></svg></button>
+                <button class="btn btn-outline btn-icon" title="More"><svg class="icon"><use href="#i-chevron-down"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="code">
+          <div class="code-block">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>button.tsx</div>
+            <div class="code-body"><span class="tok-k">import</span> { Button } <span class="tok-k">from</span> <span class="tok-s">'@helix/ui'</span>;
+
+<span class="tok-f">&lt;Button</span>
+  variant=<span class="tok-s">"primary"</span>
+  size=<span class="tok-s">"md"</span>
+  loading={<span class="tok-n">isSaving</span>}
+  leftIcon=<span class="tok-s">"plus"</span>
+  onClick={<span class="tok-n">handleSave</span>}
+<span class="tok-f">&gt;</span>
+  Save issue
+<span class="tok-f">&lt;/Button&gt;</span>
+
+<span class="tok-c">// icon-only: title carries the a11y label</span>
+<span class="tok-f">&lt;Button</span> variant=<span class="tok-s">"ghost"</span> iconOnly=<span class="tok-s">"copy"</span> title=<span class="tok-s">"Copy ID"</span> <span class="tok-f">/&gt;</span></div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="props">
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">variant</td><td class="mono muted">'primary'|'soft'|'ghost'|'outline'|'danger'</td><td class="mono muted">'primary'</td><td>Visual weight; danger is reserved for destructive actions</td></tr>
+                <tr><td class="mono">size</td><td class="mono muted">'sm'|'md'|'lg'</td><td class="mono muted">'md'</td><td>Height 24 / 30 / 36px</td></tr>
+                <tr><td class="mono">loading</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Shows spinner, disables pointer events</td></tr>
+                <tr><td class="mono">disabled</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Dims and blocks interaction</td></tr>
+                <tr><td class="mono">leftIcon / rightIcon</td><td class="mono muted">IconName</td><td class="mono muted">—</td><td>Glyph from the icon set, rendered at 14×14</td></tr>
+                <tr><td class="mono">fullWidth</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Stretches to fill the parent row</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="badge">
+        <div class="v-ds-docs-title">Badge</div>
+        <div class="v-ds-docs-sub">Compact status pills with optional dot. The status mapping story below is the exact contract the whole product shares.</div>
+        <div class="tabs v-ds-docs-tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="props">Props</button>
+        </div>
+        <div class="v-ds-tabpane active" data-tabpane="preview">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Preview</span><span class="panel-sub">semantic + status mapping</span></div>
+            <div class="panel-body v-ds-preview">
+              <div class="v-ds-preview-row">
+                <span class="v-ds-preview-label">Variants</span>
+                <span class="badge badge-success">success</span>
+                <span class="badge badge-warning">warning</span>
+                <span class="badge badge-danger">danger</span>
+                <span class="badge badge-info">info</span>
+                <span class="badge badge-neutral">neutral</span>
+                <span class="badge badge-accent">accent</span>
+                <span class="badge badge-outline">outline</span>
+              </div>
+              <div class="v-ds-preview-row">
+                <span class="v-ds-preview-label">With dots</span>
+                <span class="badge badge-success"><span class="dot dot-success"></span>Synced</span>
+                <span class="badge badge-warning"><span class="dot dot-warning"></span>Drift</span>
+                <span class="badge badge-danger"><span class="dot dot-danger"></span>Failing</span>
+                <span class="badge badge-info"><span class="dot dot-info"></span>Queued</span>
+              </div>
+              <div class="v-ds-preview-row">
+                <span class="v-ds-preview-label">Issue status</span>
+                <span class="badge badge-neutral"><span class="dot dot-neutral"></span>backlog</span>
+                <span class="badge badge-info"><span class="dot dot-info"></span>todo</span>
+                <span class="badge badge-accent"><span class="dot dot-accent"></span>in_progress</span>
+                <span class="badge badge-warning"><span class="dot dot-warning"></span>in_review</span>
+                <span class="badge badge-success"><span class="dot dot-success"></span>done</span>
+              </div>
+              <div>
+                <span class="hint">Used by: IssueCard · API view · issue lists across this product</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="code">
+          <div class="code-block">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>badge.tsx</div>
+            <div class="code-body"><span class="tok-k">const</span> STATUS_VARIANT = {
+  <span class="tok-n">done</span>: <span class="tok-s">'success'</span>, <span class="tok-n">in_review</span>: <span class="tok-s">'warning'</span>,
+  <span class="tok-n">in_progress</span>: <span class="tok-s">'accent'</span>, <span class="tok-n">todo</span>: <span class="tok-s">'info'</span>,
+  <span class="tok-n">backlog</span>: <span class="tok-s">'neutral'</span>,
+};
+
+<span class="tok-f">&lt;Badge</span> variant={<span class="tok-n">STATUS_VARIANT</span>[issue.<span class="tok-n">status</span>]} dot<span class="tok-f">&gt;</span>
+  {issue.<span class="tok-n">status</span>}
+<span class="tok-f">&lt;/Badge&gt;</span></div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="props">
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">variant</td><td class="mono muted">'success'|'warning'|'danger'|'info'|'neutral'|'accent'|'outline'</td><td class="mono muted">'neutral'</td><td>Semantic fill + edge pairing</td></tr>
+                <tr><td class="mono">dot</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Leading status dot matching the variant</td></tr>
+                <tr><td class="mono">icon</td><td class="mono muted">IconName</td><td class="mono muted">—</td><td>Optional 11×11 leading glyph</td></tr>
+                <tr><td class="mono">children</td><td class="mono muted">ReactNode</td><td class="mono muted">—</td><td>Label — usually the raw enum value</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="avatar">
+        <div class="v-ds-docs-title">Avatar</div>
+        <div class="v-ds-docs-sub">Initials fallback with a per-user pastel gradient from the <span class="mono">users.avatar_url</span> palette; stacks for assignee groups.</div>
+        <div class="tabs v-ds-docs-tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="props">Props</button>
+        </div>
+        <div class="v-ds-tabpane active" data-tabpane="preview">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Preview</span><span class="panel-sub">the four Helix maintainers</span></div>
+            <div class="panel-body v-ds-preview">
+              <div class="v-ds-preview-row">
+                <span class="v-ds-preview-label">Team</span>
+                <span class="avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)" title="Aiko Tanaka">AT</span>
+                <span class="avatar" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)" title="Marcus Webb">MW</span>
+                <span class="avatar" style="background:linear-gradient(135deg,#10b981,#06b6d4)" title="Priya Nair">PN</span>
+                <span class="avatar" style="background:linear-gradient(135deg,#8a5cf6,#d946ef)" title="Theo Meyer">TM</span>
+              </div>
+              <div class="v-ds-preview-row">
+                <span class="v-ds-preview-label">Sizes</span>
+                <span class="avatar avatar-sm" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">AT</span>
+                <span class="avatar" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">MW</span>
+                <span class="avatar avatar-lg" style="background:linear-gradient(135deg,#10b981,#06b6d4)">PN</span>
+              </div>
+              <div class="v-ds-preview-row">
+                <span class="v-ds-preview-label">Stack</span>
+                <span class="avatar-stack">
+                  <span class="avatar" style="background:linear-gradient(135deg,#10b981,#06b6d4)" title="Priya Nair">PN</span>
+                  <span class="avatar" style="background:linear-gradient(135deg,#8a5cf6,#d946ef)" title="Theo Meyer">TM</span>
+                  <span class="avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)" title="Aiko Tanaka">AT</span>
+                  <span class="avatar" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)" title="Marcus Webb">MW</span>
+                </span>
+                <span class="hint">+3 more assignees</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="code">
+          <div class="code-block">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>avatar.tsx</div>
+            <div class="code-body"><span class="tok-f">&lt;Avatar</span> name=<span class="tok-s">"Aiko Tanaka"</span> size=<span class="tok-s">"md"</span> <span class="tok-f">/&gt;</span>
+
+<span class="tok-c">// initials are derived; gradient comes from avatar_url</span>
+<span class="tok-f">&lt;Avatar.Stack</span> max=<span class="tok-n">3</span><span class="tok-f">&gt;</span>
+  {assignees.<span class="tok-n">map</span>(a =&gt; <span class="tok-f">&lt;Avatar</span> name={<span class="tok-n">a</span>} <span class="tok-f">/&gt;</span>)}
+<span class="tok-f">&lt;/Avatar.Stack&gt;</span></div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="props">
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">name</td><td class="mono muted">string</td><td class="mono muted">— (required)</td><td>Full name; initials derived for the fallback</td></tr>
+                <tr><td class="mono">src</td><td class="mono muted">string?</td><td class="mono muted">—</td><td>avatar_url; gradient fallback while loading or missing</td></tr>
+                <tr><td class="mono">size</td><td class="mono muted">'sm'|'md'|'lg'</td><td class="mono muted">'md'</td><td>20 / 24 / 32px</td></tr>
+                <tr><td class="mono">alt</td><td class="mono muted">string?</td><td class="mono muted">name</td><td>Accessible label</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="card">
+        <div class="v-ds-docs-title">Card</div>
+        <div class="v-ds-docs-sub">Surface containers with three interaction flavors. Paste <span class="mono">hoverable</span> or <span class="mono">clickable</span> to signal interactivity.</div>
+        <div class="tabs v-ds-docs-tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="props">Props</button>
+        </div>
+        <div class="v-ds-tabpane active" data-tabpane="preview">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Preview</span><span class="panel-sub">hover the second card</span></div>
+            <div class="panel-body" style="display:flex;gap:16px;flex-wrap:wrap">
+              <div class="card card-pad" style="width:280px">
+                <div style="font-size:13px;font-weight:600;letter-spacing:-.01em">Website Redesign</div>
+                <div class="hint" style="margin-top:4px">Marketing site, docs, and app shell. 412 tasks across 3 projects.</div>
+                <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+                  <span class="badge badge-info">active</span>
+                  <span class="badge badge-neutral"><span class="mono">prj_42</span></span>
+                </div>
+              </div>
+              <div class="card card-pad hoverable" style="width:280px">
+                <div style="font-size:13px;font-weight:600;letter-spacing:-.01em">Mobile App</div>
+                <div class="hint" style="margin-top:4px">iOS + Android parity work. 2,103 tasks, 18 open blockers.</div>
+                <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+                  <span class="badge badge-warning">on_hold</span>
+                  <span class="badge badge-neutral"><span class="mono">prj_17</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="code">
+          <div class="code-block">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>card.tsx</div>
+            <div class="code-body"><span class="tok-f">&lt;Card</span> hoverable padding<span class="tok-f">&gt;</span>
+  <span class="tok-f">&lt;Card.Title&gt;</span>Mobile App<span class="tok-f">&lt;/Card.Title&gt;</span>
+  <span class="tok-f">&lt;Card.Body&gt;</span>
+    iOS + Android parity work. 2,103 tasks, 18 blockers.
+  <span class="tok-f">&lt;/Card.Body&gt;</span>
+<span class="tok-f">&lt;/Card&gt;</span>
+
+<span class="tok-c">// navigable surface → clickable + data-nav handled by Prism router</span>
+<span class="tok-f">&lt;Card</span> clickable<span class="tok-f">&gt;</span>…<span class="tok-f">&lt;/Card&gt;</span></div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="props">
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">padding</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Applies the 16px card-pad inset</td></tr>
+                <tr><td class="mono">hoverable</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Shadow lift + border emphasis on hover</td></tr>
+                <tr><td class="mono">clickable</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Cursor + translate + accent border; pair with onClick</td></tr>
+                <tr><td class="mono">as</td><td class="mono muted">'div'|'a'|'article'</td><td class="mono muted">'div'</td><td>Semantic element</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="input">
+        <div class="v-ds-docs-title">Input</div>
+        <div class="v-ds-docs-sub">Text fields with label, hint, and error slots. Focus ring is a 3px accent halo — never a border-only outline.</div>
+        <div class="tabs v-ds-docs-tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="props">Props</button>
+        </div>
+        <div class="v-ds-tabpane active" data-tabpane="preview">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Preview</span><span class="panel-sub">label · hint · error · disabled · textarea</span></div>
+            <div class="panel-body">
+              <div class="v-ds-form-grid">
+                <div class="field">
+                  <label class="field-label" for="v-ds-in-1">Issue title</label>
+                  <input class="input" id="v-ds-in-1" placeholder="e.g. Fix navigation overflow on mobile">
+                </div>
+                <div class="field">
+                  <label class="field-label" for="v-ds-in-2">Slug <span class="muted">(optional)</span></label>
+                  <input class="input" id="v-ds-in-2" value="website-redesign" placeholder="kebab-case">
+                  <div class="field-hint">Used in URLs: <span class="mono">/projects/website-redesign</span></div>
+                </div>
+                <div class="field">
+                  <label class="field-label" for="v-ds-in-3">Email</label>
+                  <input class="input error" id="v-ds-in-3" value="aiko@helix.dev">
+                  <div class="field-error">A user with this email already exists.</div>
+                </div>
+                <div class="field">
+                  <label class="field-label" for="v-ds-in-4">Read-only</label>
+                  <input class="input" id="v-ds-in-4" value="theo@helix.dev" disabled>
+                  <div class="field-hint">Managed by SSO — contact an admin to change it.</div>
+                </div>
+                <div class="field" style="grid-column:1/-1">
+                  <label class="field-label" for="v-ds-in-5">Description</label>
+                  <textarea class="input" id="v-ds-in-5" rows="3" placeholder="What needs to change and why?"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="code">
+          <div class="code-block">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>input.tsx</div>
+            <div class="code-body"><span class="tok-f">&lt;Field</span> label=<span class="tok-s">"Email"</span> error={errors.<span class="tok-n">email</span>}<span class="tok-f">&gt;</span>
+  <span class="tok-f">&lt;Input</span>
+    type=<span class="tok-s">"email"</span>
+    value={form.<span class="tok-n">email</span>}
+    onChange={handleChange}
+    placeholder=<span class="tok-s">"name@helix.dev"</span>
+    invalid={!!errors.<span class="tok-n">email</span>}
+  <span class="tok-f">/&gt;</span>
+<span class="tok-f">&lt;/Field&gt;</span></div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="props">
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">label</td><td class="mono muted">string?</td><td class="mono muted">—</td><td>Field label; omit for bare input</td></tr>
+                <tr><td class="mono">hint</td><td class="mono muted">string?</td><td class="mono muted">—</td><td>Helper text under the field</td></tr>
+                <tr><td class="mono">error</td><td class="mono muted">string?</td><td class="mono muted">—</td><td>Sets invalid state and renders the error line</td></tr>
+                <tr><td class="mono">disabled</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Read-only, dimmed</td></tr>
+                <tr><td class="mono">type</td><td class="mono muted">InputType</td><td class="mono muted">'text'</td><td>Passed to the native input</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="select">
+        <div class="v-ds-docs-title">Select</div>
+        <div class="v-ds-docs-sub">Native select with a drawn chevron — no custom dropdown machinery, full keyboard and screen-reader support for free.</div>
+        <div class="tabs v-ds-docs-tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="props">Props</button>
+        </div>
+        <div class="v-ds-tabpane active" data-tabpane="preview">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Preview</span><span class="panel-sub">real data from the shared model</span></div>
+            <div class="panel-body">
+              <div class="v-ds-form-grid">
+                <div class="field">
+                  <label class="field-label" for="v-ds-sel-1">Project</label>
+                  <select class="select" id="v-ds-sel-1">
+                    <option>All projects</option>
+                    <option>Website Redesign</option>
+                    <option>Mobile App</option>
+                    <option>Data Platform</option>
+                    <option>Onboarding</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="field-label" for="v-ds-sel-2">Assignee</label>
+                  <select class="select" id="v-ds-sel-2">
+                    <option>Unassigned</option>
+                    <option>Aiko Tanaka</option>
+                    <option>Marcus Webb</option>
+                    <option>Priya Nair</option>
+                    <option selected>Theo Meyer</option>
+                  </select>
+                  <div class="field-hint">Sourced from <span class="mono">users</span> (1,284 rows)</div>
+                </div>
+                <div class="field">
+                  <label class="field-label" for="v-ds-sel-3">Status</label>
+                  <select class="select" id="v-ds-sel-3" disabled>
+                    <option>backlog</option>
+                  </select>
+                  <div class="field-hint">Disabled — board is archived</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="code">
+          <div class="code-block">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>select.tsx</div>
+            <div class="code-body"><span class="tok-f">&lt;Select</span>
+  label=<span class="tok-s">"Assignee"</span>
+  value={filters.<span class="tok-n">assignee_id</span>}
+  onChange={setFilters}
+<span class="tok-f">&gt;</span>
+  <span class="tok-f">&lt;option</span> value=<span class="tok-s">""</span><span class="tok-f">&gt;</span>Unassigned<span class="tok-f">&lt;/option&gt;</span>
+  {users.<span class="tok-n">map</span>(u =&gt; (
+    <span class="tok-f">&lt;option</span> key={<span class="tok-n">u</span>.<span class="tok-n">id</span>} value={<span class="tok-n">u</span>.<span class="tok-n">id</span>}<span class="tok-f">&gt;</span>{<span class="tok-n">u</span>.<span class="tok-n">name</span>}<span class="tok-f">&lt;/option&gt;</span>
+  ))}
+<span class="tok-f">&lt;/Select&gt;</span></div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="props">
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">label</td><td class="mono muted">string?</td><td class="mono muted">—</td><td>Visible label above the control</td></tr>
+                <tr><td class="mono">options</td><td class="mono muted">SelectOption[]</td><td class="mono muted">—</td><td>{ value, label, disabled? } — or pass children</td></tr>
+                <tr><td class="mono">placeholder</td><td class="mono muted">string?</td><td class="mono muted">—</td><td>Rendered as a disabled empty option</td></tr>
+                <tr><td class="mono">disabled</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Blocks interaction</td></tr>
+                <tr><td class="mono">onChange</td><td class="mono muted">(value) =&gt; void</td><td class="mono muted">—</td><td>Called with the selected value</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="tabs">
+        <div class="v-ds-docs-title">Tabs</div>
+        <div class="v-ds-docs-sub">Underlined segment switcher. Two-line content swap, live below — try the counts.</div>
+        <div class="tabs v-ds-docs-tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="props">Props</button>
+        </div>
+        <div class="v-ds-tabpane active" data-tabpane="preview">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Preview</span><span class="panel-sub">interactive</span></div>
+            <div class="panel-body">
+              <div class="tabs" id="v-ds-tabs-demo">
+                <button class="tab active" data-tab="all">All<span class="badge badge-neutral" style="margin-left:4px">12</span></button>
+                <button class="tab" data-tab="active">In progress<span class="badge badge-accent" style="margin-left:4px">3</span></button>
+                <button class="tab" data-tab="done">Done<span class="badge badge-success" style="margin-left:4px">41</span></button>
+              </div>
+              <div id="v-ds-demo-panes" style="padding-top:12px">
+                <div class="v-ds-demo-tabpane active" data-demo="all">
+                  <div class="v-ds-issue-row"><span class="mono muted" style="font-size:11px">iss_9f2c1a</span><span style="flex:1">Redesign empty state for issue list</span><span class="badge badge-accent">in_progress</span></div>
+                  <div class="v-ds-issue-row"><span class="mono muted" style="font-size:11px">iss_9f7712</span><span style="flex:1">Fix flaky e2e for billing flows</span><span class="badge badge-info">todo</span></div>
+                  <div class="v-ds-issue-row"><span class="mono muted" style="font-size:11px">iss_9d2e01</span><span style="flex:1">Add keyboard nav to command palette</span><span class="badge badge-warning">in_review</span></div>
+                  <div class="hint" style="margin-top:10px">12 issues match · showing 3</div>
+                </div>
+                <div class="v-ds-demo-tabpane" data-demo="active">
+                  <div class="v-ds-issue-row"><span class="mono muted" style="font-size:11px">iss_9f2c1a</span><span style="flex:1">Redesign empty state for issue list</span><span class="badge badge-accent">in_progress</span></div>
+                  <div class="v-ds-issue-row"><span class="mono muted" style="font-size:11px">iss_9f12b8</span><span style="flex:1">Migrate API client to v3</span><span class="badge badge-accent">in_progress</span></div>
+                  <div class="v-ds-issue-row"><span class="mono muted" style="font-size:11px">iss_9e044d</span><span style="flex:1">Compression policy for comments</span><span class="badge badge-accent">in_progress</span></div>
+                </div>
+                <div class="v-ds-demo-tabpane" data-demo="done">
+                  <div class="v-ds-issue-row"><span class="mono muted" style="font-size:11px">iss_9af120</span><span style="flex:1">Schema map hover highlighting</span><span class="badge badge-success">done</span></div>
+                  <div class="v-ds-issue-row"><span class="mono muted" style="font-size:11px">iss_99e827</span><span style="flex:1">Publish @helix/ui v2.4.0</span><span class="badge badge-success">done</span></div>
+                  <div class="hint" style="margin-top:10px">41 issues · closed in the last 30 days</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="code">
+          <div class="code-block">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>tabs.tsx</div>
+            <div class="code-body"><span class="tok-k">const</span> TABS = [
+  { <span class="tok-n">id</span>: <span class="tok-s">'all'</span>, <span class="tok-n">label</span>: <span class="tok-s">'All'</span>, <span class="tok-n">count</span>: <span class="tok-n">12</span> },
+  { <span class="tok-n">id</span>: <span class="tok-s">'active'</span>, <span class="tok-n">label</span>: <span class="tok-s">'In progress'</span>, <span class="tok-n">count</span>: <span class="tok-n">3</span> },
+];
+
+<span class="tok-f">&lt;Tabs</span> items={<span class="tok-n">TABS</span>} value={tab} onChange={setTab} <span class="tok-f">/&gt;</span></div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="props">
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">items</td><td class="mono muted">TabItem[]</td><td class="mono muted">— (required)</td><td>{ id, label, count?, icon?, disabled? }</td></tr>
+                <tr><td class="mono">value</td><td class="mono muted">string</td><td class="mono muted">—</td><td>Controlled active tab id</td></tr>
+                <tr><td class="mono">onChange</td><td class="mono muted">(id) =&gt; void</td><td class="mono muted">—</td><td>Fired on tab select</td></tr>
+                <tr><td class="mono">count</td><td class="mono muted">boolean</td><td class="mono muted">true</td><td>Renders item counts as neutral badges</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="switch">
+        <div class="v-ds-docs-title">Switch</div>
+        <div class="v-ds-docs-sub">Binary toggle with a 14px thumb travel. Always pair with a label — the switch itself never carries meaning alone.</div>
+        <div class="tabs v-ds-docs-tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="props">Props</button>
+        </div>
+        <div class="v-ds-tabpane active" data-tabpane="preview">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Preview</span><span class="panel-sub">interactive — click to toggle</span></div>
+            <div class="panel-body v-ds-preview">
+              <div class="v-ds-switch-row">
+                <button class="switch" id="v-ds-switch-demo" role="switch" aria-checked="false" title="Toggle email digests"></button>
+                <span style="font-size:12.5px">Email digests</span>
+                <span class="badge badge-neutral" id="v-ds-switch-label">Disabled</span>
+              </div>
+              <div class="v-ds-switch-row">
+                <button class="switch on" role="switch" aria-checked="true" aria-disabled="true" disabled title="Always on — mention pings are not configurable"></button>
+                <span style="font-size:12.5px">Mention notifications</span>
+                <span class="badge badge-outline">always on</span>
+              </div>
+              <div class="v-ds-switch-row">
+                <button class="switch" role="switch" aria-checked="false" disabled title="Locked"></button>
+                <span style="font-size:12.5px">Public API access</span>
+                <span class="badge badge-outline">requires admin</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="code">
+          <div class="code-block">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>switch.tsx</div>
+            <div class="code-body"><span class="tok-f">&lt;Switch</span>
+  checked={prefs.<span class="tok-n">email_digests</span>}
+  onChange={setPrefs}
+  label=<span class="tok-s">"Email digests"</span>
+  ariaLabel=<span class="tok-s">"Toggle email digests"</span>
+<span class="tok-f">/&gt;</span></div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="props">
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">checked</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Controlled on/off state</td></tr>
+                <tr><td class="mono">onChange</td><td class="mono muted">(checked) =&gt; void</td><td class="mono muted">—</td><td>Called with the next state</td></tr>
+                <tr><td class="mono">disabled</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Blocks toggling</td></tr>
+                <tr><td class="mono">label / ariaLabel</td><td class="mono muted">string</td><td class="mono muted">—</td><td>Visible or accessible label</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="dialog">
+        <div class="v-ds-docs-title">Dialog</div>
+        <div class="v-ds-docs-sub">Modal for decisions that deserve a pause. Backdrop blurs, dialog casts shadow-3, and the focus is trapped while open.</div>
+        <div class="tabs v-ds-docs-tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="props">Props</button>
+        </div>
+        <div class="v-ds-tabpane active" data-tabpane="preview">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Preview</span><span class="panel-sub">interactive — opens a real modal</span></div>
+            <div class="panel-body v-ds-preview">
+              <div class="v-ds-preview-row">
+                <button class="btn btn-primary" id="v-ds-dialog-open"><svg class="icon"><use href="#i-external"/></svg>Open dialog</button>
+                <button class="btn btn-outline" id="v-ds-dialog-open-danger"><svg class="icon"><use href="#i-trash"/></svg>Open destructive</button>
+              </div>
+              <span class="hint">Closes via the ×, Cancel, backdrop click, or Escape. The demo reuses the shell’s own <span class="mono">.dialog-backdrop</span> classes.</span>
+            </div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="code">
+          <div class="code-block">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>dialog.tsx</div>
+            <div class="code-body"><span class="tok-k">const</span> [open, setOpen] = useState(<span class="tok-n">false</span>);
+
+<span class="tok-f">&lt;Dialog</span> open={open} onClose={() =&gt; setOpen(<span class="tok-n">false</span>)}
+  title=<span class="tok-s">"Archive project"</span> sub={<span class="tok-s">"prj_42 · Website Redesign"</span>}<span class="tok-f">&gt;</span>
+  &lt;p&gt;Archiving hides the project from active boards.&lt;/p&gt;
+  <span class="tok-f">&lt;Button</span> variant=<span class="tok-s">"danger"</span> <span class="tok-f">&gt;</span>Archive<span class="tok-f">&lt;/Button&gt;</span>
+<span class="tok-f">&lt;/Dialog&gt;</span></div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="props">
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">open</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Mounts the backdrop + dialog</td></tr>
+                <tr><td class="mono">onClose</td><td class="mono muted">() =&gt; void</td><td class="mono muted">— (required)</td><td>Called on backdrop, ×, or Escape</td></tr>
+                <tr><td class="mono">title / sub</td><td class="mono muted">string?</td><td class="mono muted">—</td><td>Header block; sub supports mono IDs</td></tr>
+                <tr><td class="mono">size</td><td class="mono muted">'sm'|'md'|'lg'</td><td class="mono muted">'md'</td><td>Dialog width (360 / 440 / 560px)</td></tr>
+                <tr><td class="mono">footer</td><td class="mono muted">ReactNode</td><td class="mono muted">—</td><td>Action row; cancels left, confirms right</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="toast">
+        <div class="v-ds-docs-title">Toast</div>
+        <div class="v-ds-docs-sub">Transient confirmation, surfaced low-left in the content stage. Auto-dismisses after 2.6s in this demo; the real default is 4s.</div>
+        <div class="tabs v-ds-docs-tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="props">Props</button>
+        </div>
+        <div class="v-ds-tabpane active" data-tabpane="preview">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Preview</span><span class="panel-sub">interactive</span></div>
+            <div class="panel-body">
+              <div class="v-ds-stage">
+                <button class="btn btn-primary" id="v-ds-toast-btn" style="align-self:flex-start"><svg class="icon"><use href="#i-send"/></svg>Trigger toast</button>
+                <div class="v-ds-toast" id="v-ds-toast-demo" role="status"><svg class="icon"><use href="#i-check"/></svg><span><strong>Issue created</strong> · <span class="mono">iss_9f2c1a</span></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="code">
+          <div class="code-block">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>toast.tsx</div>
+            <div class="code-body"><span class="tok-k">import</span> { toast } <span class="tok-k">from</span> <span class="tok-s">'@helix/ui'</span>;
+
+<span class="tok-k">const</span> res = <span class="tok-k">await</span> api.<span class="tok-n">createIssue</span>(payload);
+toast.<span class="tok-n">success</span>({
+  title: <span class="tok-s">'Issue created'</span>,
+  description: res.<span class="tok-n">id</span>,
+  action: { <span class="tok-n">label</span>: <span class="tok-s">'View'</span>, onClick: openIssue },
+});</div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="props">
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">title</td><td class="mono muted">string</td><td class="mono muted">— (required)</td><td>Bold first line</td></tr>
+                <tr><td class="mono">description</td><td class="mono muted">string?</td><td class="mono muted">—</td><td>Secondary line; mono-wrapped ids render as-is</td></tr>
+                <tr><td class="mono">variant</td><td class="mono muted">'success'|'info'|'danger'</td><td class="mono muted">'info'</td><td>Leading icon color</td></tr>
+                <tr><td class="mono">duration</td><td class="mono muted">number</td><td class="mono muted">4000</td><td>ms before auto-dismiss</td></tr>
+                <tr><td class="mono">action</td><td class="mono muted">{ label, onClick }</td><td class="mono muted">—</td><td>Optional inline action link</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="tooltip">
+        <div class="v-ds-docs-title">Tooltip</div>
+        <div class="v-ds-docs-sub">Hover-only annotation, 8px above the target with a caret. Available for icon buttons, avatars, and truncated mono text.</div>
+        <div class="tabs v-ds-docs-tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="props">Props</button>
+        </div>
+        <div class="v-ds-tabpane active" data-tabpane="preview">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Preview</span><span class="panel-sub">hover the targets</span></div>
+            <div class="panel-body v-ds-preview">
+              <div class="v-ds-preview-row">
+                <span class="v-ds-preview-label">Hover targets</span>
+                <span class="tooltip-demo"><button class="btn btn-outline btn-sm" data-copy="self" data-copy-text="iss_9f2c1a">Copy issue ID</button><span class="tip">Copies iss_9f2c1a to clipboard</span></span>
+                <span class="tooltip-demo"><span class="avatar" style="background:linear-gradient(135deg,#10b981,#06b6d4)">PN</span><span class="tip">Priya Nair · editor</span></span>
+                <span class="tooltip-demo"><button class="btn btn-ghost btn-icon"><svg class="icon"><use href="#i-info"/></svg></button><span class="tip">Shows helper text on hover</span></span>
+              </div>
+              <span class="hint">Tooltips are non-interactive: they never contain buttons, links, or focusable content.</span>
+            </div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="code">
+          <div class="code-block">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>tooltip.tsx</div>
+            <div class="code-body"><span class="tok-f">&lt;Tooltip</span> content=<span class="tok-s">"Copies iss_9f2c1a to clipboard"</span><span class="tok-f">&gt;</span>
+  <span class="tok-f">&lt;Button</span> variant=<span class="tok-s">"outline"</span> size=<span class="tok-s">"sm"</span><span class="tok-f">&gt;</span>Copy ID<span class="tok-f">&lt;/Button&gt;</span>
+<span class="tok-f">&lt;/Tooltip&gt;</span></div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="props">
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">content</td><td class="mono muted">string</td><td class="mono muted">— (required)</td><td>Tip text; keep under 60 chars</td></tr>
+                <tr><td class="mono">side</td><td class="mono muted">'top'|'bottom'|'left'|'right'</td><td class="mono muted">'top'</td><td>Placement with automatic flip</td></tr>
+                <tr><td class="mono">delay</td><td class="mono muted">number</td><td class="mono muted">0</td><td>ms before the tip appears</td></tr>
+                <tr><td class="mono">disabled</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Suppresses the tip</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="table">
+        <div class="v-ds-docs-title">Table</div>
+        <div class="v-ds-docs-sub">Dense data grid with sticky header, row hover, and tabular numbers. Feeds the Database view’s column browser.</div>
+        <div class="tabs v-ds-docs-tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="props">Props</button>
+        </div>
+        <div class="v-ds-tabpane active" data-tabpane="preview">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Preview</span><span class="panel-sub">seed rows from users (1,284)</span></div>
+            <div class="panel-body" style="padding:12px">
+              <div class="table-wrap">
+                <table class="tbl">
+                  <thead><tr><th>Member</th><th>Role</th><th>Last active</th><th>Open issues</th></tr></thead>
+                  <tbody>
+                    <tr><td><span style="display:inline-flex;align-items:center;gap:8px"><span class="avatar avatar-sm" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">AT</span><span class="strong">Aiko Tanaka</span></span></td><td><span class="badge badge-accent">admin</span></td><td><span class="mono muted">2m ago</span></td><td class="num">41</td></tr>
+                    <tr><td><span style="display:inline-flex;align-items:center;gap:8px"><span class="avatar avatar-sm" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">MW</span><span class="strong">Marcus Webb</span></span></td><td><span class="badge badge-info">editor</span></td><td><span class="mono muted">1h ago</span></td><td class="num">12</td></tr>
+                    <tr><td><span style="display:inline-flex;align-items:center;gap:8px"><span class="avatar avatar-sm" style="background:linear-gradient(135deg,#10b981,#06b6d4)">PN</span><span class="strong">Priya Nair</span></span></td><td><span class="badge badge-info">editor</span></td><td><span class="mono muted">3h ago</span></td><td class="num">87</td></tr>
+                    <tr><td><span style="display:inline-flex;align-items:center;gap:8px"><span class="avatar avatar-sm" style="background:linear-gradient(135deg,#8a5cf6,#d946ef)">TM</span><span class="strong">Theo Meyer</span></span></td><td><span class="badge badge-accent">admin</span></td><td><span class="mono muted">5m ago</span></td><td class="num">23</td></tr>
+                    <tr><td><span style="display:inline-flex;align-items:center;gap:8px"><span class="avatar avatar-sm" style="background:linear-gradient(135deg,#14b8a6,#84cc16)">SR</span><span class="strong">Sofia Reyes</span></span></td><td><span class="badge badge-neutral">viewer</span></td><td><span class="mono muted">1d ago</span></td><td class="num">0</td></tr>
+                    <tr><td><span style="display:inline-flex;align-items:center;gap:8px"><span class="avatar avatar-sm" style="background:linear-gradient(135deg,#ec4899,#f97316)">DO</span><span class="strong">Daniel Okafor</span></span></td><td><span class="badge badge-neutral">viewer</span></td><td><span class="mono muted">2d ago</span></td><td class="num">5</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:12px">
+                <span class="hint">Role enum: admin · editor · viewer — backed by the <span class="mono">users.role</span> column.</span>
+                <button class="btn btn-ghost btn-sm" data-nav="db" style="margin-left:auto"><svg class="icon"><use href="#i-db"/></svg>Inspect users schema</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="code">
+          <div class="code-block">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>table.tsx</div>
+            <div class="code-body"><span class="tok-f">&lt;Table</span>
+  columns={[
+    { <span class="tok-n">key</span>: <span class="tok-s">'name'</span>, <span class="tok-n">label</span>: <span class="tok-s">'Member'</span>, <span class="tok-n">render</span>: MemberCell },
+    { <span class="tok-n">key</span>: <span class="tok-s">'role'</span>, <span class="tok-n">label</span>: <span class="tok-s">'Role'</span>, <span class="tok-n">render</span>: RoleBadge },
+  ]}
+  rows={users}
+  dense
+  sortable
+<span class="tok-f">/&gt;</span></div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="props">
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">columns</td><td class="mono muted">Column[]</td><td class="mono muted">— (required)</td><td>{ key, label, render?, align? }</td></tr>
+                <tr><td class="mono">rows</td><td class="mono muted">T[]</td><td class="mono muted">— (required)</td><td>Row data; keys must be unique</td></tr>
+                <tr><td class="mono">dense</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>8px cell padding</td></tr>
+                <tr><td class="mono">sortable</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Clickable headers with direction</td></tr>
+                <tr><td class="mono">emptyMessage</td><td class="mono muted">string</td><td class="mono muted">'No rows'</td><td>Shown when rows is empty</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="skeleton">
+        <div class="v-ds-docs-title">Skeleton</div>
+        <div class="v-ds-docs-sub">Shimmer placeholder while data streams in. Mirrors the target shape — never a generic gray box.</div>
+        <div class="tabs v-ds-docs-tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="props">Props</button>
+        </div>
+        <div class="v-ds-tabpane active" data-tabpane="preview">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Preview</span><span class="panel-sub">issue card while loading</span></div>
+            <div class="panel-body">
+              <div class="card card-pad" style="width:320px;max-width:100%">
+                <div style="display:flex;gap:10px;align-items:center">
+                  <div class="skeleton" style="width:32px;height:32px;border-radius:50%"></div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+                    <div class="v-ds-skel" style="width:70%"></div>
+                    <div class="v-ds-skel" style="width:40%"></div>
+                  </div>
+                </div>
+                <div style="margin-top:14px;display:flex;flex-direction:column;gap:7px">
+                  <div class="v-ds-skel" style="width:100%"></div>
+                  <div class="v-ds-skel" style="width:92%"></div>
+                  <div class="v-ds-skel" style="width:58%"></div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:14px">
+                  <span class="skeleton" style="width:56px;height:20px;border-radius:999px"></span>
+                  <span class="skeleton" style="width:72px;height:20px;border-radius:999px"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="code">
+          <div class="code-block">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>skeleton.tsx</div>
+            <div class="code-body"><span class="tok-f">&lt;Skeleton</span> variant=<span class="tok-s">"card"</span> lines={<span class="tok-n">3</span>} avatar<span class="tok-f">&gt;</span>
+  <span class="tok-c">// replaces <IssueCard /> until issues resolve</span>
+<span class="tok-f">&lt;/Skeleton&gt;</span></div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="props">
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">variant</td><td class="mono muted">'card'|'list'|'table'</td><td class="mono muted">'card'</td><td>Shape the skeleton mirrors</td></tr>
+                <tr><td class="mono">lines</td><td class="mono muted">number</td><td class="mono muted">3</td><td>Text line count</td></tr>
+                <tr><td class="mono">avatar</td><td class="mono muted">boolean</td><td class="mono muted">false</td><td>Leading circular placeholder</td></tr>
+                <tr><td class="mono">animate</td><td class="mono muted">boolean</td><td class="mono muted">true</td><td>Shimmer loop; disable for reduced motion</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="v-ds-pane" data-ds-pane="emptystate">
+        <div class="v-ds-docs-title">EmptyState</div>
+        <div class="v-ds-docs-sub">The “nothing here yet” moment — always paired with a next action. Copy should tell the user why the list is empty.</div>
+        <div class="tabs v-ds-docs-tabs">
+          <button class="tab active" data-tab="preview">Preview</button>
+          <button class="tab" data-tab="code">Code</button>
+          <button class="tab" data-tab="props">Props</button>
+        </div>
+        <div class="v-ds-tabpane active" data-tabpane="preview">
+          <div class="panel">
+            <div class="panel-head"><span class="panel-title">Preview</span><span class="panel-sub">filtered-empty + first-run variants</span></div>
+            <div class="panel-body" style="display:flex;gap:16px;flex-wrap:wrap;align-items:stretch">
+              <div class="card" style="flex:1;min-width:280px">
+                <div class="empty">
+                  <svg class="icon"><use href="#i-search"/></svg>
+                  <div class="strong" style="font-size:13px">No issues match “label:urgent”</div>
+                  <div class="hint">Try removing filters or broadening the query. 2,417 open issues match no filter.</div>
+                  <div style="display:flex;gap:8px;margin-top:12px">
+                    <button class="btn btn-soft btn-sm">Clear filters</button>
+                    <button class="btn btn-ghost btn-sm">New issue</button>
+                  </div>
+                </div>
+              </div>
+              <div class="card" style="flex:1;min-width:280px">
+                <div class="empty">
+                  <svg class="icon"><use href="#i-comment"/></svg>
+                  <div class="strong" style="font-size:13px">No comments yet</div>
+                  <div class="hint">Start the discussion — threads surface decisions for the whole team.</div>
+                  <button class="btn btn-soft btn-sm" style="margin-top:12px"><svg class="icon"><use href="#i-plus"/></svg>Add comment</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="code">
+          <div class="code-block">
+            <div class="code-head"><span class="dots"><i></i><i></i><i></i></span>empty-state.tsx</div>
+            <div class="code-body"><span class="tok-f">&lt;EmptyState</span>
+  icon=<span class="tok-s">"search"</span>
+  title=<span class="tok-s">"No issues match this filter"</span>
+  description=<span class="tok-s">"2,417 open issues match no filter."</span>
+<span class="tok-f">&gt;</span>
+  <span class="tok-f">&lt;Button</span> variant=<span class="tok-s">"soft"</span> onClick={clearFilters}<span class="tok-f">&gt;</span>Clear filters<span class="tok-f">&lt;/Button&gt;</span>
+<span class="tok-f">&lt;/EmptyState&gt;</span></div>
+          </div>
+        </div>
+        <div class="v-ds-tabpane" data-tabpane="props">
+          <div class="table-wrap">
+            <table class="tbl">
+              <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">icon</td><td class="mono muted">IconName</td><td class="mono muted">'search'</td><td>28×28 glyph centered above</td></tr>
+                <tr><td class="mono">title</td><td class="mono muted">string</td><td class="mono muted">— (required)</td><td>States what is missing</td></tr>
+                <tr><td class="mono">description</td><td class="mono muted">string?</td><td class="mono muted">—</td><td>Explains why, in one sentence</td></tr>
+                <tr><td class="mono">action</td><td class="mono muted">ReactNode</td><td class="mono muted">—</td><td>Primary recovery action</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= CROSS-VIEW REFERENCES ================= -->
+      <div class="v-ds-xref">
+        <div class="v-ds-xref-card panel">
+          <div class="v-ds-xref-title"><svg class="icon"><use href="#i-plug"/></svg>API Explorer</div>
+          <div class="hint">Response badges, priority chips, and status pills in the console are rendered from these very tokens.</div>
+          <div style="margin-top:auto;padding-top:10px"><button class="btn btn-ghost btn-sm" data-nav="api"><svg class="icon"><use href="#i-arrow-right"/></svg>Open API view</button></div>
+        </div>
+        <div class="v-ds-xref-card panel">
+          <div class="v-ds-xref-title"><svg class="icon"><use href="#i-db"/></svg>Database</div>
+          <div class="hint"><span class="mono">IssueCard</span> columns map 1:1 to the <span class="mono">issues</span> schema — status enums included.</div>
+          <div style="margin-top:auto;padding-top:10px"><button class="btn btn-ghost btn-sm" data-nav="db"><svg class="icon"><use href="#i-arrow-right"/></svg>Inspect issues schema</button></div>
+        </div>
+        <div class="v-ds-xref-card panel">
+          <div class="v-ds-xref-title"><svg class="icon"><use href="#i-home"/></svg>Overview</div>
+          <div class="hint">Source health, changelog, and sync status for @helix/ui v2.4.0.</div>
+          <div style="margin-top:auto;padding-top:10px"><button class="btn btn-ghost btn-sm" data-nav="overview"><svg class="icon"><use href="#i-arrow-right"/></svg>Back to overview</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog demo lives outside the pane so display:none never hides it -->
+  <div class="dialog-backdrop" id="v-ds-dialog-demo" style="display:none" role="dialog" aria-modal="true" aria-labelledby="v-ds-dialog-title">
+    <div class="dialog">
+      <div class="dialog-head">
+        <div>
+          <div class="dialog-title" id="v-ds-dialog-title">Archive project</div>
+          <div class="dialog-sub"><span class="mono">prj_42</span> · Website Redesign</div>
+        </div>
+        <button class="btn btn-ghost btn-icon" style="margin-left:auto" data-ds-dialog-close aria-label="Close"><svg class="icon"><use href="#i-x"/></svg></button>
+      </div>
+      <div class="dialog-body">
+        <p style="font-size:12.5px;color:var(--text-2)">Archiving hides this project from active boards. Issues keep their <span class="mono">project_id</span> and stay queryable via the API — this is reversible.</p>
+        <div class="field">
+          <label class="field-label" for="v-ds-dialog-confirm">Confirmation <span class="muted">— required</span></label>
+          <input class="input" id="v-ds-dialog-confirm" placeholder="Type “archive” to continue">
+        </div>
+      </div>
+      <div class="dialog-foot">
+        <button class="btn btn-ghost" data-ds-dialog-close>Cancel</button>
+        <button class="btn btn-danger" data-ds-dialog-close disabled><svg class="icon"><use href="#i-trash"/></svg>Archive project</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+if (document.getElementById('view-design')) {
+  (function () {
+    'use strict';
+    var DS = ['colors', 'typography', 'spacing', 'radii', 'elevation', 'icons',
+      'button', 'badge', 'avatar', 'card', 'input', 'select', 'tabs', 'switch',
+      'dialog', 'toast', 'tooltip', 'table', 'skeleton', 'emptystate'];
+
+    function dsFromHash() {
+      var h = location.hash, i = h.indexOf('?');
+      if (i < 0) return null;
+      try { return new URLSearchParams(h.slice(i + 1)).get('comp'); } catch (e) { return null; }
+    }
+    function dsSelect(name) {
+      if (DS.indexOf(name) < 0) name = 'button';
+      document.querySelectorAll('#view-design .rail-item[data-ds]').forEach(function (b) {
+        b.classList.toggle('active', b.getAttribute('data-ds') === name);
+      });
+      document.querySelectorAll('#view-design .v-ds-pane').forEach(function (p) {
+        p.classList.toggle('active', p.getAttribute('data-ds-pane') === name);
+      });
+      var content = document.querySelector('.content');
+      if (content) content.scrollTop = 0;
+    }
+    dsSelect(dsFromHash() || 'button');
+    window.addEventListener('hashchange', function () {
+      var c = dsFromHash();
+      if (c) dsSelect(c);
+    });
+    document.addEventListener('click', function (e) {
+      var it = e.target.closest('#view-design .rail-item[data-ds]');
+      if (!it) return;
+      var name = it.getAttribute('data-ds');
+      dsSelect(name);
+      var want = 'design?comp=' + name;
+      if (location.hash.replace(/^#\/?/, '') !== want) location.hash = want;
+    });
+
+    /* rail filter */
+    var filter = document.getElementById('v-ds-rail-filter');
+    var filterEmpty = document.getElementById('v-ds-filter-empty');
+    if (filter) {
+      filter.addEventListener('input', function () {
+        var q = filter.value.trim().toLowerCase();
+        var groups = document.querySelectorAll('#view-design .rail-group');
+        var anyVisible = false;
+        groups.forEach(function (g) {
+          var any = false, n = g.nextElementSibling;
+          while (n && !n.classList.contains('rail-group')) {
+            if (n.classList.contains('rail-item')) {
+              var hit = !q || n.getAttribute('data-ds').indexOf(q) >= 0 || n.textContent.toLowerCase().indexOf(q) >= 0;
+              n.style.display = hit ? '' : 'none';
+              if (hit) any = true;
+            }
+            n = n.nextElementSibling;
+          }
+          g.style.display = any ? '' : 'none';
+          if (any) anyVisible = true;
+        });
+        if (filterEmpty) filterEmpty.classList.toggle('on', !anyVisible);
+      });
+    }
+
+    /* component docs tabs (Preview / Code / Props) */
+    document.querySelectorAll('#view-design .v-ds-docs-tabs').forEach(function (tabs) {
+      tabs.addEventListener('click', function (e) {
+        var b = e.target.closest('.tab');
+        if (!b) return;
+        var name = b.getAttribute('data-tab');
+        if (!name) return;
+        tabs.querySelectorAll('.tab').forEach(function (x) { x.classList.toggle('active', x === b); });
+        var pane = tabs.parentElement;
+        pane.querySelectorAll('.v-ds-tabpane').forEach(function (p) {
+          p.classList.toggle('active', p.getAttribute('data-tabpane') === name);
+        });
+      });
+      tabs.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        var list = tabs.querySelectorAll('.tab');
+        if (!list.length) return;
+        var idx = Array.prototype.indexOf.call(list, document.activeElement);
+        if (idx < 0) {
+          for (var i = 0; i < list.length; i++) {
+            if (list[i].classList.contains('active')) { idx = i; break; }
+          }
+        }
+        if (idx < 0) return;
+        var next = (e.key === 'ArrowRight') ? (idx + 1) % list.length : (idx - 1 + list.length) % list.length;
+        e.preventDefault();
+        list[next].focus();
+        list[next].click();
+      });
+    });
+
+    /* Button: loading state */
+    var lb = document.getElementById('v-ds-loading-btn');
+    if (lb) {
+      lb.addEventListener('click', function () {
+        if (lb.disabled) return;
+        lb.disabled = true;
+        lb.innerHTML = '<svg class="icon spin"><use href="#i-refresh"/></svg>Creating…';
+        setTimeout(function () {
+          lb.disabled = false;
+          lb.innerHTML = '<svg class="icon"><use href="#i-plus"/></svg>Create issue';
+        }, 1600);
+      });
+    }
+
+    /* Dialog */
+    var dlg = document.getElementById('v-ds-dialog-demo');
+    if (dlg) {
+      var confirmInput = document.getElementById('v-ds-dialog-confirm');
+      var archiveBtn = dlg.querySelector('.btn-danger');
+      function gateArchive() {
+        if (archiveBtn) archiveBtn.disabled = !confirmInput || confirmInput.value !== 'archive';
+      }
+      function openDlg() {
+        dlg.style.display = 'grid';
+        if (confirmInput) { confirmInput.value = ''; confirmInput.focus(); }
+        gateArchive();
+      }
+      var openBtn = document.getElementById('v-ds-dialog-open');
+      var openDanger = document.getElementById('v-ds-dialog-open-danger');
+      if (openBtn) openBtn.addEventListener('click', openDlg);
+      if (openDanger) openDanger.addEventListener('click', openDlg);
+      dlg.querySelectorAll('[data-ds-dialog-close]').forEach(function (b) {
+        b.addEventListener('click', function () { dlg.style.display = 'none'; });
+      });
+      dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.style.display = 'none'; });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && dlg.style.display !== 'none') dlg.style.display = 'none';
+      });
+      if (confirmInput) confirmInput.addEventListener('input', gateArchive);
+      dlg.addEventListener('keydown', function (e) {
+        if (e.key !== 'Tab') return;
+        var focusables = dlg.querySelectorAll('button:not([disabled]), input:not([disabled])');
+        if (!focusables.length) return;
+        var first = focusables[0], last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      });
+    }
+
+    /* Switch */
+    var sw = document.getElementById('v-ds-switch-demo');
+    var swLabel = document.getElementById('v-ds-switch-label');
+    if (sw && swLabel) {
+      sw.addEventListener('click', function () {
+        var on = sw.classList.toggle('on');
+        sw.setAttribute('aria-checked', on ? 'true' : 'false');
+        swLabel.textContent = on ? 'Enabled' : 'Disabled';
+        swLabel.className = on ? 'badge badge-success' : 'badge badge-neutral';
+      });
+    }
+
+    /* Tabs demo */
+    var tabsDemo = document.getElementById('v-ds-tabs-demo');
+    if (tabsDemo) {
+      tabsDemo.querySelectorAll('.tab').forEach(function (t) {
+        t.addEventListener('click', function () {
+          tabsDemo.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('active'); });
+          t.classList.add('active');
+          document.querySelectorAll('#v-ds-demo-panes .v-ds-demo-tabpane').forEach(function (p) {
+            p.classList.toggle('active', p.getAttribute('data-demo') === t.getAttribute('data-tab'));
+          });
+        });
+      });
+    }
+
+    /* Toast */
+    var tb = document.getElementById('v-ds-toast-btn');
+    var toast = document.getElementById('v-ds-toast-demo');
+    if (tb && toast) {
+      tb.addEventListener('click', function () {
+        toast.classList.add('in');
+        clearTimeout(tb._t);
+        tb._t = setTimeout(function () { toast.classList.remove('in'); }, 2600);
+      });
+    }
+  })();
+}
+</script>

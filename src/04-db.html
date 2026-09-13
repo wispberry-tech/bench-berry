@@ -1,0 +1,1076 @@
+<style>
+/* ============ Prism · Database view (v-db- prefix only) ============ */
+.v-db-pane{display:none}
+.v-db-pane.active{display:block}
+
+.v-db-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.v-db-name{display:flex;align-items:center;gap:10px;min-width:0}
+.v-db-table-name{font-family:var(--mono);font-size:19px;font-weight:600;letter-spacing:-.02em;color:var(--text);white-space:nowrap}
+.v-db-actions{margin-left:auto;display:flex;align-items:center;gap:8px;flex:none}
+
+.v-db-grid{display:grid;grid-template-columns:minmax(0,1fr) 284px;gap:16px;align-items:start}
+.v-db-main,.v-db-side{display:flex;flex-direction:column;gap:16px;min-width:0}
+.v-db-tbl{border:none;border-radius:0;border-top:1px solid var(--border)}
+.v-db-tbl td:last-child{white-space:normal;line-height:1.5}
+.v-db-tbl th:last-child{white-space:normal}
+
+.v-db-chip{display:inline-flex;align-items:center;height:16px;padding:0 6px;border-radius:var(--r-full);font-size:9.5px;font-weight:600;letter-spacing:.04em;font-family:var(--mono);line-height:1}
+.v-db-chip-pk{background:var(--accent-subtle);color:var(--accent);border:1px solid var(--accent-border)}
+.v-db-chip-fk{background:var(--surface);color:var(--text-3);border:1px solid var(--border-strong)}
+.v-db-null-yes{color:var(--text-3);font-weight:600}
+.v-db-null-no{color:var(--text-4)}
+.v-db-type{font-size:11.5px}
+
+.v-db-idx-list{padding:6px 0}
+.v-db-idx{display:flex;align-items:center;gap:10px;min-height:32px;padding:0 16px;border-bottom:1px solid var(--border-faint)}
+.v-db-idx:last-child{border-bottom:none}
+.v-db-idx .icon{width:13px;height:13px;color:var(--text-4)}
+.v-db-idx .mono{font-size:12px}
+.v-db-idx .badge{height:17px;padding:0 7px;font-size:9.5px;gap:4px}
+.v-db-idx .v-db-dim{font-size:11px}
+
+.v-db-meta{padding:12px 16px;display:flex;flex-direction:column}
+.v-db-meta-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:5px 0;font-size:12px}
+.v-db-meta-row .hint{font-size:11px;font-variant-numeric:tabular-nums}
+.v-db-meta-row .mono{font-size:11.5px}
+
+.v-db-api-chips{padding:14px 16px 6px;display:flex;flex-wrap:wrap;align-items:center}
+.v-db-api-chip{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border:1px solid var(--border-strong);border-radius:var(--r-full);font-size:11px;color:var(--text-2);margin:0 6px 8px 0;transition:border-color .12s,color .12s,background .12s;background:var(--surface)}
+.v-db-api-chip:hover{border-color:var(--accent-border);color:var(--accent);background:var(--accent-faint);text-decoration:none}
+.v-db-api-chip .mono{font-size:10.5px}
+.v-db-m{font-weight:600;font-size:10px;letter-spacing:.02em}
+.v-db-m-get{color:var(--info)}.v-db-m-post{color:var(--success)}.v-db-m-patch{color:var(--warning)}.v-db-m-delete{color:var(--danger)}
+.v-db-api-note{padding:0 16px 14px;font-size:11.5px;color:var(--text-3);line-height:1.55}
+
+.v-db-surf{display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid var(--border-faint)}
+.v-db-surf:first-child{border-top:none}
+.v-db-surf .icon{width:14px;height:14px;color:var(--text-3)}
+.v-db-surf .hint{font-size:11px;line-height:1.4}
+.v-db-surf .strong{font-size:12.5px}
+
+.v-db-ddl{display:none}
+
+.v-db-rail-foot{margin-top:auto;padding:14px 16px 12px;border-top:1px solid var(--border-faint)}
+.v-db-rail-foot .hint{line-height:1.6}
+
+.v-db-drift{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border:1px solid var(--warning-border);background:var(--warning-bg);border-radius:var(--r-m);font-size:11.5px;color:var(--warning);line-height:1.5;margin-bottom:16px}
+.v-db-drift .icon{width:13px;height:13px;flex:none;margin-top:1px}
+.v-db-drift a{color:var(--warning);font-weight:600}
+
+@media (max-width:1080px){
+  .v-db-grid{grid-template-columns:minmax(0,1fr)}
+}
+</style>
+
+<section class="view" id="view-db" data-view="db">
+  <div class="view-body">
+
+    <!-- ============ RAIL ============ -->
+    <aside class="rail">
+      <div class="rail-head">
+        <div class="rail-title">
+          <svg class="icon" style="color:var(--text-3)"><use href="#i-db"/></svg>
+          <span>helix_postgres</span>
+          <span class="badge badge-neutral" style="margin-left:auto">Postgres 16</span>
+        </div>
+        <div class="rail-sub">8 tables · 2.3M rows · RLS protected</div>
+      </div>
+
+      <div class="rail-group">Tables</div>
+      <button class="rail-item" data-table="users"><svg class="icon"><use href="#i-table"/></svg><span class="mono">users</span><span class="rail-count">1.3k</span></button>
+      <button class="rail-item" data-table="teams"><svg class="icon"><use href="#i-table"/></svg><span class="mono">teams</span><span class="rail-count">36</span></button>
+      <button class="rail-item" data-table="memberships"><svg class="icon"><use href="#i-table"/></svg><span class="mono">memberships</span><span class="rail-count">2.4k</span></button>
+      <button class="rail-item" data-table="projects"><svg class="icon"><use href="#i-table"/></svg><span class="mono">projects</span><span class="rail-count">142</span></button>
+      <button class="rail-item active" data-table="issues"><svg class="icon"><use href="#i-table"/></svg><span class="mono">issues</span><span class="rail-count">38.9k</span></button>
+      <button class="rail-item" data-table="comments"><svg class="icon"><use href="#i-table"/></svg><span class="mono">comments</span><span class="rail-count">102.3k</span></button>
+      <button class="rail-item" data-table="labels"><svg class="icon"><use href="#i-table"/></svg><span class="mono">labels</span><span class="rail-count">18</span></button>
+      <button class="rail-item" data-table="api_keys"><svg class="icon"><use href="#i-table"/></svg><span class="mono">api_keys</span><span class="rail-count">47</span></button>
+
+      <div class="v-db-rail-foot">
+        <div class="hint">Introspected 5m ago · <span class="mono" style="font-size:10.5px">information_schema</span> live</div>
+        <div class="hint mono" style="font-size:10.5px;margin-top:4px">postgres://hlx_read:••••@db.helix.dev/helix_postgres</div>
+      </div>
+    </aside>
+
+    <!-- ============ CONTENT ============ -->
+    <div class="view-content">
+      <div class="view-head">
+        <div>
+          <div class="vh-title">Database</div>
+          <div class="vh-sub">helix_postgres · PostgreSQL 16 · 8 tables · 2.3M rows. Live schema, indexes, and relationships — one source of truth for the API layer.</div>
+        </div>
+        <div class="vh-actions">
+          <span class="badge badge-success"><span class="dot dot-success"></span>connected</span>
+        </div>
+      </div>
+
+      <!-- ============ PANE · issues ============ -->
+      <div class="v-db-pane active" id="v-db-pane-issues">
+        <div class="v-db-head">
+          <div class="v-db-name">
+            <span class="v-db-table-name">issues</span>
+            <span class="badge badge-neutral">38,954 rows</span>
+          </div>
+          <div class="v-db-actions">
+            <a class="btn btn-outline" href="#api?op=issues"><svg class="icon"><use href="#i-plug"/></svg>API docs</a>
+            <button class="btn btn-ghost" data-copy="#v-db-ddl-issues"><svg class="icon"><use href="#i-copy"/></svg>Copy CREATE TABLE</button>
+          </div>
+        </div>
+
+        <div class="v-db-drift">
+          <svg class="icon"><use href="#i-warn"/></svg>
+          <span>Schema drift against <span class="mono">openapi.yaml</span>: API still declares <span class="mono">labels</span> as <span class="mono">string[]</span>, DB has <span class="mono">text[]</span> — re-sync to align the API view. <a href="#overview">Fix in Overview →</a></span>
+        </div>
+
+        <div class="v-db-grid">
+          <div class="v-db-main">
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Columns</span>
+                <span class="panel-sub">11 columns</span>
+              </div>
+              <div class="table-wrap v-db-tbl">
+                <table class="tbl">
+                  <thead>
+                    <tr><th>Name</th><th>Type</th><th>Nullable</th><th>Default</th><th>Description</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><span class="mono strong">id</span> <span class="v-db-chip v-db-chip-pk">PK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">primary key; exposed as <span class="mono">iss_…</span> in the API</td></tr>
+                    <tr><td><span class="mono strong">title</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">short summary shown in lists</td></tr>
+                    <tr><td><span class="mono strong">description</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-yes">✓</span></td><td><span class="mono muted">—</span></td><td class="muted">markdown body; null when never written</td></tr>
+                    <tr><td><span class="mono strong">status</span></td><td><span class="mono muted v-db-type">issue_status</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">'backlog'</span></td><td class="muted">enum: backlog · todo · in_progress · in_review · done</td></tr>
+                    <tr><td><span class="mono strong">priority</span></td><td><span class="mono muted v-db-type">issue_priority</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">'none'</span></td><td class="muted">enum: urgent · high · medium · low · none</td></tr>
+                    <tr><td><span class="mono strong">project_id</span> <span class="v-db-chip v-db-chip-fk">FK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-yes">✓</span></td><td><span class="mono muted">—</span></td><td class="muted">→ <span class="mono">projects.id</span>; null for unscheduled work</td></tr>
+                    <tr><td><span class="mono strong">assignee_id</span> <span class="v-db-chip v-db-chip-fk">FK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-yes">✓</span></td><td><span class="mono muted">—</span></td><td class="muted">→ <span class="mono">users.id</span>; null when unassigned</td></tr>
+                    <tr><td><span class="mono strong">labels</span></td><td><span class="mono muted v-db-type">text[]</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">'{}'</span></td><td class="muted">label names by convention; GIN-indexed</td></tr>
+                    <tr><td><span class="mono strong">due_at</span></td><td><span class="mono muted v-db-type">timestamptz</span></td><td><span class="v-db-null-yes">✓</span></td><td><span class="mono muted">—</span></td><td class="muted">optional due date; null = no deadline</td></tr>
+                    <tr><td><span class="mono strong">created_at</span></td><td><span class="mono muted v-db-type">timestamptz</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">now()</span></td><td class="muted">row creation time</td></tr>
+                    <tr><td><span class="mono strong">updated_at</span></td><td><span class="mono muted v-db-type">timestamptz</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">now()</span></td><td class="muted">bumped by trigger on every write; DESC index</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Indexes</span>
+                <span class="panel-sub">5 indexes · 4 B-tree · 1 GIN</span>
+              </div>
+              <div class="v-db-idx-list">
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono strong">issues_pkey</span><span class="mono muted v-db-dim">(id)</span><span class="spacer"></span><span class="badge badge-neutral">unique</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">issues_project_idx</span><span class="mono muted v-db-dim">(project_id)</span><span class="spacer"></span><span class="muted v-db-dim" style="margin-right:4px">~21k rows scanned</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">issues_assignee_idx</span><span class="mono muted v-db-dim">(assignee_id)</span><span class="spacer"></span><span class="muted v-db-dim" style="margin-right:4px">~1.1k rows scanned</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">issues_labels_gin</span><span class="mono muted v-db-dim">(labels)</span><span class="spacer"></span><span class="muted v-db-dim" style="margin-right:4px">array containment</span><span class="badge badge-outline">gin</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">issues_updated_at_idx</span><span class="mono muted v-db-dim">(updated_at DESC)</span><span class="spacer"></span><span class="muted v-db-dim" style="margin-right:4px">recent-first lists</span><span class="badge badge-outline">btree</span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Sample row</span>
+                <span class="panel-sub">read replica · newest by updated_at</span>
+              </div>
+              <div class="code-block" style="border:none;border-radius:0;border-top:1px solid var(--border)">
+                <div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="mono">issues</span> · one row, JSON projection — same shape as <span class="mono">GET /issues</span></div>
+                <div class="code-body"><span class="tok-k">"id"</span><span class="tok-p">: </span><span class="tok-s">"iss_9f2c1a"</span><span class="tok-p">,</span>
+<span class="tok-k">"title"</span><span class="tok-p">: </span><span class="tok-s">"Redesign empty state for issue list"</span><span class="tok-p">,</span>
+<span class="tok-k">"status"</span><span class="tok-p">: </span><span class="tok-s">"in_progress"</span><span class="tok-p">,</span>
+<span class="tok-k">"priority"</span><span class="tok-p">: </span><span class="tok-s">"high"</span><span class="tok-p">,</span>
+<span class="tok-k">"project_id"</span><span class="tok-p">: </span><span class="tok-s">"prj_42"</span><span class="tok-p">,</span>
+<span class="tok-k">"assignee_id"</span><span class="tok-p">: </span><span class="tok-s">"usr_1173"</span><span class="tok-p">,</span>
+<span class="tok-k">"labels"</span><span class="tok-p">: [</span><span class="tok-s">"ui"</span><span class="tok-p">, </span><span class="tok-s">"p0"</span><span class="tok-p">],</span>
+<span class="tok-k">"created_at"</span><span class="tok-p">: </span><span class="tok-s">"2026-09-02T09:41:00Z"</span><span class="tok-p">,</span>
+<span class="tok-k">"updated_at"</span><span class="tok-p">: </span><span class="tok-s">"2026-09-11T16:03:00Z"</span>
+<span class="tok-p">}</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="v-db-side">
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Table info</span></div>
+              <div class="v-db-meta">
+                <div class="v-db-meta-row"><span class="muted">Rows</span><span class="mono strong num">38,954</span></div>
+                <div class="v-db-meta-row"><span class="muted">Estimated size</span><span class="mono num">154 MB</span></div>
+                <div class="v-db-meta-row"><span class="muted">Indexes</span><span class="mono num">5</span></div>
+                <div class="v-db-meta-row"><span class="muted">Row-level security</span><span><span class="dot dot-success"></span> <span class="strong">enabled</span></span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">API surface</span><span class="panel-sub">openapi.yaml v3.1</span></div>
+              <div class="v-db-api-chips">
+                <a class="v-db-api-chip" href="#api?op=issues"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/issues</span></a>
+                <a class="v-db-api-chip" href="#api?op=create_issue"><span class="v-db-m v-db-m-post">POST</span><span class="mono">/issues</span></a>
+                <a class="v-db-api-chip" href="#api?op=get_issue"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/issues/{id}</span></a>
+                <a class="v-db-api-chip" href="#api?op=update_issue"><span class="v-db-m v-db-m-patch">PATCH</span><span class="mono">/issues/{id}</span></a>
+                <a class="v-db-api-chip" href="#api?op=delete_issue"><span class="v-db-m v-db-m-delete">DELETE</span><span class="mono">/issues/{id}</span></a>
+                <a class="v-db-api-chip" href="#api?op=add_comment"><span class="v-db-m v-db-m-post">POST</span><span class="mono">/issues/{id}/comments</span></a>
+              </div>
+              <div class="v-db-api-note">Rows are served to the API view — edit here, reflected there. List queries filter on <span class="mono">status</span>, <span class="mono">assignee_id</span>, <span class="mono">project_id</span>, <span class="mono">labels</span>; all backed by the indexes above.</div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Connected surfaces</span></div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-plug"/></svg>
+                <div><div class="strong">API Explorer</div><div class="hint">6 endpoints read &amp; write this table</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#api?op=issues">Open</a>
+              </div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-cube"/></svg>
+                <div><div class="strong">@helix/ui</div><div class="hint">IssueCard · IssueStatusBadge · PriorityTag</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#design?comp=card">Open</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-db-ddl" id="v-db-ddl-issues">CREATE TABLE public.issues (
+  id uuid PRIMARY KEY,
+  title text NOT NULL,
+  description text,
+  status issue_status NOT NULL DEFAULT 'backlog',
+  priority issue_priority NOT NULL DEFAULT 'none',
+  project_id uuid REFERENCES public.projects(id) ON DELETE SET NULL,
+  assignee_id uuid REFERENCES public.users(id) ON DELETE SET NULL,
+  labels text[] NOT NULL DEFAULT '{}',
+  due_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+-- enum issue_status: backlog | todo | in_progress | in_review | done
+-- indexes: issues_pkey (unique) · issues_project_idx · issues_assignee_idx · issues_labels_gin · issues_updated_at_idx DESC</div>
+      </div>
+
+      <!-- ============ PANE · users ============ -->
+      <div class="v-db-pane" id="v-db-pane-users">
+        <div class="v-db-head">
+          <div class="v-db-name">
+            <span class="v-db-table-name">users</span>
+            <span class="badge badge-neutral">1,284 rows</span>
+          </div>
+          <div class="v-db-actions">
+            <a class="btn btn-outline" href="#api?op=users"><svg class="icon"><use href="#i-plug"/></svg>API docs</a>
+            <button class="btn btn-ghost" data-copy="#v-db-ddl-users"><svg class="icon"><use href="#i-copy"/></svg>Copy CREATE TABLE</button>
+          </div>
+        </div>
+
+        <div class="v-db-grid">
+          <div class="v-db-main">
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Columns</span>
+                <span class="panel-sub">6 columns</span>
+              </div>
+              <div class="table-wrap v-db-tbl">
+                <table class="tbl">
+                  <thead>
+                    <tr><th>Name</th><th>Type</th><th>Nullable</th><th>Default</th><th>Description</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><span class="mono strong">id</span> <span class="v-db-chip v-db-chip-pk">PK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">gen_random_uuid()</span></td><td class="muted">primary key; exposed as <span class="mono">usr_…</span> in the API</td></tr>
+                    <tr><td><span class="mono strong">email</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">login email; unique via <span class="mono">users_email_key</span></td></tr>
+                    <tr><td><span class="mono strong">name</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">display name used across the product</td></tr>
+                    <tr><td><span class="mono strong">avatar_url</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-yes">✓</span></td><td><span class="mono muted">—</span></td><td class="muted">avatar image; falls back to initials</td></tr>
+                    <tr><td><span class="mono strong">role</span></td><td><span class="mono muted v-db-type">user_role</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">'viewer'</span></td><td class="muted">enum: admin · editor · viewer</td></tr>
+                    <tr><td><span class="mono strong">created_at</span></td><td><span class="mono muted v-db-type">timestamptz</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">now()</span></td><td class="muted">account creation time</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Indexes</span>
+                <span class="panel-sub">3 indexes</span>
+              </div>
+              <div class="v-db-idx-list">
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono strong">users_pkey</span><span class="mono muted v-db-dim">(id)</span><span class="spacer"></span><span class="badge badge-neutral">unique</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">users_email_key</span><span class="mono muted v-db-dim">(email)</span><span class="spacer"></span><span class="badge badge-neutral">unique</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">users_role_idx</span><span class="mono muted v-db-dim">(role)</span><span class="spacer"></span><span class="muted v-db-dim" style="margin-right:4px">admin fleet scans</span><span class="badge badge-outline">btree</span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Sample row</span>
+                <span class="panel-sub">read replica · by email</span>
+              </div>
+              <div class="code-block" style="border:none;border-radius:0;border-top:1px solid var(--border)">
+                <div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="mono">users</span> · one row, JSON projection — same shape as <span class="mono">GET /users</span></div>
+                <div class="code-body"><span class="tok-k">"id"</span><span class="tok-p">: </span><span class="tok-s">"usr_1173"</span><span class="tok-p">,</span>
+<span class="tok-k">"email"</span><span class="tok-p">: </span><span class="tok-s">"aiko@helix.dev"</span><span class="tok-p">,</span>
+<span class="tok-k">"name"</span><span class="tok-p">: </span><span class="tok-s">"Aiko Tanaka"</span><span class="tok-p">,</span>
+<span class="tok-k">"role"</span><span class="tok-p">: </span><span class="tok-s">"editor"</span><span class="tok-p">,</span>
+<span class="tok-k">"created_at"</span><span class="tok-p">: </span><span class="tok-s">"2025-03-14T10:02:00Z"</span>
+<span class="tok-p">}</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="v-db-side">
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Table info</span></div>
+              <div class="v-db-meta">
+                <div class="v-db-meta-row"><span class="muted">Rows</span><span class="mono strong num">1,284</span></div>
+                <div class="v-db-meta-row"><span class="muted">Estimated size</span><span class="mono num">1.1 MB</span></div>
+                <div class="v-db-meta-row"><span class="muted">Indexes</span><span class="mono num">3</span></div>
+                <div class="v-db-meta-row"><span class="muted">Row-level security</span><span><span class="dot dot-success"></span> <span class="strong">enabled</span></span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">API surface</span><span class="panel-sub">openapi.yaml v3.1</span></div>
+              <div class="v-db-api-chips">
+                <a class="v-db-api-chip" href="#api?op=users"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/users</span></a>
+                <a class="v-db-api-chip" href="#api?op=get_user"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/users/{id}</span></a>
+                <a class="v-db-api-chip" href="#api?op=update_user"><span class="v-db-m v-db-m-patch">PATCH</span><span class="mono">/users/{id}</span></a>
+              </div>
+              <div class="v-db-api-note">Rows are served to the API view — edit here, reflected there. <span class="mono">GET /users</span> is how the sidebar member list loads.</div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Connected surfaces</span></div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-plug"/></svg>
+                <div><div class="strong">API Explorer</div><div class="hint">3 endpoints read &amp; write this table</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#api?op=users">Open</a>
+              </div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-cube"/></svg>
+                <div><div class="strong">@helix/ui</div><div class="hint">Avatar · MemberList · UserMenu</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#design?comp=avatar">Open</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-db-ddl" id="v-db-ddl-users">CREATE TABLE public.users (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text NOT NULL UNIQUE,
+  name text NOT NULL,
+  avatar_url text,
+  role user_role NOT NULL DEFAULT 'viewer',
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+-- enum user_role: admin | editor | viewer
+-- indexes: users_pkey (unique) · users_email_key (unique) · users_role_idx</div>
+      </div>
+
+      <!-- ============ PANE · teams ============ -->
+      <div class="v-db-pane" id="v-db-pane-teams">
+        <div class="v-db-head">
+          <div class="v-db-name">
+            <span class="v-db-table-name">teams</span>
+            <span class="badge badge-neutral">36 rows</span>
+          </div>
+          <div class="v-db-actions">
+            <a class="btn btn-outline" href="#api?op=teams"><svg class="icon"><use href="#i-plug"/></svg>API docs</a>
+            <button class="btn btn-ghost" data-copy="#v-db-ddl-teams"><svg class="icon"><use href="#i-copy"/></svg>Copy CREATE TABLE</button>
+          </div>
+        </div>
+
+        <div class="v-db-grid">
+          <div class="v-db-main">
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Columns</span>
+                <span class="panel-sub">4 columns</span>
+              </div>
+              <div class="table-wrap v-db-tbl">
+                <table class="tbl">
+                  <thead>
+                    <tr><th>Name</th><th>Type</th><th>Nullable</th><th>Default</th><th>Description</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><span class="mono strong">id</span> <span class="v-db-chip v-db-chip-pk">PK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">gen_random_uuid()</span></td><td class="muted">primary key; exposed as <span class="mono">tm_…</span></td></tr>
+                    <tr><td><span class="mono strong">slug</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">unique workspace slug; routes <span class="mono">/teams/{slug}</span></td></tr>
+                    <tr><td><span class="mono strong">name</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">workspace display name</td></tr>
+                    <tr><td><span class="mono strong">created_at</span></td><td><span class="mono muted v-db-type">timestamptz</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">now()</span></td><td class="muted">workspace creation time</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Indexes</span>
+                <span class="panel-sub">2 indexes</span>
+              </div>
+              <div class="v-db-idx-list">
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono strong">teams_pkey</span><span class="mono muted v-db-dim">(id)</span><span class="spacer"></span><span class="badge badge-neutral">unique</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">teams_slug_key</span><span class="mono muted v-db-dim">(slug)</span><span class="spacer"></span><span class="badge badge-neutral">unique</span><span class="badge badge-outline">btree</span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Sample row</span>
+                <span class="panel-sub">read replica · by slug</span>
+              </div>
+              <div class="code-block" style="border:none;border-radius:0;border-top:1px solid var(--border)">
+                <div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="mono">teams</span> · one row, JSON projection — same shape as <span class="mono">GET /teams/{slug}</span></div>
+                <div class="code-body"><span class="tok-k">"id"</span><span class="tok-p">: </span><span class="tok-s">"tm_7c3f"</span><span class="tok-p">,</span>
+<span class="tok-k">"slug"</span><span class="tok-p">: </span><span class="tok-s">"helix"</span><span class="tok-p">,</span>
+<span class="tok-k">"name"</span><span class="tok-p">: </span><span class="tok-s">"Helix"</span><span class="tok-p">,</span>
+<span class="tok-k">"created_at"</span><span class="tok-p">: </span><span class="tok-s">"2024-11-02T08:00:00Z"</span>
+<span class="tok-p">}</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="v-db-side">
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Table info</span></div>
+              <div class="v-db-meta">
+                <div class="v-db-meta-row"><span class="muted">Rows</span><span class="mono strong num">36</span></div>
+                <div class="v-db-meta-row"><span class="muted">Estimated size</span><span class="mono num">72 kB</span></div>
+                <div class="v-db-meta-row"><span class="muted">Indexes</span><span class="mono num">2</span></div>
+                <div class="v-db-meta-row"><span class="muted">Row-level security</span><span><span class="dot dot-success"></span> <span class="strong">enabled</span></span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">API surface</span><span class="panel-sub">openapi.yaml v3.1</span></div>
+              <div class="v-db-api-chips">
+                <a class="v-db-api-chip" href="#api?op=teams"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/teams</span></a>
+                <a class="v-db-api-chip" href="#api?op=get_team"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/teams/{slug}</span></a>
+                <a class="v-db-api-chip" href="#api?op=team_projects"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/teams/{slug}/projects</span></a>
+              </div>
+              <div class="v-db-api-note">Rows are served to the API view — edit here, reflected there. Slug lookups hit <span class="mono">teams_slug_key</span> directly.</div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Connected surfaces</span></div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-plug"/></svg>
+                <div><div class="strong">API Explorer</div><div class="hint">3 endpoints read this table</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#api?op=teams">Open</a>
+              </div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-cube"/></svg>
+                <div><div class="strong">@helix/ui</div><div class="hint">TeamSwitcher · WorkspaceBadge</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#design?comp=badge">Open</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-db-ddl" id="v-db-ddl-teams">CREATE TABLE public.teams (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug text NOT NULL UNIQUE,
+  name text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+-- indexes: teams_pkey (unique) · teams_slug_key (unique)</div>
+      </div>
+
+      <!-- ============ PANE · memberships ============ -->
+      <div class="v-db-pane" id="v-db-pane-memberships">
+        <div class="v-db-head">
+          <div class="v-db-name">
+            <span class="v-db-table-name">memberships</span>
+            <span class="badge badge-neutral">2,410 rows</span>
+          </div>
+          <div class="v-db-actions">
+            <a class="btn btn-outline" href="#api"><svg class="icon"><use href="#i-plug"/></svg>API docs</a>
+            <button class="btn btn-ghost" data-copy="#v-db-ddl-memberships"><svg class="icon"><use href="#i-copy"/></svg>Copy CREATE TABLE</button>
+          </div>
+        </div>
+
+        <div class="v-db-grid">
+          <div class="v-db-main">
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Columns</span>
+                <span class="panel-sub">5 columns</span>
+              </div>
+              <div class="table-wrap v-db-tbl">
+                <table class="tbl">
+                  <thead>
+                    <tr><th>Name</th><th>Type</th><th>Nullable</th><th>Default</th><th>Description</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><span class="mono strong">id</span> <span class="v-db-chip v-db-chip-pk">PK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">gen_random_uuid()</span></td><td class="muted">primary key; exposed as <span class="mono">mb_…</span></td></tr>
+                    <tr><td><span class="mono strong">user_id</span> <span class="v-db-chip v-db-chip-fk">FK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">→ <span class="mono">users.id</span>, cascades on delete</td></tr>
+                    <tr><td><span class="mono strong">team_id</span> <span class="v-db-chip v-db-chip-fk">FK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">→ <span class="mono">teams.id</span>, cascades on delete</td></tr>
+                    <tr><td><span class="mono strong">role</span></td><td><span class="mono muted v-db-type">membership_role</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">'member'</span></td><td class="muted">enum: owner · admin · member; per-team, overrides user role</td></tr>
+                    <tr><td><span class="mono strong">joined_at</span></td><td><span class="mono muted v-db-type">timestamptz</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">now()</span></td><td class="muted">when the user joined this team</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Indexes</span>
+                <span class="panel-sub">3 indexes</span>
+              </div>
+              <div class="v-db-idx-list">
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono strong">memberships_pkey</span><span class="mono muted v-db-dim">(id)</span><span class="spacer"></span><span class="badge badge-neutral">unique</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">memberships_user_team_key</span><span class="mono muted v-db-dim">(user_id, team_id)</span><span class="spacer"></span><span class="badge badge-neutral">unique</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">memberships_team_idx</span><span class="mono muted v-db-dim">(team_id)</span><span class="spacer"></span><span class="muted v-db-dim" style="margin-right:4px">~67 rows per team</span><span class="badge badge-outline">btree</span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Sample row</span>
+                <span class="panel-sub">read replica · join table</span>
+              </div>
+              <div class="code-block" style="border:none;border-radius:0;border-top:1px solid var(--border)">
+                <div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="mono">memberships</span> · one row, JSON projection</div>
+                <div class="code-body"><span class="tok-k">"id"</span><span class="tok-p">: </span><span class="tok-s">"mb_5d29"</span><span class="tok-p">,</span>
+<span class="tok-k">"user_id"</span><span class="tok-p">: </span><span class="tok-s">"usr_1173"</span><span class="tok-p">,</span>
+<span class="tok-k">"team_id"</span><span class="tok-p">: </span><span class="tok-s">"tm_7c3f"</span><span class="tok-p">,</span>
+<span class="tok-k">"role"</span><span class="tok-p">: </span><span class="tok-s">"owner"</span><span class="tok-p">,</span>
+<span class="tok-k">"joined_at"</span><span class="tok-p">: </span><span class="tok-s">"2025-03-14T10:02:00Z"</span>
+<span class="tok-p">}</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="v-db-side">
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Table info</span></div>
+              <div class="v-db-meta">
+                <div class="v-db-meta-row"><span class="muted">Rows</span><span class="mono strong num">2,410</span></div>
+                <div class="v-db-meta-row"><span class="muted">Estimated size</span><span class="mono num">1.8 MB</span></div>
+                <div class="v-db-meta-row"><span class="muted">Indexes</span><span class="mono num">3</span></div>
+                <div class="v-db-meta-row"><span class="muted">Row-level security</span><span><span class="dot dot-success"></span> <span class="strong">enabled</span></span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">API surface</span><span class="panel-sub">openapi.yaml v3.1</span></div>
+              <div class="v-db-api-note" style="padding-top:14px">No direct endpoints — join tables stay internal. Memberships expand in <a href="#api?op=users">GET /users</a> and <a href="#api?op=teams">GET /teams</a> responses when <span class="mono">?include=memberships</span> is set.</div>
+              <div class="v-db-api-note">Rows are served to the API view — edit here, reflected there.</div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Connected surfaces</span></div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-plug"/></svg>
+                <div><div class="strong">API Explorer</div><div class="hint">expanded via <span class="mono">?include=memberships</span></div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#api?op=teams">Open</a>
+              </div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-cube"/></svg>
+                <div><div class="strong">@helix/ui</div><div class="hint">MemberList · MemberRow</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#design?comp=avatar">Open</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-db-ddl" id="v-db-ddl-memberships">CREATE TABLE public.memberships (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  team_id uuid NOT NULL REFERENCES public.teams(id) ON DELETE CASCADE,
+  role membership_role NOT NULL DEFAULT 'member',
+  joined_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (user_id, team_id)
+);
+-- enum membership_role: owner | admin | member
+-- indexes: memberships_pkey (unique) · memberships_user_team_key (unique) · memberships_team_idx</div>
+      </div>
+
+      <!-- ============ PANE · projects ============ -->
+      <div class="v-db-pane" id="v-db-pane-projects">
+        <div class="v-db-head">
+          <div class="v-db-name">
+            <span class="v-db-table-name">projects</span>
+            <span class="badge badge-neutral">142 rows</span>
+          </div>
+          <div class="v-db-actions">
+            <a class="btn btn-outline" href="#api?op=projects"><svg class="icon"><use href="#i-plug"/></svg>API docs</a>
+            <button class="btn btn-ghost" data-copy="#v-db-ddl-projects"><svg class="icon"><use href="#i-copy"/></svg>Copy CREATE TABLE</button>
+          </div>
+        </div>
+
+        <div class="v-db-grid">
+          <div class="v-db-main">
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Columns</span>
+                <span class="panel-sub">7 columns</span>
+              </div>
+              <div class="table-wrap v-db-tbl">
+                <table class="tbl">
+                  <thead>
+                    <tr><th>Name</th><th>Type</th><th>Nullable</th><th>Default</th><th>Description</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><span class="mono strong">id</span> <span class="v-db-chip v-db-chip-pk">PK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">gen_random_uuid()</span></td><td class="muted">primary key; exposed as <span class="mono">prj_…</span></td></tr>
+                    <tr><td><span class="mono strong">slug</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">unique project slug, e.g. <span class="mono">helix-web</span></td></tr>
+                    <tr><td><span class="mono strong">name</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">project display name</td></tr>
+                    <tr><td><span class="mono strong">team_id</span> <span class="v-db-chip v-db-chip-fk">FK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">→ <span class="mono">teams.id</span>, cascades on delete</td></tr>
+                    <tr><td><span class="mono strong">status</span></td><td><span class="mono muted v-db-type">project_status</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">'active'</span></td><td class="muted">enum: active · archived · on_hold</td></tr>
+                    <tr><td><span class="mono strong">color</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">'#5256e5'</span></td><td class="muted">hex accent for avatars and badges</td></tr>
+                    <tr><td><span class="mono strong">created_at</span></td><td><span class="mono muted v-db-type">timestamptz</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">now()</span></td><td class="muted">project creation time</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Indexes</span>
+                <span class="panel-sub">4 indexes</span>
+              </div>
+              <div class="v-db-idx-list">
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono strong">projects_pkey</span><span class="mono muted v-db-dim">(id)</span><span class="spacer"></span><span class="badge badge-neutral">unique</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">projects_slug_key</span><span class="mono muted v-db-dim">(slug)</span><span class="spacer"></span><span class="badge badge-neutral">unique</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">projects_team_idx</span><span class="mono muted v-db-dim">(team_id)</span><span class="spacer"></span><span class="muted v-db-dim" style="margin-right:4px">team dashboard queries</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">projects_status_idx</span><span class="mono muted v-db-dim">(status)</span><span class="spacer"></span><span class="muted v-db-dim" style="margin-right:4px">archive sweeps</span><span class="badge badge-outline">btree</span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Sample row</span>
+                <span class="panel-sub">read replica · by slug</span>
+              </div>
+              <div class="code-block" style="border:none;border-radius:0;border-top:1px solid var(--border)">
+                <div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="mono">projects</span> · one row, JSON projection — same shape as <span class="mono">GET /projects/{id}</span></div>
+                <div class="code-body"><span class="tok-k">"id"</span><span class="tok-p">: </span><span class="tok-s">"prj_42"</span><span class="tok-p">,</span>
+<span class="tok-k">"slug"</span><span class="tok-p">: </span><span class="tok-s">"helix-web"</span><span class="tok-p">,</span>
+<span class="tok-k">"name"</span><span class="tok-p">: </span><span class="tok-s">"Helix Web"</span><span class="tok-p">,</span>
+<span class="tok-k">"team_id"</span><span class="tok-p">: </span><span class="tok-s">"tm_7c3f"</span><span class="tok-p">,</span>
+<span class="tok-k">"status"</span><span class="tok-p">: </span><span class="tok-s">"active"</span><span class="tok-p">,</span>
+<span class="tok-k">"color"</span><span class="tok-p">: </span><span class="tok-s">"#5256e5"</span><span class="tok-p">,</span>
+<span class="tok-k">"created_at"</span><span class="tok-p">: </span><span class="tok-s">"2025-01-20T09:30:00Z"</span>
+<span class="tok-p">}</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="v-db-side">
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Table info</span></div>
+              <div class="v-db-meta">
+                <div class="v-db-meta-row"><span class="muted">Rows</span><span class="mono strong num">142</span></div>
+                <div class="v-db-meta-row"><span class="muted">Estimated size</span><span class="mono num">320 kB</span></div>
+                <div class="v-db-meta-row"><span class="muted">Indexes</span><span class="mono num">4</span></div>
+                <div class="v-db-meta-row"><span class="muted">Row-level security</span><span><span class="dot dot-success"></span> <span class="strong">enabled</span></span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">API surface</span><span class="panel-sub">openapi.yaml v3.1</span></div>
+              <div class="v-db-api-chips">
+                <a class="v-db-api-chip" href="#api?op=projects"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/projects</span></a>
+                <a class="v-db-api-chip" href="#api?op=get_project"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/projects/{id}</span></a>
+                <a class="v-db-api-chip" href="#api?op=update_project"><span class="v-db-m v-db-m-patch">PATCH</span><span class="mono">/projects/{id}</span></a>
+                <a class="v-db-api-chip" href="#api?op=archive_project"><span class="v-db-m v-db-m-post">POST</span><span class="mono">/projects/{id}/archive</span></a>
+              </div>
+              <div class="v-db-api-note">Rows are served to the API view — edit here, reflected there. <span class="mono">teams/{slug}/projects</span> resolves through <span class="mono">projects_team_idx</span>.</div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Connected surfaces</span></div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-plug"/></svg>
+                <div><div class="strong">API Explorer</div><div class="hint">4 endpoints read &amp; write this table</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#api?op=projects">Open</a>
+              </div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-cube"/></svg>
+                <div><div class="strong">@helix/ui</div><div class="hint">ProjectBadge · ProjectPicker</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#design?comp=badge">Open</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-db-ddl" id="v-db-ddl-projects">CREATE TABLE public.projects (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug text NOT NULL UNIQUE,
+  name text NOT NULL,
+  team_id uuid NOT NULL REFERENCES public.teams(id) ON DELETE CASCADE,
+  status project_status NOT NULL DEFAULT 'active',
+  color text NOT NULL DEFAULT '#5256e5',
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+-- enum project_status: active | archived | on_hold
+-- indexes: projects_pkey (unique) · projects_slug_key (unique) · projects_team_idx · projects_status_idx</div>
+      </div>
+
+      <!-- ============ PANE · comments ============ -->
+      <div class="v-db-pane" id="v-db-pane-comments">
+        <div class="v-db-head">
+          <div class="v-db-name">
+            <span class="v-db-table-name">comments</span>
+            <span class="badge badge-neutral">102,312 rows</span>
+          </div>
+          <div class="v-db-actions">
+            <a class="btn btn-outline" href="#api?op=comments"><svg class="icon"><use href="#i-plug"/></svg>API docs</a>
+            <button class="btn btn-ghost" data-copy="#v-db-ddl-comments"><svg class="icon"><use href="#i-copy"/></svg>Copy CREATE TABLE</button>
+          </div>
+        </div>
+
+        <div class="v-db-grid">
+          <div class="v-db-main">
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Columns</span>
+                <span class="panel-sub">5 columns</span>
+              </div>
+              <div class="table-wrap v-db-tbl">
+                <table class="tbl">
+                  <thead>
+                    <tr><th>Name</th><th>Type</th><th>Nullable</th><th>Default</th><th>Description</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><span class="mono strong">id</span> <span class="v-db-chip v-db-chip-pk">PK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">gen_random_uuid()</span></td><td class="muted">primary key; exposed as <span class="mono">cmt_…</span></td></tr>
+                    <tr><td><span class="mono strong">body</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">markdown comment body</td></tr>
+                    <tr><td><span class="mono strong">issue_id</span> <span class="v-db-chip v-db-chip-fk">FK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">→ <span class="mono">issues.id</span>, cascades on delete</td></tr>
+                    <tr><td><span class="mono strong">author_id</span> <span class="v-db-chip v-db-chip-fk">FK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">→ <span class="mono">users.id</span>, cascades on delete</td></tr>
+                    <tr><td><span class="mono strong">created_at</span></td><td><span class="mono muted v-db-type">timestamptz</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">now()</span></td><td class="muted">when the comment was posted</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Indexes</span>
+                <span class="panel-sub">4 indexes</span>
+              </div>
+              <div class="v-db-idx-list">
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono strong">comments_pkey</span><span class="mono muted v-db-dim">(id)</span><span class="spacer"></span><span class="badge badge-neutral">unique</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">comments_issue_created_idx</span><span class="mono muted v-db-dim">(issue_id, created_at)</span><span class="spacer"></span><span class="muted v-db-dim" style="margin-right:4px">thread reads, ~2.6 per issue</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">comments_author_idx</span><span class="mono muted v-db-dim">(author_id)</span><span class="spacer"></span><span class="muted v-db-dim" style="margin-right:4px">“my comments” queries</span><span class="badge badge-outline">btree</span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Sample row</span>
+                <span class="panel-sub">read replica · newest by created_at</span>
+              </div>
+              <div class="code-block" style="border:none;border-radius:0;border-top:1px solid var(--border)">
+                <div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="mono">comments</span> · one row, JSON projection — same shape as <span class="mono">GET /comments</span></div>
+                <div class="code-body"><span class="tok-k">"id"</span><span class="tok-p">: </span><span class="tok-s">"cmt_8a21e0"</span><span class="tok-p">,</span>
+<span class="tok-k">"body"</span><span class="tok-p">: </span><span class="tok-s">"Confirmed on staging — the fix works, closing."</span><span class="tok-p">,</span>
+<span class="tok-k">"issue_id"</span><span class="tok-p">: </span><span class="tok-s">"iss_9f2c1a"</span><span class="tok-p">,</span>
+<span class="tok-k">"author_id"</span><span class="tok-p">: </span><span class="tok-s">"usr_1173"</span><span class="tok-p">,</span>
+<span class="tok-k">"created_at"</span><span class="tok-p">: </span><span class="tok-s">"2026-09-11T16:21:00Z"</span>
+<span class="tok-p">}</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="v-db-side">
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Table info</span></div>
+              <div class="v-db-meta">
+                <div class="v-db-meta-row"><span class="muted">Rows</span><span class="mono strong num">102,312</span></div>
+                <div class="v-db-meta-row"><span class="muted">Estimated size</span><span class="mono num">412 MB</span></div>
+                <div class="v-db-meta-row"><span class="muted">Indexes</span><span class="mono num">4</span></div>
+                <div class="v-db-meta-row"><span class="muted">Row-level security</span><span><span class="dot dot-success"></span> <span class="strong">enabled</span></span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">API surface</span><span class="panel-sub">openapi.yaml v3.1</span></div>
+              <div class="v-db-api-chips">
+                <a class="v-db-api-chip" href="#api?op=comments"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/comments</span></a>
+                <a class="v-db-api-chip" href="#api?op=get_comment"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/comments/{id}</span></a>
+                <a class="v-db-api-chip" href="#api?op=delete_comment"><span class="v-db-m v-db-m-delete">DELETE</span><span class="mono">/comments/{id}</span></a>
+                <a class="v-db-api-chip" href="#api?op=add_comment"><span class="v-db-m v-db-m-post">POST</span><span class="mono">/issues/{id}/comments</span></a>
+              </div>
+              <div class="v-db-api-note">Rows are served to the API view — edit here, reflected there. The heaviest table; reads hit the replica, writes go to primary.</div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Connected surfaces</span></div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-plug"/></svg>
+                <div><div class="strong">API Explorer</div><div class="hint">4 endpoints read &amp; write this table</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#api?op=comments">Open</a>
+              </div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-cube"/></svg>
+                <div><div class="strong">@helix/ui</div><div class="hint">CommentItem · CommentComposer</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#design?comp=card">Open</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-db-ddl" id="v-db-ddl-comments">CREATE TABLE public.comments (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  body text NOT NULL,
+  issue_id uuid NOT NULL REFERENCES public.issues(id) ON DELETE CASCADE,
+  author_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+-- indexes: comments_pkey (unique) · comments_issue_created_idx · comments_author_idx</div>
+      </div>
+
+      <!-- ============ PANE · labels ============ -->
+      <div class="v-db-pane" id="v-db-pane-labels">
+        <div class="v-db-head">
+          <div class="v-db-name">
+            <span class="v-db-table-name">labels</span>
+            <span class="badge badge-neutral">18 rows</span>
+          </div>
+          <div class="v-db-actions">
+            <a class="btn btn-outline" href="#api?op=labels"><svg class="icon"><use href="#i-plug"/></svg>API docs</a>
+            <button class="btn btn-ghost" data-copy="#v-db-ddl-labels"><svg class="icon"><use href="#i-copy"/></svg>Copy CREATE TABLE</button>
+          </div>
+        </div>
+
+        <div class="v-db-grid">
+          <div class="v-db-main">
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Columns</span>
+                <span class="panel-sub">3 columns</span>
+              </div>
+              <div class="table-wrap v-db-tbl">
+                <table class="tbl">
+                  <thead>
+                    <tr><th>Name</th><th>Type</th><th>Nullable</th><th>Default</th><th>Description</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><span class="mono strong">id</span> <span class="v-db-chip v-db-chip-pk">PK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">gen_random_uuid()</span></td><td class="muted">primary key; exposed as <span class="mono">lbl_…</span></td></tr>
+                    <tr><td><span class="mono strong">name</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">unique label name; referenced from <span class="mono">issues.labels</span></td></tr>
+                    <tr><td><span class="mono strong">color</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">'#5256e5'</span></td><td class="muted">hex color token rendered by LabelChip</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Indexes</span>
+                <span class="panel-sub">2 indexes</span>
+              </div>
+              <div class="v-db-idx-list">
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono strong">labels_pkey</span><span class="mono muted v-db-dim">(id)</span><span class="spacer"></span><span class="badge badge-neutral">unique</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">labels_name_key</span><span class="mono muted v-db-dim">(name)</span><span class="spacer"></span><span class="badge badge-neutral">unique</span><span class="badge badge-outline">btree</span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Sample row</span>
+                <span class="panel-sub">read replica · by name</span>
+              </div>
+              <div class="code-block" style="border:none;border-radius:0;border-top:1px solid var(--border)">
+                <div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="mono">labels</span> · one row, JSON projection — same shape as <span class="mono">GET /labels</span></div>
+                <div class="code-body"><span class="tok-k">"id"</span><span class="tok-p">: </span><span class="tok-s">"lbl_07"</span><span class="tok-p">,</span>
+<span class="tok-k">"name"</span><span class="tok-p">: </span><span class="tok-s">"ui"</span><span class="tok-p">,</span>
+<span class="tok-k">"color"</span><span class="tok-p">: </span><span class="tok-s">"#7c5cf0"</span>
+<span class="tok-p">}</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="v-db-side">
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Table info</span></div>
+              <div class="v-db-meta">
+                <div class="v-db-meta-row"><span class="muted">Rows</span><span class="mono strong num">18</span></div>
+                <div class="v-db-meta-row"><span class="muted">Estimated size</span><span class="mono num">48 kB</span></div>
+                <div class="v-db-meta-row"><span class="muted">Indexes</span><span class="mono num">2</span></div>
+                <div class="v-db-meta-row"><span class="muted">Row-level security</span><span><span class="dot dot-neutral"></span> <span class="muted">disabled</span></span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">API surface</span><span class="panel-sub">openapi.yaml v3.1</span></div>
+              <div class="v-db-api-chips">
+                <a class="v-db-api-chip" href="#api?op=labels"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/labels</span></a>
+                <a class="v-db-api-chip" href="#api?op=create_label"><span class="v-db-m v-db-m-post">POST</span><span class="mono">/labels</span></a>
+                <a class="v-db-api-chip" href="#api?op=update_label"><span class="v-db-m v-db-m-patch">PATCH</span><span class="mono">/labels/{id}</span></a>
+                <a class="v-db-api-chip" href="#api?op=delete_label"><span class="v-db-m v-db-m-delete">DELETE</span><span class="mono">/labels/{id}</span></a>
+              </div>
+              <div class="v-db-api-note">Rows are served to the API view — edit here, reflected there. Issue ↔ label is M:N and enforced at the app layer via <span class="mono">issues.labels</span>.</div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Connected surfaces</span></div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-plug"/></svg>
+                <div><div class="strong">API Explorer</div><div class="hint">4 endpoints read &amp; write this table</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#api?op=labels">Open</a>
+              </div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-cube"/></svg>
+                <div><div class="strong">@helix/ui</div><div class="hint">LabelChip · LabelPicker</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#design?comp=badge">Open</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-db-ddl" id="v-db-ddl-labels">CREATE TABLE public.labels (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL UNIQUE,
+  color text NOT NULL DEFAULT '#5256e5'
+);
+-- indexes: labels_pkey (unique) · labels_name_key (unique)
+-- relation to issues: M:N via issues.labels (text[]) — no junction table</div>
+      </div>
+
+      <!-- ============ PANE · api_keys ============ -->
+      <div class="v-db-pane" id="v-db-pane-api_keys">
+        <div class="v-db-head">
+          <div class="v-db-name">
+            <span class="v-db-table-name">api_keys</span>
+            <span class="badge badge-neutral">47 rows</span>
+          </div>
+          <div class="v-db-actions">
+            <a class="btn btn-outline" href="#api"><svg class="icon"><use href="#i-plug"/></svg>API docs</a>
+            <button class="btn btn-ghost" data-copy="#v-db-ddl-api_keys"><svg class="icon"><use href="#i-copy"/></svg>Copy CREATE TABLE</button>
+          </div>
+        </div>
+
+        <div class="v-db-grid">
+          <div class="v-db-main">
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Columns</span>
+                <span class="panel-sub">8 columns</span>
+              </div>
+              <div class="table-wrap v-db-tbl">
+                <table class="tbl">
+                  <thead>
+                    <tr><th>Name</th><th>Type</th><th>Nullable</th><th>Default</th><th>Description</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><span class="mono strong">id</span> <span class="v-db-chip v-db-chip-pk">PK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">gen_random_uuid()</span></td><td class="muted">primary key, internal only</td></tr>
+                    <tr><td><span class="mono strong">name</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">human label: ci-pipeline, staging, api-bot</td></tr>
+                    <tr><td><span class="mono strong">key_prefix</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">first 8 chars for display, e.g. <span class="mono">hlx_live_</span></td></tr>
+                    <tr><td><span class="mono strong">key_hash</span></td><td><span class="mono muted v-db-type">text</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">sha256 of the raw key; plaintext never stored</td></tr>
+                    <tr><td><span class="mono strong">scopes</span></td><td><span class="mono muted v-db-type">text[]</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">'{}'</span></td><td class="muted">granted scopes: issues:read, issues:write, comments:write…</td></tr>
+                    <tr><td><span class="mono strong">team_id</span> <span class="v-db-chip v-db-chip-fk">FK</span></td><td><span class="mono muted v-db-type">uuid</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">—</span></td><td class="muted">→ <span class="mono">teams.id</span>, cascades on delete</td></tr>
+                    <tr><td><span class="mono strong">created_at</span></td><td><span class="mono muted v-db-type">timestamptz</span></td><td><span class="v-db-null-no">—</span></td><td><span class="mono muted">now()</span></td><td class="muted">when the key was issued</td></tr>
+                    <tr><td><span class="mono strong">last_used_at</span></td><td><span class="mono muted v-db-type">timestamptz</span></td><td><span class="v-db-null-yes">✓</span></td><td><span class="mono muted">—</span></td><td class="muted">most recent authentication; null if unused</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Indexes</span>
+                <span class="panel-sub">3 indexes</span>
+              </div>
+              <div class="v-db-idx-list">
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono strong">api_keys_pkey</span><span class="mono muted v-db-dim">(id)</span><span class="spacer"></span><span class="badge badge-neutral">unique</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">api_keys_key_hash_key</span><span class="mono muted v-db-dim">(key_hash)</span><span class="spacer"></span><span class="badge badge-neutral">unique</span><span class="badge badge-outline">btree</span></div>
+                <div class="v-db-idx"><svg class="icon"><use href="#i-table"/></svg><span class="mono">api_keys_team_idx</span><span class="mono muted v-db-dim">(team_id)</span><span class="spacer"></span><span class="muted v-db-dim" style="margin-right:4px">settings page listing</span><span class="badge badge-outline">btree</span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="panel-title">Sample row</span>
+                <span class="panel-sub">read replica · by created_at</span>
+              </div>
+              <div class="code-block" style="border:none;border-radius:0;border-top:1px solid var(--border)">
+                <div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="mono">api_keys</span> · one row, JSON projection (never includes key_hash)</div>
+                <div class="code-body"><span class="tok-k">"id"</span><span class="tok-p">: </span><span class="tok-s">"ky_4e1a"</span><span class="tok-p">,</span>
+<span class="tok-k">"name"</span><span class="tok-p">: </span><span class="tok-s">"ci-pipeline"</span><span class="tok-p">,</span>
+<span class="tok-k">"key_prefix"</span><span class="tok-p">: </span><span class="tok-s">"hlx_live_a1b2…"</span><span class="tok-p">,</span>
+<span class="tok-k">"scopes"</span><span class="tok-p">: [</span><span class="tok-s">"issues:read"</span><span class="tok-p">, </span><span class="tok-s">"issues:write"</span><span class="tok-p">, </span><span class="tok-s">"comments:write"</span><span class="tok-p">],</span>
+<span class="tok-k">"team_id"</span><span class="tok-p">: </span><span class="tok-s">"tm_7c3f"</span><span class="tok-p">,</span>
+<span class="tok-k">"created_at"</span><span class="tok-p">: </span><span class="tok-s">"2026-06-08T14:12:00Z"</span><span class="tok-p">,</span>
+<span class="tok-k">"last_used_at"</span><span class="tok-p">: </span><span class="tok-s">"2026-09-12T07:44:00Z"</span>
+<span class="tok-p">}</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="v-db-side">
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Table info</span></div>
+              <div class="v-db-meta">
+                <div class="v-db-meta-row"><span class="muted">Rows</span><span class="mono strong num">47</span></div>
+                <div class="v-db-meta-row"><span class="muted">Estimated size</span><span class="mono num">64 kB</span></div>
+                <div class="v-db-meta-row"><span class="muted">Indexes</span><span class="mono num">3</span></div>
+                <div class="v-db-meta-row"><span class="muted">Row-level security</span><span><span class="dot dot-success"></span> <span class="strong">enabled</span></span></div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">API surface</span><span class="panel-sub">auth for all endpoints</span></div>
+              <div class="v-db-api-chips">
+                <a class="v-db-api-chip" href="#api?op=issues"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/issues</span></a>
+                <a class="v-db-api-chip" href="#api?op=create_issue"><span class="v-db-m v-db-m-post">POST</span><span class="mono">/issues</span></a>
+                <a class="v-db-api-chip" href="#api?op=users"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/users</span></a>
+                <a class="v-db-api-chip" href="#api?op=teams"><span class="v-db-m v-db-m-get">GET</span><span class="mono">/teams</span></a>
+                <span class="v-db-api-chip" style="border-style:dashed;cursor:default"><span class="muted">+ 19 more</span></span>
+              </div>
+              <div class="v-db-api-note">Every request authenticates as <span class="mono">Authorization: Bearer &lt;key&gt;</span>; the middleware looks up <span class="mono">key_hash</span> and enforces <span class="mono">scopes</span> per route.</div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head"><span class="panel-title">Connected surfaces</span></div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-plug"/></svg>
+                <div><div class="strong">API Explorer</div><div class="hint">bearer auth shown on every endpoint</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#api?op=issues">Open</a>
+              </div>
+              <div class="v-db-surf">
+                <svg class="icon"><use href="#i-cube"/></svg>
+                <div><div class="strong">@helix/ui</div><div class="hint">ApiKeyTable · ScopeTag</div></div>
+                <a class="btn btn-ghost btn-sm" style="margin-left:auto" href="#design?comp=table">Open</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="v-db-ddl" id="v-db-ddl-api_keys">CREATE TABLE public.api_keys (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  key_prefix text NOT NULL,
+  key_hash text NOT NULL UNIQUE,
+  scopes text[] NOT NULL DEFAULT '{}',
+  team_id uuid NOT NULL REFERENCES public.teams(id) ON DELETE CASCADE,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  last_used_at timestamptz
+);
+-- plaintext keys are never stored: key_hash = sha256 of the raw key
+-- indexes: api_keys_pkey (unique) · api_keys_key_hash_key (unique) · api_keys_team_idx</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+if (document.getElementById('view-db')) {
+  (function () {
+    'use strict';
+    var PANES = document.querySelectorAll('#view-db .v-db-pane');
+    var RAILS = document.querySelectorAll('#view-db .rail-item[data-table]');
+
+    function dbTable() {
+      var h = (location.hash || '').replace(/^#\/?/, '').split('?')[0];
+      if (h !== 'db') return null;
+      return new URLSearchParams((location.hash.split('?')[1] || '')).get('table') || 'issues';
+    }
+
+    function showTable(id) {
+      var pane = document.getElementById('v-db-pane-' + id);
+      if (!pane) return;
+      PANES.forEach(function (p) { p.classList.toggle('active', p === pane); });
+      RAILS.forEach(function (r) { r.classList.toggle('active', r.getAttribute('data-table') === id); });
+    }
+
+    function apply() {
+      var t = dbTable();
+      if (t) showTable(t);
+    }
+
+    RAILS.forEach(function (r) {
+      r.addEventListener('click', function () {
+        var id = r.getAttribute('data-table');
+        var h = 'db?table=' + id;
+        if (location.hash === '#' + h) { showTable(id); } else { location.hash = h; }
+      });
+    });
+
+    apply();
+    window.addEventListener('hashchange', apply);
+  })();
+}
+</script>
