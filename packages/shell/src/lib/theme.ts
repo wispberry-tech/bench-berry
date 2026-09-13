@@ -1,65 +1,33 @@
 // packages/shell/src/lib/theme.ts
 /// <reference lib="dom" />
-// Theme + accent application. Precedence: localStorage > config.theme (from
-// the virtual config module) > defaults ('light', 'violet'). `applyTheme`
-// writes data-theme / data-accent on <html> and persists to localStorage.
-import type { ThemeConfig } from "./types.ts";
-
+// Theme + accent application. Dark mode follows the OS via
+// prefers-color-scheme; the accent comes from the resolved config.
+// `applyTheme` writes data-theme / data-accent on <html> only — nothing is
+// persisted (theme is OS-managed, accent is config-managed).
 export type ThemeName = "light" | "dark";
 
 export const ACCENTS = ["violet", "blue", "green", "rose"] as const;
-export type Accent = (typeof ACCENTS)[number];
+type Accent = (typeof ACCENTS)[number];
 
-export const DEFAULT_THEME: ThemeName = "light";
 export const DEFAULT_ACCENT = "violet";
 
-const THEME_KEY = "berrybench:theme";
-const ACCENT_KEY = "berrybench:accent";
-
-export interface ThemeSettings {
-  theme: ThemeName;
-  accent: string;
-}
-
-/** Read stored overrides; invalid values are ignored. */
-export function readStored(): Partial<ThemeSettings> {
-  const out: Partial<ThemeSettings> = {};
-  try {
-    const theme = localStorage.getItem(THEME_KEY);
-    if (theme === "light" || theme === "dark") out.theme = theme;
-    const accent = localStorage.getItem(ACCENT_KEY);
-    if (accent && accent.length > 0) out.accent = accent;
-  } catch {
-    // localStorage unavailable (private mode etc.) — ignore.
-  }
-  return out;
-}
-
-/** Determine the effective theme/accent: localStorage > config > defaults. */
-export function initialTheme(cfgTheme?: ThemeConfig): ThemeSettings {
-  const stored = readStored();
-  const theme = stored.theme ?? cfgTheme?.defaultTheme ?? DEFAULT_THEME;
-  const accent = stored.accent ?? cfgTheme?.accent ?? DEFAULT_ACCENT;
-  return { theme, accent };
-}
-
-/** Apply theme/accent to <html> and persist both to localStorage. */
+/** Apply theme/accent to <html>. No persistence: OS owns the theme, config owns the accent. */
 export function applyTheme(theme: ThemeName, accent: string): void {
   document.documentElement.setAttribute("data-theme", theme);
   document.documentElement.setAttribute("data-accent", accent);
-  try {
-    localStorage.setItem(THEME_KEY, theme);
-    localStorage.setItem(ACCENT_KEY, accent);
-  } catch {
-    // ignore persistence failures
-  }
 }
 
-/** Flip the theme, apply + persist it, and return the new name. */
-export function toggleTheme(current: ThemeName, accent: string): ThemeName {
-  const next: ThemeName = current === "dark" ? "light" : "dark";
-  applyTheme(next, accent);
-  return next;
+/** Current theme from the OS preference. */
+export function systemTheme(): ThemeName {
+  return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+/** Subscribe to OS theme changes; returns an unsubscribe function. */
+export function watchSystemTheme(onChange: (t: ThemeName) => void): () => void {
+  const mq = matchMedia("(prefers-color-scheme: dark)");
+  const handler = (e: MediaQueryListEvent): void => onChange(e.matches ? "dark" : "light");
+  mq.addEventListener("change", handler);
+  return () => mq.removeEventListener("change", handler);
 }
 
 /** True when the accent is one of the token-defined values. */

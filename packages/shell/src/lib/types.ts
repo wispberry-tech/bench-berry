@@ -8,9 +8,9 @@
 
 export type WorkspaceId = "design" | "api" | "db";
 
-export type EnablementSource = "default" | "auto" | "config" | "ui" | "env";
+type EnablementSource = "default" | "auto" | "config" | "ui" | "env";
 
-export interface WorkspaceResolution {
+interface WorkspaceResolution {
   enabled: boolean;
   enabledBy: EnablementSource;
   source?: Record<string, unknown>;
@@ -18,7 +18,6 @@ export interface WorkspaceResolution {
 
 export interface ThemeConfig {
   accent?: string;
-  defaultTheme?: "light" | "dark";
 }
 
 export interface ResolvedConfig {
@@ -31,6 +30,7 @@ export interface ResolvedConfig {
 export interface ApiSnapshot {
   title?: string;
   version?: string;
+  server?: string;
   endpointCount: number;
   ops: {
     id: string;
@@ -39,13 +39,26 @@ export interface ApiSnapshot {
     summary?: string;
     table?: string;
     comp?: string;
+    operationId?: string;
+    tags?: string[];
+    parameters?: {
+      name: string;
+      in: string;
+      required?: boolean;
+      description?: string;
+      type?: string;
+      example?: unknown;
+    }[];
+    requestSchema?: unknown;
+    requestExample?: unknown;
+    responses?: { status: string; description?: string; schema?: unknown; example?: unknown }[];
   }[];
 }
 
 // ---------- phase 4: story meta + preview protocol (§4.6) ----------
 
 /** One scenario override for a story: name + props to render with. */
-export interface StoryScenario {
+interface StoryScenario {
   name: string;
   props: Record<string, unknown>;
 }
@@ -54,7 +67,7 @@ export interface StoryScenario {
  * Per-story metadata carried in the design snapshot (§4.6). `file` is the
  * project-relative story path ('src/...'); every other field is optional.
  */
-export interface StoryMeta {
+interface StoryMeta {
   file: string;
   title?: string;
   description?: string;
@@ -66,16 +79,17 @@ export interface StoryMeta {
 
 /**
  * PostMessage protocol between the shell and the live preview iframe
- * (mirrors packages/preview/protocol.ts). The shell sends setProps/setStory
- * and listens for ready/error.
+ * (mirrors packages/preview/protocol.ts). The shell sends
+ * setProps/setStory/setTheme and listens for ready/error.
  */
 export type PreviewMessage =
   | { type: "ready" }
   | { type: "error"; message: string }
   | { type: "setProps"; props: Record<string, unknown> }
-  | { type: "setStory"; storyId: string };
+  | { type: "setStory"; storyId: string }
+  | { type: "setTheme"; theme: "light" | "dark" };
 
-export interface DesignSnapshot {
+interface DesignSnapshot {
   packageName?: string;
   version?: string;
   stories: StoryMeta[];
@@ -84,11 +98,27 @@ export interface DesignSnapshot {
 export interface DbSnapshot {
   error?: string;
   connection?: { host: string; database: string };
-  tables: { name: string; columns: number }[];
+  tables: {
+    name: string;
+    schema: string;
+    rowCount?: number;
+    columns: {
+      name: string;
+      type: string;
+      nullable: boolean;
+      default?: string;
+      primaryKey: boolean;
+    }[];
+    foreignKeys: {
+      column: string;
+      referencesTable: string;
+      referencesColumn: string;
+    }[];
+  }[];
 }
 
 /** Value produced by the aggregate snapshot module for a missing/unparseable file. */
-export interface SnapshotError {
+interface SnapshotError {
   error: string;
 }
 
@@ -122,7 +152,17 @@ export function isDbSnapshot(v: unknown): v is DbSnapshot {
   return Array.isArray(s.tables) && s.tables.every(
     (row) =>
       typeof row === "object" && row !== null && typeof row.name === "string" &&
-      typeof row.columns === "number",
+      typeof row.schema === "string" &&
+      Array.isArray(row.columns) && row.columns.every(
+        (col) =>
+          typeof col === "object" && col !== null && typeof col.name === "string" &&
+          typeof col.type === "string",
+      ) &&
+      Array.isArray(row.foreignKeys) && row.foreignKeys.every(
+        (fk) =>
+          typeof fk === "object" && fk !== null && typeof fk.column === "string" &&
+          typeof fk.referencesTable === "string" && typeof fk.referencesColumn === "string",
+      ),
   );
 }
 
@@ -132,6 +172,10 @@ export function isSnapshotError(v: unknown): v is SnapshotError {
 
 // ---------- workspace metadata ----------
 
+// Pinned to core's `WORKSPACE_IDS` (packages/core/workspace.ts) — this file
+// compiles independently of core, so the literal must be updated alongside
+// any change to the canonical list (registry, config schema, snapshot writer,
+// vite plugin all derive from that const).
 export const WORKSPACE_IDS: readonly WorkspaceId[] = ["design", "api", "db"] as const;
 
 export const WORKSPACE_LABELS: Record<WorkspaceId, string> = {

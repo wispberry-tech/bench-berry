@@ -1,9 +1,8 @@
-// packages/shell/src/lib/keyboard.ts
-/// <reference lib="dom" />
 // Global key handling + data-copy button behavior, mirroring the mockup shell:
-// '/' or Ctrl/Cmd+K opens the palette, Esc closes it, ArrowUp/Down + Home/End
-// move focus through the active workspace's rail, and [data-copy] buttons copy
-// to the clipboard with a transient 'copied' state.
+// '/' or Ctrl/Cmd+K opens the palette, and [data-copy] buttons copy to the
+// clipboard with a transient 'copied' state. The palette's arrow/enter/esc
+// behaviour is owned by bits-ui Command/Dialog (src/Palette.svelte), so the
+// only palette keys handled here are the open triggers.
 import { CHECK_ICON } from "./markup.ts";
 
 export interface PaletteController {
@@ -14,19 +13,12 @@ export interface PaletteController {
 
 const FORM_TAG: Record<string, true> = { INPUT: true, SELECT: true, TEXTAREA: true };
 
-/** Global keydown: palette open/close shortcuts. */
+/** Global keydown: palette open shortcut ('/' and Ctrl/Cmd+K). */
 export function handleGlobalKeydown(e: KeyboardEvent, palette: PaletteController): void {
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
     e.preventDefault();
     if (palette.isOpen()) palette.close();
     else palette.open();
-    return;
-  }
-  if (e.key === "Escape") {
-    if (palette.isOpen()) {
-      e.preventDefault();
-      palette.close();
-    }
     return;
   }
   if (e.key === "/" && !palette.isOpen()) {

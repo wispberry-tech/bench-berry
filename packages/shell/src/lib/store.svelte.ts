@@ -24,7 +24,7 @@ const SNAPSHOTS_MODULE = "virtual:berrybench-snapshots";
 const ENV_MODULE = "virtual:berrybench-env";
 
 /** Live preview environment: `dev` flag + the preview base URL (see §4.6). */
-export interface PreviewEnv {
+interface PreviewEnv {
   dev: boolean;
   preview: { base: string };
 }
@@ -101,13 +101,3 @@ if (hot) {
     applyEnv(list[2]?.default);
   });
 }
-
-export type {
-  ApiSnapshot,
-  DbSnapshot,
-  DesignSnapshot,
-  ResolvedConfig,
-  SnapshotError,
-  ThemeConfig,
-  WorkspaceId,
-} from "./types.ts";

@@ -1,15 +1,18 @@
 <script lang="ts">
-  // Shell chrome: topbar (workspace dropdown, theme toggle, palette button with
-  // '/' hint), main view area, palette overlay, settings route. Route state is
-  // derived from location.hash + the live store; config/snapshot changes
-  // re-resolve so disabled workspaces drop out and deep links redirect.
+  // Shell chrome: topbar (workspace dropdown, palette button with '/' hint),
+  // main view area, palette overlay, settings route. Route state is derived
+  // from location.hash + the live store; config/snapshot changes re-resolve so
+  // disabled workspaces drop out and deep links redirect. Dark mode follows
+  // the OS preference (prefers-color-scheme); the accent tracks config.
   import { config, snapshots } from './lib/store.svelte.ts';
   import { parseHash, resolve, hashFor, go, type Route } from './lib/router.ts';
   import { WORKSPACE_LABELS } from './lib/types.ts';
   import {
-    initialTheme,
-    toggleTheme,
+    systemTheme,
+    watchSystemTheme,
     applyTheme,
+    isKnownAccent,
+    DEFAULT_ACCENT,
     type ThemeName,
   } from './lib/theme.ts';
   import {
@@ -18,6 +21,9 @@
     handleCopyClick,
     type PaletteController,
   } from './lib/keyboard.ts';
+  import Button from './lib/components/ui/button.svelte';
+  import Select from './lib/components/ui/select.svelte';
+  import EmptyState from './lib/components/EmptyState.svelte';
   import Palette from './Palette.svelte';
   import Settings from './Settings.svelte';
   import Design from './workspaces/Design.svelte';
@@ -26,15 +32,15 @@
 
   let route = $state<Route>({ kind: 'workspace', ws: null });
   let paletteOpen = $state(false);
-  let theme = $state<ThemeName>('light');
-  let accent = $state('violet');
+  let theme = $state<ThemeName>(systemTheme());
+  const accent = $derived(
+    isKnownAccent(config.theme?.accent ?? '') ? config.theme!.accent! : DEFAULT_ACCENT,
+  );
 
-  // Theme precedence: localStorage > config.theme > defaults.
-  $effect(() => {
-    const t = initialTheme(config.theme);
-    theme = t.theme;
-    accent = t.accent;
-  });
+  // Live OS preference: theme re-resolves on system flips; the effect's
+  // returned unsubscribe is Svelte's effect cleanup, so the listener is
+  // disposed with the component.
+  $effect(() => watchSystemTheme((t) => (theme = t)));
   $effect(() => {
     applyTheme(theme, accent);
   });
@@ -90,9 +96,7 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="i-search" viewBox="0 0 16 16"><path d="M7 2.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9zm4.5 8.7 3 3.05" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
-    <symbol id="i-command" viewBox="0 0 16 16"><path d="M5.5 3.5A2 2 0 1 0 3.5 5.5h9a2 2 0 1 0-2-2c0 1.104.896 2 2 2v1a2 2 0 1 0 2 2c0 1.104-.896 2-2 2a2 2 0 1 0-2 2 2 2 0 1 0-2-2v-1a2 2 0 1 0-2 2 2 2 0 1 0 2-2v1c0-1.104-.896-2-2-2 0 1.104-.896 2-2 2a2 2 0 1 0-2-2 2 2 0 1 0 2-2h-1c1.104 0 2-.896 2-2 0 1.104.896 2 2 2h1" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-    <symbol id="i-sun" viewBox="0 0 16 16"><path d="M8 2V1m0 14v-1m6-6h1M1 8h1m10.657-3.657.707-.707M3.636 12.364l.707-.707m8.486 0 .707.707M3.636 3.636l.707.707M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
-    <symbol id="i-moon" viewBox="0 0 16 16"><path d="M13.5 9.5A6 6 0 0 1 6.5 2.5a6 6 0 1 0 7 7z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></symbol>
+    <symbol id="i-command" viewBox="0 0 16 16"><path d="M5.5 3.5A2 2 0 1 0 3.5 5.5h9a2 2 0 1 0-2-2c0 1.104.896 2 2 2v1a2 2 0 1 0 2 2c0 1.104-.896 2-2 2a2 2 0 1 0-2 2 2 2 0 1 0-2-2v-1a2 2 0 1 0-2 2 2 2 0 1 0-2-2v1c0-1.104-.896-2-2-2 0 1.104-.896 2-2 2a2 2 0 1 0-2-2 2 2 0 1 0 2-2h-1c1.104 0 2-.896 2-2 0 1.104.896 2 2 2h1" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-chevron-down" viewBox="0 0 16 16"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-cube" viewBox="0 0 16 16"><path d="M8 1.5 13.5 4.5v7L8 14.5 2.5 11.5v-7L8 1.5Zm0 0v6.2m5.5-2.7L8 7.7l-5.5-2.7M8 13.7V7.7" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></symbol>
     <symbol id="i-plug" viewBox="0 0 16 16"><path d="M9.5 2.5V6h4M9.5 2.5h-3M9.5 6c0 .8-.3 1.5-.8 2.1L6 11.1a2.8 2.8 0 1 1-2.1-2.1l3-2.7c.6-.5 1.3-.8 2.1-.8h4a1 1 0 0 1 1 1v0M7 12.5V15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -105,56 +109,54 @@
   </defs>
 </svg>
 
-<div class="app">
-  <div class="main">
-    <header class="topbar">
-      <label class="tb-ws" title="Workspace">
-        <svg class="icon tb-ws-chev"><use href="#i-chevron-down"/></svg>
-        <select
-          value={currentWs ?? ''}
-          onchange={(e) => {
-            const v = (e.currentTarget as HTMLSelectElement).value;
-            if (v) navigate(hashFor({ kind: 'workspace', ws: v as 'design' | 'api' | 'db' }));
-          }}
-        >
-          {#if currentWs === null}
-            <option value="" disabled>—</option>
-          {/if}
-          {#each enabledWorkspaces as id (id)}
-            <option value={id}>{WORKSPACE_LABELS[id]}</option>
-          {/each}
-        </select>
-      </label>
-      <div class="tb-right">
-        <button class="btn btn-ghost" type="button" onclick={() => navigate('#/settings')}>
-          <svg class="icon"><use href="#i-settings"/></svg>
+<div class="flex h-screen overflow-hidden bg-background text-foreground">
+  <div class="flex min-w-0 flex-1 flex-col">
+    <header
+      class="flex flex-none items-center gap-3 border-b border-border bg-background px-3.5"
+      style="height: var(--topbar-h)"
+    >
+      <Select
+        class="w-[220px]"
+        title="Workspace"
+        value={currentWs ?? ''}
+        onchange={(e) => {
+          const v = (e.currentTarget as HTMLSelectElement).value;
+          if (v) navigate(hashFor({ kind: 'workspace', ws: v as 'design' | 'api' | 'db' }));
+        }}
+      >
+        {#if currentWs === null}
+          <option value="" disabled>—</option>
+        {/if}
+        {#each enabledWorkspaces as id (id)}
+          <option value={id}>{WORKSPACE_LABELS[id]}</option>
+        {/each}
+      </Select>
+      <div class="ml-auto flex items-center gap-1.5">
+        <Button variant="ghost" size="sm" onclick={() => navigate('#/settings')}>
+          <svg class="size-4"><use href="#i-settings"/></svg>
           Settings
-        </button>
-        <button
-          class="btn btn-ghost btn-icon"
-          type="button"
-          title="Toggle theme"
-          onclick={() => (theme = toggleTheme(theme, accent))}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          class="gap-1"
+          aria-label="Open command palette"
+          title="Open command palette (/)"
+          onclick={() => (paletteOpen = true)}
         >
-          <svg class="icon"><use href={theme === 'dark' ? '#i-sun' : '#i-moon'}/></svg>
-        </button>
-        <button class="btn btn-outline" type="button" onclick={() => (paletteOpen = true)}>
-          <svg class="icon"><use href="#i-command"/></svg>
+          <svg class="size-4"><use href="#i-command"/></svg>
           <span class="kbd">/</span>
-        </button>
+        </Button>
       </div>
     </header>
 
-    <main class="content">
+    <main class="relative flex-1 overflow-y-auto">
       {#if route.kind === 'settings'}
         <Settings />
       {:else if route.ws === null || enabledWorkspaces.length === 0}
-        <div class="empty">
-          <svg class="icon"><use href="#i-warn"/></svg>
-          <p>No workspaces enabled. Open Settings to enable design, api, or db.</p>
-        </div>
+        <EmptyState message="No workspaces enabled. Open Settings to enable design, api, or db." />
       {:else if route.ws === 'design'}
-        <Design {route} navigate={navigate} />
+        <Design {route} navigate={navigate} theme={theme} />
       {:else if route.ws === 'api'}
         <Api {route} navigate={navigate} />
       {:else if route.ws === 'db'}
@@ -166,8 +168,9 @@
 
 {#if paletteOpen}
   <Palette
+    open={paletteOpen}
+    onOpenChange={(o) => (paletteOpen = o)}
     onclose={() => (paletteOpen = false)}
     navigate={navigate}
-    toggleTheme={() => (theme = toggleTheme(theme, accent))}
   />
 {/if}

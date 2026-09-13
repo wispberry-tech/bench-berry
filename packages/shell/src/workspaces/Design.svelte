@@ -7,12 +7,31 @@
   // controls column; ready/error messages flip the loading/error state.
   import { snapshots, env } from '../lib/store.svelte.ts';
   import { isDesignSnapshot, isSnapshotError, type PreviewMessage } from '../lib/types.ts';
+  import { highlightJson, highlightCode } from '../lib/highlight.ts';
   import { basename, errorPanel } from '../lib/markup.ts';
   import { hashFor, type Route } from '../lib/router.ts';
+  import { readRailState, isCollapsed, setGroupCollapsed } from '../lib/railState.ts';
 
-  let { route, navigate } = $props<{
+  import PageHeader from '../lib/components/PageHeader.svelte';
+  import EmptyState from '../lib/components/EmptyState.svelte';
+  import Card from '../lib/components/ui/card.svelte';
+  import Alert from '../lib/components/ui/alert.svelte';
+  import Badge from '../lib/components/ui/badge.svelte';
+  import Button from '../lib/components/ui/button.svelte';
+  import Input from '../lib/components/ui/input.svelte';
+  import Select from '../lib/components/ui/select.svelte';
+  import Rail from '../lib/components/rail/Rail.svelte';
+  import RailGroup from '../lib/components/rail/RailGroup.svelte';
+  import RailItem from '../lib/components/rail/RailItem.svelte';
+  import Tabs from '../lib/components/ui/tabs.svelte';
+  import TabsList from '../lib/components/ui/tabs-list.svelte';
+  import TabsTrigger from '../lib/components/ui/tabs-trigger.svelte';
+  import TabsContent from '../lib/components/ui/tabs-content.svelte';
+
+  let { route, navigate, theme = 'light' } = $props<{
     route: Route;
     navigate: (hash: string) => void;
+    theme: 'light' | 'dark';
   }>();
 
   const raw = $derived(snapshots.design);
@@ -29,6 +48,24 @@
 
   const packageName = $derived(snap?.packageName ?? 'Design System');
   const version = $derived(snap?.version);
+
+  // ---------- rail collapse state (persisted) ----------
+  let railState = $state(readRailState());
+
+  // Auto-expand the Stories group when the ACTIVE STORY switches (deep link,
+  // palette navigation or first load) so the current selection is always
+  // visible. Deliberately keyed to the id so a user collapsing the group is
+  // not undone by the effect re-running on railState changes.
+  let lastActiveFile = $state<string | null>(activeFile ?? null);
+  $effect(() => {
+    const file = activeFile;
+    if (!file) return;
+    if (file === lastActiveFile) return;
+    lastActiveFile = file;
+    if (isCollapsed(railState, 'design', 'Stories')) {
+      railState = setGroupCollapsed(railState, 'design', 'Stories', false);
+    }
+  });
 
   // ---------- tabs ----------
   type TabId = 'preview' | 'docs' | 'code';
@@ -107,7 +144,7 @@
       frameStory = file;
       postToFrame({ type: 'setProps', props: mergedProps() });
     } else {
-      frameSrc = `${env.preview.base}?story=${encodeURIComponent(file)}`;
+      frameSrc = `${env.preview.base}?story=${encodeURIComponent(file)}&theme=${theme}`;
       frameStory = file;
       previewStatus = 'loading';
       previewMessage = '';
@@ -129,188 +166,228 @@
         previewStatus = 'ready';
         previewMessage = '';
         postToFrame({ type: 'setProps', props: mergedProps() });
+        postToFrame({ type: 'setTheme', theme });
       } else if (msg.type === 'error') {
         previewStatus = 'error';
         previewMessage = typeof msg.message === 'string' ? msg.message : 'Unknown preview error';
       }
-    };
-    window.addEventListener('message', handler);
+    };    window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
+  });
+
+  // Push live theme changes to a ready frame; the boot theme rides in frameSrc.
+  $effect(() => {
+    if (frame && previewStatus === 'ready') {
+      postToFrame({ type: 'setTheme', theme });
+    }
   });
 
   /** Any control change pushes the current merged props to the preview. */
   function onControlChange(): void {
     postToFrame({ type: 'setProps', props: mergedProps() });
   }
-
-  function pretty(v: unknown): string {
-    return JSON.stringify(v, null, 2);
-  }
 </script>
 
-<div class="view-body">
-  <aside class="rail" data-ws="design">
-    <div class="rail-head">
-      <div class="rail-title">{packageName}</div>
-      {#if version}
-        <div class="rail-sub">v{version}</div>
+<div class="view-body flex min-h-full">
+  <Rail title={packageName} sub={version ? `v${version}` : undefined}>
+    {#if snap}
+      <RailGroup
+        ws="design"
+        group="Stories"
+        count={snap.stories.length}
+        collapsed={isCollapsed(railState, 'design', 'Stories')}
+onToggle={() =>
+          (railState = setGroupCollapsed(
+            railState,
+            'design',
+            'Stories',
+            !isCollapsed(railState, 'design', 'Stories'),
+          ))}
+      >
+        {#each snap.stories as story (story.file)}
+          <RailItem
+            active={story.file === activeFile}
+            mono
+            data-ws="design"
+            data-id={story.file}
+            onclick={() => navigate(hashFor({ kind: 'workspace', ws: 'design', key: 'comp', id: story.file }))}
+          >
+            {story.title ?? basename(story.file)}
+          </RailItem>
+        {/each}
+      </RailGroup>
+    {/if}
+  </Rail>
+
+  <div class="min-w-0 flex-1">
+    <div class="mx-auto w-full max-w-[1200px] px-8 pb-16 pt-6">
+      <PageHeader
+        title="Design System"
+        meta={[packageName, version ? `v${version}` : undefined, `${snap?.stories.length ?? 0} stories`]}
+      />
+      {#if error}
+        {@html errorPanel(error)}
+      {:else if snap && activeStory}
+        <div data-ws="design" data-id={activeStory.file}>
+          <h2 class="text-[16px] font-semibold tracking-[-0.015em] text-foreground">
+            {activeStory.title ?? basename(activeStory.file)}
+          </h2>
+          <p class="mt-0.5 font-mono text-[12.5px] text-muted-foreground">{activeStory.file}</p>
+
+          <Tabs value={tab} onValueChange={(v) => (tab = v as TabId)} class="mt-4">
+            <TabsList>
+              <TabsTrigger value="preview">Preview</TabsTrigger>
+              <TabsTrigger value="docs">Docs</TabsTrigger>
+              <TabsTrigger value="code">Code</TabsTrigger>
+            </TabsList>
+            <TabsContent value="preview" class="mt-4">
+              <div class="flex items-start gap-4">
+                <Card class="min-w-0 flex-1 p-0 overflow-hidden">
+                  {#if frameSrc}
+                    <iframe
+                      bind:this={frame}
+                      class="block h-[clamp(380px,60vh,720px)] w-full border-0 bg-white dark:bg-secondary"
+                      sandbox="allow-scripts"
+                      title={activeStory.title ? `${activeStory.title} preview` : 'Story preview'}
+                      src={frameSrc}
+                    ></iframe>
+                    {#if previewStatus === 'loading'}
+                      <p class="px-4 py-2 text-[11px] text-muted-foreground">Loading preview…</p>
+                    {:else if previewStatus === 'error'}
+                      <Alert variant="destructive" class="m-4 flex items-start gap-2">
+                        <Badge variant="destructive">Preview error</Badge>
+                        <p class="text-[11px] leading-snug">{previewMessage}</p>
+                      </Alert>
+                    {/if}
+                  {/if}
+                </Card>
+                <div class="w-[240px] flex-none">
+                  <div class="flex flex-col gap-3 rounded-lg border border-border bg-card p-3.5 shadow-sm">
+                    <div class="text-[10.5px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">
+                      Props
+                    </div>
+                    {#if controls.length > 0}
+                      {#each controls as c (c.key)}
+                        <label class="flex flex-col gap-1.5">
+                          <span class="text-[11.5px] font-medium text-secondary-foreground">{c.key}</span>
+                          {#if c.type === 'enum'}
+                            <Select
+                              value={String(values[c.key] ?? '')}
+                              onchange={(e) => {
+                                values[c.key] = (e.currentTarget as HTMLSelectElement).value;
+                                onControlChange();
+                              }}
+                            >
+                              {#each c.options as opt (opt)}
+                                <option value={opt}>{opt}</option>
+                              {/each}
+                            </Select>
+                          {:else if c.type === 'string'}
+                            <Input
+                              value={typeof values[c.key] === 'string' ? values[c.key] : ''}
+                              oninput={(e) => {
+                                values[c.key] = (e.currentTarget as HTMLInputElement).value;
+                                onControlChange();
+                              }}
+                            />
+                          {:else}
+                            <Input
+                              type="number"
+                              value={typeof values[c.key] === 'number' ? values[c.key] : 0}
+                              oninput={(e) => {
+                                const n = (e.currentTarget as HTMLInputElement).valueAsNumber;
+                                values[c.key] = Number.isFinite(n) ? n : 0;
+                                onControlChange();
+                              }}
+                            />
+                          {/if}
+                        </label>
+                      {/each}
+                    {:else}
+                      <p class="text-[11px] text-muted-foreground">No props schema for this story.</p>
+                    {/if}
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="docs" class="mt-4">
+              <div class="flex max-w-[720px] flex-col gap-3.5">
+                <p class="text-[12.5px] leading-snug text-muted-foreground">
+                  {activeStory.description ?? 'No description.'}
+                </p>
+                {#if activeStory.schema !== undefined}
+                  <div class="overflow-hidden rounded-lg border border-border">
+                    <table class="w-full border-collapse bg-card text-left text-[11.5px]">
+                      <thead>
+                        <tr class="border-b border-border bg-muted/50">
+                          <th class="h-8 px-3.5 font-semibold uppercase tracking-[0.06em] text-muted-foreground">Name</th>
+                          <th class="h-8 px-3.5 font-semibold uppercase tracking-[0.06em] text-muted-foreground">Type</th>
+                          <th class="h-8 px-3.5 font-semibold uppercase tracking-[0.06em] text-muted-foreground">Default</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {#each Object.entries(activeStory.schema) as [key, spec] (key)}
+                          <tr class="border-b border-border last:border-b-0">
+                            <td class="px-3.5 py-2 font-mono text-[11px] text-foreground">{key}</td>
+                            <td class="px-3.5 py-2">
+                              <code class="rounded bg-muted/60 px-1.5 py-0.5 font-mono text-[10.5px] text-secondary-foreground">
+                                {typeof spec === 'object' && spec !== null && 'type' in spec
+                                  ? String((spec as { type: unknown }).type)
+                                  : 'any'}
+                              </code>
+                            </td>
+                            <td class="px-3.5 py-2 font-mono text-[11px] text-muted-foreground">
+                              {activeStory.props?.[key] !== undefined ? String(activeStory.props[key]) : '—'}
+                            </td>
+                          </tr>
+                        {/each}
+                      </tbody>
+                    </table>
+                  </div>
+                {/if}
+                {#if activeStory.props !== undefined || activeStory.schema !== undefined}
+                  <div class="flex flex-col gap-3">
+                    {#if activeStory.props !== undefined}
+                      <div>
+                        <div class="mb-1 text-[10.5px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">props</div>
+                        <pre class="codeblock">{@html highlightJson(activeStory.props)}</pre>
+                      </div>
+                    {/if}
+                    {#if activeStory.schema !== undefined}
+                      <div>
+                        <div class="mb-1 text-[10.5px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">schema</div>
+                        <pre class="codeblock">{@html highlightJson(activeStory.schema)}</pre>
+                      </div>
+                    {/if}
+                  </div>
+                {/if}
+              </div>
+            </TabsContent>
+            <TabsContent value="code" class="mt-4">
+              <div class="flex flex-col gap-2">
+                <div class="flex items-center justify-between gap-2.5">
+                  <span class="text-[10.5px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">code</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    data-copy
+                    data-copy-text={activeStory.code ?? ''}
+                    disabled={!activeStory.code}
+                  >
+                    Copy
+                  </Button>
+                </div>
+                <pre class="codeblock">{@html highlightCode(activeStory.code ?? '')}</pre>
+                {#if !activeStory.code}
+                  <p class="text-[11px] text-muted-foreground">No code sample for this story.</p>
+                {/if}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      {:else}
+        <EmptyState message="No stories in this snapshot yet." />
       {/if}
     </div>
-    {#if snap}
-      <div class="rail-group">Stories</div>
-      {#each snap.stories as story (story.file)}
-        <button
-          class="rail-item"
-          class:active={story.file === activeFile}
-          type="button"
-          data-ws="design"
-          data-id={story.file}
-          onclick={() => navigate(hashFor({ kind: 'workspace', ws: 'design', key: 'comp', id: story.file }))}
-        >
-          <span class="mono">{story.title ?? basename(story.file)}</span>
-        </button>
-      {/each}
-    {/if}
-  </aside>
-
-  <div class="view-content">
-    <div class="view-head">
-      <div>
-        <div class="vh-title">Design System</div>
-        <div class="vh-sub">{packageName}{version ? ` v${version}` : ''} — stories rendered from the latest snapshot.</div>
-      </div>
-    </div>
-    {#if error}
-      {@html errorPanel(error)}
-    {:else if snap && activeStory}
-      <div class="v-ds-pane" data-ws="design" data-id={activeStory.file}>
-        <div class="v-ds-docs-title">{activeStory.title ?? basename(activeStory.file)}</div>
-        <div class="v-ds-docs-sub"><span class="mono">{activeStory.file}</span></div>
-
-        <div class="tabs v-ds-tabs">
-          <button class="tab" class:active={tab === 'preview'} type="button" onclick={() => (tab = 'preview')}>Preview</button>
-          <button class="tab" class:active={tab === 'docs'} type="button" onclick={() => (tab = 'docs')}>Docs</button>
-          <button class="tab" class:active={tab === 'code'} type="button" onclick={() => (tab = 'code')}>Code</button>
-        </div>
-
-        <div class="v-ds-tabpane" class:active={tab === 'preview'}>
-          <div class="v-ds-preview">
-            <div class="v-ds-preview-main">
-              {#if frameSrc}
-                <iframe
-                  bind:this={frame}
-                  class="preview-frame"
-                  sandbox="allow-scripts"
-                  title={activeStory.title ? `${activeStory.title} preview` : 'Story preview'}
-                  src={frameSrc}
-                ></iframe>
-                {#if previewStatus === 'loading'}
-                  <div class="hint v-ds-preview-note">Loading preview…</div>
-                {:else if previewStatus === 'error'}
-                  <div class="v-ds-preview-err">
-                    <span class="badge badge-danger">Preview error</span>
-                    <p class="hint">{previewMessage}</p>
-                  </div>
-                {/if}
-              {/if}
-            </div>
-            {#if controls.length > 0}
-              <div class="v-ds-controls">
-                <div class="v-ds-controls-title">Props</div>
-                {#each controls as c (c.key)}
-                  <label class="field">
-                    <span class="field-label">{c.key}</span>
-                    {#if c.type === 'enum'}
-                      <select
-                        class="select"
-                        value={String(values[c.key] ?? '')}
-                        onchange={(e) => {
-                          values[c.key] = (e.currentTarget as HTMLSelectElement).value;
-                          onControlChange();
-                        }}
-                      >
-                        {#each c.options as opt (opt)}
-                          <option value={opt}>{opt}</option>
-                        {/each}
-                      </select>
-                    {:else if c.type === 'string'}
-                      <input
-                        class="input"
-                        value={typeof values[c.key] === 'string' ? values[c.key] : ''}
-                        oninput={(e) => {
-                          values[c.key] = (e.currentTarget as HTMLInputElement).value;
-                          onControlChange();
-                        }}
-                      />
-                    {:else}
-                      <input
-                        class="input"
-                        type="number"
-                        value={typeof values[c.key] === 'number' ? values[c.key] : 0}
-                        oninput={(e) => {
-                          const n = (e.currentTarget as HTMLInputElement).valueAsNumber;
-                          values[c.key] = Number.isFinite(n) ? n : 0;
-                          onControlChange();
-                        }}
-                      />
-                    {/if}
-                  </label>
-                {/each}
-              </div>
-            {:else}
-              <div class="v-ds-controls v-ds-controls-empty">
-                <div class="v-ds-controls-title">Props</div>
-                <p class="hint">No props schema for this story.</p>
-              </div>
-            {/if}
-          </div>
-        </div>
-
-        <div class="v-ds-tabpane" class:active={tab === 'docs'}>
-          <div class="v-ds-docs">
-            <p class="v-ds-docs-desc">{activeStory.description ?? 'No description.'}</p>
-            {#if activeStory.props !== undefined || activeStory.schema !== undefined}
-              <div class="v-ds-docs-json">
-                {#if activeStory.props !== undefined}
-                  <div>
-                    <div class="v-ds-docs-json-title">props</div>
-                    <pre class="codeblock">{pretty(activeStory.props)}</pre>
-                  </div>
-                {/if}
-                {#if activeStory.schema !== undefined}
-                  <div>
-                    <div class="v-ds-docs-json-title">schema</div>
-                    <pre class="codeblock">{pretty(activeStory.schema)}</pre>
-                  </div>
-                {/if}
-              </div>
-            {/if}
-          </div>
-        </div>
-
-        <div class="v-ds-tabpane" class:active={tab === 'code'}>
-          <div class="v-ds-code-head">
-            <span class="v-ds-docs-json-title">code</span>
-            <button
-              class="btn btn-ghost btn-sm"
-              type="button"
-              data-copy
-              data-copy-text={activeStory.code ?? ''}
-              disabled={!activeStory.code}
-            >
-              Copy
-            </button>
-          </div>
-          <pre class="codeblock">{activeStory.code ?? ''}</pre>
-          {#if !activeStory.code}
-            <p class="hint">No code sample for this story.</p>
-          {/if}
-        </div>
-      </div>
-    {:else}
-      <div class="empty">
-        <p>No stories in this snapshot yet.</p>
-      </div>
-    {/if}
   </div>
 </div>

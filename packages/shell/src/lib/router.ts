@@ -8,7 +8,7 @@ import type { ResolvedConfig, WorkspaceId } from "./types.ts";
 import { isApiSnapshot, isDbSnapshot, isDesignSnapshot, WORKSPACE_IDS } from "./types.ts";
 
 /** Parsed hash — ws is null for empty/unknown hashes and for '#/settings'. */
-export interface ParsedHash {
+interface ParsedHash {
   ws: WorkspaceId | null;
   key?: string;
   id?: string;

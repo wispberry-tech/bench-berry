@@ -5,7 +5,17 @@
   // read-only note explains the config is compiled in.
   import { config } from './lib/store.svelte.ts';
   import { WORKSPACE_IDS, type WorkspaceId } from './lib/types.ts';
-  import { ACCENTS, DEFAULT_ACCENT, isKnownAccent, type ThemeName } from './lib/theme.ts';
+  import { ACCENTS, DEFAULT_ACCENT, isKnownAccent } from './lib/theme.ts';
+
+  import PageHeader from './lib/components/PageHeader.svelte';
+  import Section from './lib/components/Section.svelte';
+  import Card from './lib/components/ui/card.svelte';
+  import Badge from './lib/components/ui/badge.svelte';
+  import Switch from './lib/components/ui/switch.svelte';
+  import Label from './lib/components/ui/label.svelte';
+  import Select from './lib/components/ui/select.svelte';
+  import Alert from './lib/components/ui/alert.svelte';
+  import Button from './lib/components/ui/button.svelte';
 
   interface SaveResponse {
     ok: boolean;
@@ -19,7 +29,6 @@
     db: false,
   });
   let accent = $state<string>(DEFAULT_ACCENT);
-  let defaultTheme = $state<ThemeName>('light');
   let saving = $state(false);
   let status = $state<{ ok: boolean; message: string } | null>(null);
 
@@ -32,17 +41,16 @@
     }
     const cfgAccent = config.theme?.accent ?? DEFAULT_ACCENT;
     accent = isKnownAccent(cfgAccent) ? cfgAccent : DEFAULT_ACCENT;
-    defaultTheme = config.theme?.defaultTheme ?? 'light';
     status = null;
   });
 
   function buildDelta(): {
     workspaces?: Record<string, { enabled: boolean }>;
-    theme?: { accent?: string; defaultTheme?: ThemeName };
+    theme?: { accent?: string };
   } {
     const delta: {
       workspaces?: Record<string, { enabled: boolean }>;
-      theme?: { accent?: string; defaultTheme?: ThemeName };
+      theme?: { accent?: string };
     } = {};
     const workspaces: Record<string, { enabled: boolean }> = {};
     for (const id of WORKSPACE_IDS) {
@@ -50,9 +58,8 @@
       if (draft[id] !== orig) workspaces[id] = { enabled: draft[id] };
     }
     if (Object.keys(workspaces).length > 0) delta.workspaces = workspaces;
-    const theme: { accent?: string; defaultTheme?: ThemeName } = {};
+    const theme: { accent?: string } = {};
     if (accent !== (config.theme?.accent ?? DEFAULT_ACCENT)) theme.accent = accent;
-    if (defaultTheme !== (config.theme?.defaultTheme ?? 'light')) theme.defaultTheme = defaultTheme;
     if (Object.keys(theme).length > 0) delta.theme = theme;
     return delta;
   }
@@ -80,85 +87,75 @@
   }
 </script>
 
-<div class="settings-wrap">
-  <div class="view-head">
-    <div>
-      <div class="vh-title">Settings</div>
-      <div class="vh-sub">Which workspaces are enabled, and how the shell looks. Changes are written back to the project config.</div>
-    </div>
-  </div>
+<div class="mx-auto w-full max-w-[640px] px-8 pb-16 pt-6">
+  <PageHeader
+    title="Settings"
+    sub="Which workspaces are enabled, and how the shell looks. Changes are written back to the project config."
+  />
 
   {#if !dev}
-    <div class="settings-note">
-      <svg class="icon"><use href="#i-warn"/></svg>
-      <span>Settings are compiled into this build — edit <span class="mono">berrybench.config.ts</span> in the project root and restart the dev server.</span>
-    </div>
+    <Alert class="mb-4 flex items-start gap-2">
+      <svg class="size-4 flex-none" style="stroke-width: 1.2" aria-hidden="true">
+        <use href="#i-warn" />
+      </svg>
+      <span class="text-xs leading-relaxed"
+        >Settings are compiled into this build — edit
+        <code class="font-mono">berrybench.config.ts</code> in the project root and restart the dev
+        server.</span
+      >
+    </Alert>
   {/if}
 
-  <div class="settings-section-title">Workspaces</div>
-  <div class="panel">
-    {#each WORKSPACE_IDS as id (id)}
-      <div class="ws-card">
-        <div class="ws-card-name">
-          <span class="mono">{id}</span>
-          <span class="badge badge-neutral">{config.workspaces[id]?.enabledBy ?? 'default'}</span>
+  <Section title="Workspaces">
+    <Card class="divide-y divide-border overflow-hidden">
+      {#each WORKSPACE_IDS as id (id)}
+        <div class="flex items-center gap-3 px-4 py-3">
+          <div class="min-w-0 flex-1">
+            <code class="font-mono text-[12.5px] font-semibold text-foreground">{id}</code>
+            <Badge variant="secondary" class="ml-2">{config.workspaces[id]?.enabledBy ?? 'default'}</Badge>
+          </div>
+          <div class="flex flex-none items-center gap-3">
+            {#if dev}
+              <span class="text-xs text-muted-foreground">{draft[id] ? 'enabled' : 'disabled'}</span>
+              <Switch bind:checked={draft[id]} aria-label={`Toggle ${id}`} />
+            {:else}
+              <span class="text-xs text-muted-foreground"
+                >{config.workspaces[id]?.enabled ? 'enabled' : 'disabled'}</span
+              >
+            {/if}
+          </div>
         </div>
-        <div class="ws-card-toggle">
-          {#if dev}
-            <label class="hint" for="ws-{id}">
-              {draft[id] ? 'enabled' : 'disabled'}
-            </label>
-            <input id="ws-{id}" class="checkbox" type="checkbox" bind:checked={draft[id]} />
-          {:else}
-            <span class="hint">{config.workspaces[id]?.enabled ? 'enabled' : 'disabled'}</span>
-          {/if}
+      {/each}
+    </Card>
+  </Section>
+
+  <Section title="Theme" class="mt-6">
+    <Card>
+      <div class="flex items-center justify-between gap-3 px-4 py-3">
+        <div class="flex flex-col gap-1">
+          <Label class="text-secondary-foreground">Accent</Label>
+          <span class="text-[11px] text-muted-foreground"
+            >Applied as <code class="font-mono">data-accent</code> on the shell.</span
+          >
         </div>
+        {#if dev}
+          <Select class="w-36" bind:value={accent}>
+            {#each ACCENTS as a (a)}
+              <option value={a}>{a}</option>
+            {/each}
+          </Select>
+        {:else}
+          <Badge variant="default">{isKnownAccent(accent) ? accent : DEFAULT_ACCENT}</Badge>
+        {/if}
       </div>
-    {/each}
-  </div>
-
-  <div style="height:24px"></div>
-
-  <div class="settings-section-title">Theme</div>
-  <div class="panel">
-    <div class="settings-theme-row">
-      <div class="field">
-        <span class="field-label">Accent</span>
-        <span class="field-hint">Applied as <span class="mono">data-accent</span> on the shell.</span>
-      </div>
-      {#if dev}
-        <select class="select" bind:value={accent}>
-          {#each ACCENTS as a (a)}
-            <option value={a}>{a}</option>
-          {/each}
-        </select>
-      {:else}
-        <span class="badge badge-accent">{isKnownAccent(accent) ? accent : DEFAULT_ACCENT}</span>
-      {/if}
-    </div>
-    <div class="settings-theme-row">
-      <div class="field">
-        <span class="field-label">Default theme</span>
-        <span class="field-hint">Fallback unless overridden by localStorage.</span>
-      </div>
-      {#if dev}
-        <select class="select" bind:value={defaultTheme}>
-          <option value="light">light</option>
-          <option value="dark">dark</option>
-        </select>
-      {:else}
-        <span class="badge badge-neutral">{defaultTheme}</span>
-      {/if}
-    </div>
-  </div>
+    </Card>
+  </Section>
 
   {#if dev}
-    <div class="settings-actions">
-      <button class="btn btn-primary" type="button" disabled={saving} onclick={save}>
-        {saving ? 'Saving…' : 'Save'}
-      </button>
+    <div class="mt-6 flex items-center gap-3">
+      <Button disabled={saving} onclick={save}>{saving ? 'Saving…' : 'Save'}</Button>
       {#if status}
-        <span class="settings-status {status.ok ? 'ok' : 'err'}">{status.message}</span>
+        <span class="text-xs {status.ok ? 'text-success' : 'text-destructive'}">{status.message}</span>
       {/if}
     </div>
   {/if}
