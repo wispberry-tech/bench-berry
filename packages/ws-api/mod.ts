@@ -7,6 +7,10 @@ export interface ApiOp {
   method: string;
   path: string;
   summary?: string;
+  /** Cross-link target id: ws-db table name (§5 `x-berrybench` extension). */
+  table?: string;
+  /** Cross-link target id: ws-design story (by title or file basename, §5 `x-berrybench` extension). */
+  comp?: string;
 }
 
 export interface ApiSnapshot {
@@ -68,6 +72,12 @@ function buildOps(spec: Record<string, unknown>): ApiOp[] {
       }
       const entry: ApiOp = { id: slugId(path, method), method: method.toUpperCase(), path };
       if (summary !== undefined) entry.summary = summary;
+      // §5 cross-links: `x-berrybench: { table?, comp? }` per op (object form only).
+      const xb = op['x-berrybench'];
+      if (isRecord(xb)) {
+        if (typeof xb.table === 'string') entry.table = xb.table;
+        if (typeof xb.comp === 'string') entry.comp = xb.comp;
+      }
       ops.push(entry);
     }
   }

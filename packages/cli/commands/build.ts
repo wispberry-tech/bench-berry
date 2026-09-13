@@ -58,6 +58,22 @@ export async function cmdBuild(
   printSnapshotLines(out, written.resolved, written.results);
 
   const shellDir = Deno.env.get('BERRYBENCH_SHELL_DIR') ?? join(import.meta.dirname!, '../../shell');
+  // Compiled binaries cannot reach the repo-relative default (import.meta.dirname
+  // is the executable's extract dir); fail with a clear hint instead of a vite
+  // error deep in the build.
+  if (Deno.env.get('BERRYBENCH_SHELL_DIR') === undefined) {
+    try {
+      await Deno.stat(shellDir);
+    } catch (error) {
+      if (error instanceof Deno.errors.NotFound) {
+        err(
+          `Shell app not found at ${shellDir}; run from a berry-bench checkout or set BERRYBENCH_SHELL_DIR to a berry-bench checkout/packages/shell`,
+        );
+        return 1;
+      }
+      throw error;
+    }
+  }
   const outDir = join(root, 'dist');
   try {
     await viteBuild({

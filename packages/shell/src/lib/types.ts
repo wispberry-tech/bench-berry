@@ -32,7 +32,7 @@ export interface ApiSnapshot {
   title?: string;
   version?: string;
   endpointCount: number;
-  ops: { id: string; method: string; path: string; summary?: string }[];
+  ops: { id: string; method: string; path: string; summary?: string; table?: string; comp?: string }[];
 }
 
 // ---------- phase 4: story meta + preview protocol (§4.6) ----------

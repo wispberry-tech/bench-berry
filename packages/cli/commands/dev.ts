@@ -51,6 +51,12 @@ export async function cmdDev(
   }
 
   const shellDir = Deno.env.get('BERRYBENCH_SHELL_DIR') ?? join(import.meta.dirname!, '../../shell');
+  if (await missingShellDir(shellDir)) {
+    err(
+      `Shell app not found at ${shellDir}; run from a berry-bench checkout or set BERRYBENCH_SHELL_DIR to a berry-bench checkout/packages/shell`,
+    );
+    return 1;
+  }
   const port = Number(Deno.env.get('BERRYBENCH_PORT') ?? 5173);
 
   let server: ViteDevServer;
@@ -115,6 +121,23 @@ export async function cmdDev(
   out(`berrybench preview: http://localhost:${actualPreviewPort}/preview/`);
   await loop;
   return 0; // unreachable: watchLoop never resolves
+}
+
+/**
+ * True when the shell app is unreachable: the resolved shell dir does not
+ * exist and BERRYBENCH_SHELL_DIR was not set to point elsewhere. In compiled
+ * binaries import.meta.dirname points at the executable's extract dir, so the
+ * default repo-relative path is the compiled-binary failure case.
+ */
+async function missingShellDir(shellDir: string): Promise<boolean> {
+  if (Deno.env.get('BERRYBENCH_SHELL_DIR') !== undefined) return false;
+  try {
+    await Deno.stat(shellDir);
+    return false;
+  } catch (error) {
+    if (error instanceof Deno.errors.NotFound) return true;
+    throw error;
+  }
 }
 
 /** One resolve + snapshot write + report pass, shared by the initial run and every watch batch. */

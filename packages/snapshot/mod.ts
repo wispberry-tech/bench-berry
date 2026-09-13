@@ -32,6 +32,8 @@ const apiOpSchema = z.object({
   method: z.string(),
   path: z.string(),
   summary: z.string().optional(),
+  table: z.string().optional(),
+  comp: z.string().optional(),
 });
 
 /** ws-api snapshot shape: `{ title?, version?, endpointCount, ops }`. */

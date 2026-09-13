@@ -24,10 +24,12 @@ function capturingCtx(cwd: string): {
 
 Deno.test('init scaffolds a config and config --print --json resolves it', async (t) => {
   const tmp = await Deno.makeTempDir();
+  let initStdout: string[] = [];
   try {
     await t.step('init writes the config file', async () => {
       const cap = capturingCtx(tmp);
       const code = await run(['init', '.'], cap.ctx);
+      initStdout = cap.stdout;
       if (code !== 0) throw new Error(`init exited ${code}: ${cap.stderr.join('\n')}`);
       const expected = 'wrote berrybench.config.ts (design: on, api: on, db: off)';
       if (cap.stdout.includes(expected) !== true) {
@@ -42,6 +44,17 @@ Deno.test('init scaffolds a config and config --print --json resolves it', async
       }
     });
 
+    await t.step('init scaffolds the story convention on an empty project', async () => {
+      await Deno.stat(`${tmp}/src/components/button.svelte`);
+      await Deno.stat(`${tmp}/src/components/button.story.svelte`);
+      if (
+        initStdout.join('\n').includes('scaffolded src/components/button.story.svelte (story convention)') !==
+        true
+      ) {
+        throw new Error(`scaffold line not printed: ${initStdout.join('\n')}`);
+      }
+    });
+
     await t.step('config --print --json shows design enabled', async () => {
       const cap = capturingCtx(tmp);
       const code = await run(['config', '--print', '--json'], cap.ctx);
@@ -49,6 +62,30 @@ Deno.test('init scaffolds a config and config --print --json resolves it', async
       const parsed = JSON.parse(cap.stdout.join('\n'));
       if (parsed.workspaces?.design?.enabled !== true) {
         throw new Error(`design not enabled: ${JSON.stringify(parsed.workspaces)}`);
+      }
+    });
+  } finally {
+    await Deno.remove(tmp, { recursive: true });
+  }
+});
+
+Deno.test('init with an existing src/ skips the story scaffold', async (t) => {
+  const tmp = await Deno.makeTempDir();
+  try {
+    await Deno.mkdir(`${tmp}/src`, { recursive: true });
+    await t.step('config written, scaffold skipped silently', async () => {
+      const cap = capturingCtx(tmp);
+      const code = await run(['init', '.'], cap.ctx);
+      if (code !== 0) throw new Error(`init exited ${code}: ${cap.stderr.join('\n')}`);
+      await Deno.stat(`${tmp}/berrybench.config.ts`);
+      if (cap.stdout.join('\n').includes('scaffolded') === true) {
+        throw new Error(`scaffold line printed despite existing src/: ${cap.stdout.join('\n')}`);
+      }
+      try {
+        await Deno.stat(`${tmp}/src/components/button.story.svelte`);
+        throw new Error('story scaffold unexpectedly created');
+      } catch (error) {
+        if ((error as Error).message.includes('unexpectedly created')) throw error;
       }
     });
   } finally {

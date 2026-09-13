@@ -3,9 +3,9 @@
   // pane with method, path, summary and a copy button; header shows the
   // snapshot title/version/endpointCount, or an error panel when the snapshot
   // is missing.
-  import { snapshots } from '../lib/store.svelte.ts';
-  import { isApiSnapshot, isSnapshotError } from '../lib/types.ts';
-  import { apiOpPane, errorPanel, methodTone } from '../lib/markup.ts';
+  import { snapshots, config } from '../lib/store.svelte.ts';
+  import { isApiSnapshot, isDbSnapshot, isDesignSnapshot, isSnapshotError } from '../lib/types.ts';
+  import { apiOpPane, basename, crossLinkChip, errorPanel, methodTone } from '../lib/markup.ts';
   import { hashFor, type Route } from '../lib/router.ts';
 
   let { route, navigate } = $props<{
@@ -26,6 +26,35 @@
 
   const title = $derived(snap?.title ?? 'API Explorer');
   const endpointCount = $derived(snap?.endpointCount ?? 0);
+
+  // §5 cross-link chips: rendered per op only when the target workspace is
+  // enabled AND the referenced id exists in its snapshot; otherwise omitted.
+  const dbSnap = $derived(isDbSnapshot(snapshots.db) ? snapshots.db : null);
+  const designSnap = $derived(isDesignSnapshot(snapshots.design) ? snapshots.design : null);
+
+  const opLinks = $derived.by(() => {
+    const op = activeOp;
+    if (!op) return '';
+    const parts: string[] = [];
+    if (op.table && config.workspaces.db?.enabled && dbSnap?.tables.some((t) => t.name === op.table)) {
+      parts.push(crossLinkChip(
+        `table: ${op.table}`,
+        hashFor({ kind: 'workspace', ws: 'db', key: 'table', id: op.table }),
+        'i-db',
+      ));
+    }
+    if (op.comp && config.workspaces.design?.enabled) {
+      const found = designSnap?.stories.some((s) => (s.title ?? basename(s.file)) === op.comp);
+      if (found) {
+        parts.push(crossLinkChip(
+          `comp: ${op.comp}`,
+          hashFor({ kind: 'workspace', ws: 'design', key: 'comp', id: op.comp }),
+          'i-cube',
+        ));
+      }
+    }
+    return parts.join('');
+  });
 </script>
 
 <div class="view-body">
@@ -62,7 +91,7 @@
     {#if error}
       {@html errorPanel(error)}
     {:else if snap && activeOp}
-      {@html apiOpPane(snap, activeOp.id)}
+      {@html apiOpPane(snap, activeOp.id, opLinks)}
     {:else}
       <div class="empty">
         <p>No operations in this snapshot yet.</p>

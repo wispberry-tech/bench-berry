@@ -33,6 +33,16 @@ export function methodTone(method: string): string {
   return METHOD_TONE[method.toUpperCase()] ?? 'badge-neutral';
 }
 
+/**
+ * Small accent cross-link chip (§5): an anchor deep-linking into another
+ * enabled workspace (`#/db?table=…` / `#/design?comp=…`). Icon glyph is one
+ * of the shell sprite ids (`i-db`, `i-cube`, …); the router resolves unknown
+ * deep-link ids to the target workspace home.
+ */
+export function crossLinkChip(label: string, href: string, icon = 'i-plug'): string {
+  return `<a class="badge badge-accent" href="${esc(href)}"><svg class="icon"><use href="#${esc(icon)}"/></svg>${esc(label)}</a>`;
+}
+
 /** `<span>` method chip, uniform min-width so op paths align in the rail. */
 export function methodChip(method: string): string {
   const m = method.toUpperCase();
@@ -54,7 +64,7 @@ export function errorPanel(message: string): string {
 
 // ---------- panes ----------
 
-export function apiOpPane(snap: ApiSnapshot, id: string): string {
+export function apiOpPane(snap: ApiSnapshot, id: string, links = ''): string {
   const op = snap.ops.find((o) => o.id === id);
   if (!op) {
     return `<div class="v-api-detail" data-ws="api" data-id="${esc(id)}">${errorPanel(`no op '${id}' in snapshot`)}</div>`;
@@ -65,7 +75,7 @@ export function apiOpPane(snap: ApiSnapshot, id: string): string {
       ${methodChip(op.method)}
       <h2 class="v-api-path mono">${esc(op.path)}</h2>
     </div>
-    <div class="v-api-actions">${copyButton(op.path, 'Copy path')}</div>
+    <div class="v-api-actions">${links}${copyButton(op.path, 'Copy path')}</div>
   </div>
   ${op.summary ? `<p class="v-api-summary">${esc(op.summary)}</p>` : ''}
 </div>`;

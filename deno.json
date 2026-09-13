@@ -8,6 +8,7 @@
   "tasks": {
     "check": "deno check $(find packages -name '*.ts' -not -path '*/fixtures/*')",
     "test": "deno test -A packages/",
+    "smoke": "deno test -A packages/cli/smoke_test.ts",
     "cli": "deno run -A packages/cli/main.ts"
   },
   "imports": {

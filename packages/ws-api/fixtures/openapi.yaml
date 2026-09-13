@@ -6,6 +6,9 @@ paths:
   /issues:
     get:
       summary: List issues
+      x-berrybench:
+        table: issues
+        comp: badge
       responses:
         '200':
           description: A list of issues

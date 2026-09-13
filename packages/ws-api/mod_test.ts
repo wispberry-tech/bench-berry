@@ -1,6 +1,7 @@
 import { assertEquals, assert, assertRejects } from 'jsr:@std/assert@^1';
 import { join } from '@std/path';
 import type { ProjectContext } from '../core/workspace.ts';
+import { apiSnapshotSchema } from '../snapshot/mod.ts';
 import { apiPlugin, type ApiSnapshot } from './mod.ts';
 
 const FIXTURE = join(import.meta.dirname!, 'fixtures', 'openapi.yaml');
@@ -63,6 +64,29 @@ Deno.test('api plugin load from fixture', async (t) => {
 
     await t.step('summary falls back to first line of description', async () => {
       assertEquals(snapshot.ops[1].summary, 'Create a new issue.');
+    });
+
+    await t.step('x-berrybench extension parses table + comp cross-links', async () => {
+      assertEquals(snapshot.ops[0].table, 'issues');
+      assertEquals(snapshot.ops[0].comp, 'badge');
+    });
+
+    await t.step('ops without x-berrybench keep the old shape (fields absent)', async () => {
+      assertEquals('table' in snapshot.ops[1], false);
+      assertEquals('comp' in snapshot.ops[1], false);
+      assertEquals('table' in snapshot.ops[2], false);
+      assertEquals('comp' in snapshot.ops[2], false);
+    });
+
+    await t.step('snapshot round-trips through apiSnapshotSchema (old ops unchanged)', async () => {
+      const parsed = apiSnapshotSchema.parse(JSON.parse(JSON.stringify(snapshot)));
+      assertEquals(parsed.endpointCount, 3);
+      assertEquals(parsed.ops[0].table, 'issues');
+      assertEquals(parsed.ops[0].comp, 'badge');
+      assertEquals(parsed.ops[1].table, undefined);
+      assertEquals(parsed.ops[1].comp, undefined);
+      assertEquals(parsed.ops[2].table, undefined);
+      assertEquals(parsed.ops[2].comp, undefined);
     });
 
     await t.step('loads from openapi.yml too', async () => {
