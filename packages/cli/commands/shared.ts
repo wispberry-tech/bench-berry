@@ -1,4 +1,4 @@
-import { resolve } from '@std/path';
+import { join, resolve } from '@std/path';
 import { createRegistry, resolveConfig } from '../../core/mod.ts';
 import type {
   ProjectContext,
@@ -16,6 +16,9 @@ import type { CliContext } from '../main.ts';
 export const VERSION = '0.1.0';
 
 export const CONFIG_FILE = 'berrybench.config.ts';
+
+/** Project-relative file the vite plugin boots `virtual:berrybench-config` from. */
+export const RESOLVED_CONFIG_FILE = '.berrybench/resolved-config.json';
 
 /** All workspace plugins, in canonical display order. */
 export const plugins: readonly WorkspacePlugin[] = [designPlugin, apiPlugin, dbPlugin];
@@ -90,12 +93,30 @@ export interface SnapshotWrite {
   results: Record<WorkspaceId, SnapshotResult>;
 }
 
+/**
+ * Persist the resolved config to `.berrybench/resolved-config.json` (pretty
+ * JSON, trailing newline) — the file `virtual:berrybench-config` boots from.
+ */
+export async function writeResolvedConfigFile(
+  root: string,
+  resolved: ResolvedConfig,
+): Promise<string> {
+  const dir = join(root, '.berrybench');
+  await Deno.mkdir(dir, { recursive: true });
+  const path = join(dir, 'resolved-config.json');
+  await Deno.writeTextFile(path, `${JSON.stringify(resolved, null, 2)}\n`);
+  return path;
+}
+
 export async function writeProjectSnapshots(
   root: string,
   env: Record<string, string | undefined>,
 ): Promise<SnapshotWrite> {
   const resolved = await resolveConfig({ root, env }, plugins);
   const results = await writeSnapshots({ root, plugins, resolved });
+  // Every snapshot pass refreshes the resolved config so a `dev` server boots
+  // (and reloads) from real data without a prior `build`.
+  await writeResolvedConfigFile(root, resolved);
   return { resolved, results };
 }
 

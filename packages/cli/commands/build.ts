@@ -1,9 +1,13 @@
 import { join } from '@std/path';
+import { build as viteBuild } from 'vite';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { ConfigError } from '../../core/mod.ts';
+import { berrybench } from '../../vite-plugin/mod.ts';
 import type { CliContext } from '../main.ts';
 import {
   printSnapshotLines,
   projectDir,
+  RESOLVED_CONFIG_FILE,
   usage,
   writeProjectSnapshots,
   VERSION,
@@ -36,22 +40,38 @@ export async function cmdBuild(
     throw error;
   }
 
-  const berrybenchDir = join(root, '.berrybench');
-  await Deno.mkdir(berrybenchDir, { recursive: true });
-
-  const resolvedConfigPath = join(berrybenchDir, 'resolved-config.json');
-  await Deno.writeTextFile(resolvedConfigPath, `${JSON.stringify(written.resolved, null, 2)}\n`);
-
-  const manifestPath = join(berrybenchDir, 'manifest.json');
+  // writeProjectSnapshots already refreshed .berrybench/resolved-config.json;
+  // this command additionally writes the manifest and the shell bundle.
+  const resolvedConfigPath = join(root, RESOLVED_CONFIG_FILE);
+  const manifestPath = join(root, '.berrybench/manifest.json');
   const manifest = {
     version: VERSION,
     generatedAt: new Date().toISOString(),
     workspaces: written.results,
   };
+  await Deno.mkdir(join(root, '.berrybench'), { recursive: true });
   await Deno.writeTextFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
   out(resolvedConfigPath);
   out(manifestPath);
   printSnapshotLines(out, written.resolved, written.results);
+
+  const shellDir = Deno.env.get('BERRYBENCH_SHELL_DIR') ?? join(import.meta.dirname!, '../../shell');
+  const outDir = join(root, 'dist');
+  try {
+    await viteBuild({
+      root: shellDir,
+      base: './',
+      build: {
+        outDir,
+        emptyOutDir: true,
+      },
+      plugins: [svelte(), berrybench({ root })],
+    });
+  } catch (error) {
+    err(`build failed: ${error instanceof Error ? error.message : String(error)}`);
+    return 1;
+  }
+  out(`built ${outDir}`);
   return 0;
 }

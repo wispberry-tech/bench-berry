@@ -158,6 +158,15 @@ Deno.test('snapshot writes design+api snapshots and skips disabled db', async (t
         throw new Error(`snapshot ids: ${JSON.stringify(ids)}`);
       }
     });
+    await t.step('snapshot pass also refreshed resolved-config.json', async () => {
+      const raw = await Deno.readTextFile(`${tmp}/.berrybench/resolved-config.json`);
+      const resolved = JSON.parse(raw) as { workspaces?: Record<string, { enabled?: boolean }> };
+      if (
+        resolved.workspaces?.api?.enabled !== true || resolved.workspaces?.db?.enabled !== false
+      ) {
+        throw new Error(`resolved-config mismatch: ${raw}`);
+      }
+    });
   } finally {
     await Deno.remove(tmp, { recursive: true });
   }
@@ -182,10 +191,17 @@ Deno.test('build writes resolved-config.json and manifest.json', async (t) => {
   const tmp = await Deno.makeTempDir();
   try {
     await scaffoldProject(tmp, FIXTURE_OPENAPI);
-    await t.step('build exits 0', async () => {
+    await t.step('build exits 0 and shells the bundle', async () => {
       const cap = capturingCtx(tmp);
       const code = await run(['build', '.'], cap.ctx);
       if (code !== 0) throw new Error(`build exited ${code}: ${cap.stderr.join('\n')}`);
+      const stdout = cap.stdout.join('\n');
+      const builtLine = stdout.split('\n').find((line) => line.startsWith('built '));
+      if (builtLine === undefined) {
+        throw new Error(`stdout missing built line: ${stdout}`);
+      }
+      const distDir = builtLine.slice('built '.length).trim();
+      await Deno.stat(`${distDir}/index.html`);
     });
     await t.step('resolved-config.json exists and parses', async () => {
       const raw = await Deno.readTextFile(`${tmp}/.berrybench/resolved-config.json`);

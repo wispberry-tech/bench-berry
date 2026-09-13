@@ -4,7 +4,7 @@
 // under test mirrors what `berrybench build` writes to `.berrybench/`.
 import { join } from '@std/path';
 import { assert, assertMatch } from 'jsr:@std/assert@^1';
-import { build } from 'vite';
+import { build, createServer } from 'vite';
 import { createRegistry, resolveConfig } from '../core/mod.ts';
 import type { ResolvedConfig } from '../core/mod.ts';
 import { designPlugin } from '../ws-design/mod.ts';
@@ -118,6 +118,160 @@ Deno.test('missing snapshot module degrades to an error object', async () => {
     const code = chunkCode(result);
     // The missing snapshot module: `export default { error: 'no snapshot for db' };`
     assert(code.includes('no snapshot for db'), 'bundle missing no-snapshot error');
+  } finally {
+    await Deno.remove(root, { recursive: true });
+  }
+});
+
+/** Boot the plugin in dev-server mode (middleware, no public port) for module-load assertions. */
+async function devServer(root: string) {
+  return createServer({
+    root,
+    configFile: false,
+    logLevel: 'silent',
+    plugins: [berrybench({ root })],
+    server: { middlewareMode: true },
+  });
+}
+
+Deno.test('aggregate snapshot module serves one key per enabled workspace', async () => {
+  const root = await makeProject();
+  try {
+    await Deno.mkdir(join(root, '.berrybench/snapshots'), { recursive: true });
+    const resolved: ResolvedConfig = {
+      workspaces: {
+        design: { enabled: true, enabledBy: 'config' },
+        api: { enabled: true, enabledBy: 'auto' },
+        db: { enabled: false, enabledBy: 'default' },
+      },
+    };
+    await Deno.writeTextFile(
+      join(root, '.berrybench/resolved-config.json'),
+      JSON.stringify(resolved, null, 2),
+    );
+    await Deno.writeTextFile(
+      join(root, '.berrybench/snapshots/design.json'),
+      JSON.stringify({ packageName: '@wisp/ui', stories: [{ file: 'src/Tabs.svelte' }] }, null, 2),
+    );
+    await Deno.writeTextFile(
+      join(root, '.berrybench/snapshots/api.json'),
+      JSON.stringify({ endpointCount: 2, ops: [{ id: 'a', method: 'GET', path: '/a' }] }, null, 2),
+    );
+
+    const server = await devServer(root);
+    try {
+      const mod = await server.ssrLoadModule('virtual:berrybench-snapshots');
+      const snapshots = mod.default as Record<string, unknown>;
+      // Exactly the enabled workspaces: design + api; db stays out.
+      assert(
+        Object.keys(snapshots).sort().join(',') === 'api,design',
+        `aggregate keys: ${Object.keys(snapshots).join(',')}`,
+      );
+      assert(!('db' in snapshots), 'disabled db must be absent from the aggregate');
+      const design = snapshots.design as { packageName?: string };
+      assert(design.packageName === '@wisp/ui', 'design snapshot not served');
+      const api = snapshots.api as { endpointCount?: number };
+      assert(api.endpointCount === 2, 'api snapshot not served');
+    } finally {
+      await server.close();
+    }
+  } finally {
+    await Deno.remove(root, { recursive: true });
+  }
+});
+
+Deno.test('aggregate reports a missing enabled snapshot as an error object', async () => {
+  const root = await makeProject();
+  try {
+    await Deno.mkdir(join(root, '.berrybench/snapshots'), { recursive: true });
+    const resolved: ResolvedConfig = {
+      workspaces: {
+        design: { enabled: false, enabledBy: 'default' },
+        api: { enabled: true, enabledBy: 'config' },
+        db: { enabled: false, enabledBy: 'default' },
+      },
+    };
+    await Deno.writeTextFile(
+      join(root, '.berrybench/resolved-config.json'),
+      JSON.stringify(resolved, null, 2),
+    );
+    // No api.json on disk: the aggregate must degrade per key, never fail the load.
+
+    const server = await devServer(root);
+    try {
+      const mod = await server.ssrLoadModule('virtual:berrybench-snapshots');
+      const snapshots = mod.default as Record<string, unknown>;
+      assert(
+        Object.keys(snapshots).length === 1 && 'api' in snapshots,
+        `expected only api: ${Object.keys(snapshots).join(',')}`,
+      );
+      const api = snapshots.api as { error?: string };
+      assert(api.error === 'no snapshot for api', `unexpected api value: ${JSON.stringify(api)}`);
+    } finally {
+      await server.close();
+    }
+  } finally {
+    await Deno.remove(root, { recursive: true });
+  }
+});
+
+Deno.test('POST /__berrybench/config merges the delta and persists the config file', async () => {
+  const root = await makeProject();
+  try {
+    await Deno.mkdir(join(root, '.berrybench'), { recursive: true });
+    const current: ResolvedConfig = {
+      workspaces: {
+        design: { enabled: true, enabledBy: 'config', source: { storyGlob: 'src/**/*.svelte' } },
+        api: { enabled: true, enabledBy: 'auto' },
+        db: { enabled: false, enabledBy: 'default' },
+      },
+      theme: { accent: '#4f46e5' },
+    };
+    await Deno.writeTextFile(
+      join(root, '.berrybench/resolved-config.json'),
+      JSON.stringify(current, null, 2),
+    );
+
+    // A real (non-middleware) dev server: vite 7 forbids listen() in
+    // middleware mode, and /__berrybench/config is a genuine HTTP endpoint.
+    const server = await createServer({
+      root,
+      configFile: false,
+      logLevel: 'silent',
+      plugins: [berrybench({ root })],
+      server: { port: 0 }, // ephemeral port
+    });
+    try {
+      await server.listen();
+      const port = (server.httpServer!.address() as { port: number }).port;
+      const res = await fetch(`http://127.0.0.1:${port}/__berrybench/config`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          workspaces: { db: { enabled: true } },
+          theme: { defaultTheme: 'dark' },
+        }),
+      });
+      assert(res.status === 200, `expected 200, got ${res.status}`);
+      const body = await res.json() as { ok?: boolean; file?: string };
+      assert(
+        body.ok === true && body.file === 'berrybench.config.ts',
+        `unexpected body: ${JSON.stringify(body)}`,
+      );
+
+      // The canonical writer (core formatConfigFile) persists enablement state
+      // and source; tune the assertions to what the file actually serializes.
+      const text = await Deno.readTextFile(join(root, 'berrybench.config.ts'));
+      assert(text.includes('db: { enabled: true'), `db toggle missing: ${text}`);
+      assert(
+        text.includes("source: { storyGlob: 'src/**/*.svelte' }"),
+        `design source not preserved: ${text}`,
+      );
+      assert(text.includes("accent: '#4f46e5'"), `existing theme accent dropped: ${text}`);
+      assert(text.includes("defaultTheme: 'dark'"), `theme delta missing: ${text}`);
+    } finally {
+      await server.close();
+    }
   } finally {
     await Deno.remove(root, { recursive: true });
   }

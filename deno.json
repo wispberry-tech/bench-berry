@@ -16,7 +16,9 @@
     "@std/path": "jsr:@std/path@^1",
     "@std/fs": "jsr:@std/fs@^1",
     "pg": "npm:pg@^8",
-    "vite": "npm:vite@^7"
+    "vite": "npm:vite@^7",
+    "svelte": "npm:svelte@^5",
+    "@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^5"
   },
   "fmt": {
     "useTabs": false,
