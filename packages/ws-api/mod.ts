@@ -1,6 +1,6 @@
-import { parse as parseYaml } from '@std/yaml';
-import { join } from '@std/path';
-import type { ProjectContext, WorkspacePlugin } from '../core/workspace.ts';
+import { parse as parseYaml } from "@std/yaml";
+import { join } from "@std/path";
+import type { ProjectContext, WorkspacePlugin } from "../core/workspace.ts";
 
 export interface ApiOp {
   id: string;
@@ -20,7 +20,8 @@ export interface ApiSnapshot {
   ops: ApiOp[];
 }
 
-const SPEC_FILE_NAMES = ['openapi.yaml', 'openapi.yml'] as const;
+const SPEC_FILE_NAMES = ["openapi.yaml", "openapi.yml", "swagger.yaml", "swagger.yml"] as const;
+const SPEC_DIRS = [".", "docs", "api"] as const;
 const HTTP_METHODS: Record<string, true> = {
   get: true,
   post: true,
@@ -33,7 +34,7 @@ const HTTP_METHODS: Record<string, true> = {
 
 /** Canonical object guard for this package's YAML-shaped data. */
 export function isRecord(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
+  return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 function fail(root: string, msg: string): never {
@@ -47,11 +48,11 @@ function fail(root: string, msg: string): never {
  * `/issues/{id}` GET -> `issues-seg-get`, `/` GET -> `get`.
  */
 function slugId(path: string, method: string): string {
-  const templated = path.replace(/\{[^}]*\}/g, '{seg}');
+  const templated = path.replace(/\{[^}]*\}/g, "{seg}");
   const base = templated
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
   return base.length > 0 ? `${base}-${method}` : method;
 }
 
@@ -65,18 +66,18 @@ function buildOps(spec: Record<string, unknown>): ApiOp[] {
       if (!HTTP_METHODS[method]) continue; // parameters/$ref/servers/tags/summary/description etc.
       if (!isRecord(op)) continue;
       let summary: string | undefined;
-      if (typeof op.summary === 'string') {
+      if (typeof op.summary === "string") {
         summary = op.summary;
-      } else if (typeof op.description === 'string') {
+      } else if (typeof op.description === "string") {
         summary = op.description.split(/\r?\n/)[0]?.trim() || undefined;
       }
       const entry: ApiOp = { id: slugId(path, method), method: method.toUpperCase(), path };
       if (summary !== undefined) entry.summary = summary;
       // §5 cross-links: `x-berrybench: { table?, comp? }` per op (object form only).
-      const xb = op['x-berrybench'];
+      const xb = op["x-berrybench"];
       if (isRecord(xb)) {
-        if (typeof xb.table === 'string') entry.table = xb.table;
-        if (typeof xb.comp === 'string') entry.comp = xb.comp;
+        if (typeof xb.table === "string") entry.table = xb.table;
+        if (typeof xb.comp === "string") entry.comp = xb.comp;
       }
       ops.push(entry);
     }
@@ -85,25 +86,27 @@ function buildOps(spec: Record<string, unknown>): ApiOp[] {
 }
 
 async function findSpecFile(root: string): Promise<string | undefined> {
-  for (const name of SPEC_FILE_NAMES) {
-    const file = join(root, name);
-    try {
-      const stat = await Deno.stat(file);
-      if (stat.isFile) return file;
-    } catch (err) {
-      if (err instanceof Deno.errors.NotFound) continue;
-      throw err;
+  for (const dir of SPEC_DIRS) {
+    for (const name of SPEC_FILE_NAMES) {
+      const file = join(root, dir, name);
+      try {
+        const stat = await Deno.stat(file);
+        if (stat.isFile) return file;
+      } catch (err) {
+        if (err instanceof Deno.errors.NotFound) continue;
+        throw err;
+      }
     }
   }
   return undefined;
 }
 
 export const apiPlugin: WorkspacePlugin<ApiSnapshot> = {
-  id: 'api',
-  label: 'API Explorer',
-  icon: 'i-api',
+  id: "api",
+  label: "API Explorer",
+  icon: "i-api",
   defaultEnabled: true,
-  requiredDeps: ['openapi.yaml'],
+  requiredDeps: ["openapi.yaml"],
 
   async detect(ctx: ProjectContext): Promise<boolean> {
     return (await findSpecFile(ctx.root)) !== undefined;
@@ -112,7 +115,12 @@ export const apiPlugin: WorkspacePlugin<ApiSnapshot> = {
   async load(ctx: ProjectContext): Promise<ApiSnapshot> {
     const root = ctx.root;
     const file = await findSpecFile(root);
-    if (!file) fail(root, 'no openapi.yaml or openapi.yml found');
+    if (!file) {
+      fail(
+        root,
+        "no openapi/swagger spec found (openapi.yaml, openapi.yml, swagger.yaml, swagger.yml in ., docs/, or api/)",
+      );
+    }
 
     let text: string;
     try {
@@ -127,12 +135,12 @@ export const apiPlugin: WorkspacePlugin<ApiSnapshot> = {
     } catch (err) {
       fail(root, err instanceof Error ? err.message : String(err));
     }
-    if (!isRecord(parsed)) fail(root, 'expected an OpenAPI document object');
+    if (!isRecord(parsed)) fail(root, "expected an OpenAPI document object");
 
     const ops = buildOps(parsed);
     const info = isRecord(parsed.info) ? parsed.info : {};
-    const title = typeof info.title === 'string' ? info.title : undefined;
-    const version = typeof info.version === 'string' ? info.version : undefined;
+    const title = typeof info.title === "string" ? info.title : undefined;
+    const version = typeof info.version === "string" ? info.version : undefined;
 
     const snapshot: ApiSnapshot = { endpointCount: ops.length, ops };
     if (title !== undefined) snapshot.title = title;
