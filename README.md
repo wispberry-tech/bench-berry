@@ -38,11 +38,11 @@ export default {
     api: { enabled: true },
     db: { enabled: false },
   },
-  theme: { accent: 'violet', defaultTheme: 'light' },
+  theme: { accent: 'violet' },
 };
 ```
 
-Enablement resolves by precedence: plugin defaults → auto-detection → config file → `BERRYBENCH_WORKSPACES` env override. Unknown workspace ids, a corrupt file, and a config that enables nothing are hard errors — the settings writer never clobbers a broken file. The optional `theme` block holds the shell's accent color and default `light`/`dark` theme.
+Enablement resolves by precedence: plugin defaults → auto-detection → config file → `BERRYBENCH_WORKSPACES` env override. Unknown workspace ids, a corrupt file, and a config that enables nothing are hard errors — the settings writer never clobbers a broken file. The optional `theme` block holds the shell's accent color. Dark mode follows the operating system's `prefers-color-scheme`.
 
 Settings write-back. In dev, the shell's Settings tab POSTs a delta to `/__berrybench/config`; toggled workspaces are stamped `enabledBy: ui`. The vite plugin merges the validated delta onto the current resolution and rewrites `berrybench.config.ts`. In a production build the Settings page is read-only — the config is compiled in.
 
@@ -55,6 +55,8 @@ Settings write-back. In dev, the shell's Settings tab POSTs a delta to `/__berry
 | `db` | Database | `BERRYBENCH_DATABASE_URL` | off | `{ connection?, tables[], error? }` |
 
 Each enabled workspace writes `.berrybench/snapshots/<id>.json`, validated against a zod schema. Disabled workspaces are skipped. A failed load produces an error state instead of a crash: a project without `src/` yields an empty design snapshot, and the db snapshot carries an `error` string when `BERRYBENCH_DATABASE_URL` is unset or the connection fails. `snapshot --strict` fails the command when any enabled workspace produced an error snapshot.
+
+`api` ops carry additive `operationId?/tags?/parameters?/requestSchema?/responses?` (plus the `table?/comp?` cross-links); `db` `tables[]` items are `{ name, schema, rowCount?, columns[], foreignKeys[] }` — `columns[]` are `{ name, type, nullable, default?, primaryKey }`, `foreignKeys[]` are `{ column, referencesTable, referencesColumn }`.
 
 ## Story convention
 
@@ -88,12 +90,12 @@ Svelte 5 story (`src/stories/button.story.svelte`):
 
 Rules:
 
-- The extractor anchors on the first `title:` literal within the first 2000 chars; `title` may be an unquoted key. Every other key stays quoted and JSON-parseable — the extractor reads balanced `{…}` literals and `JSON.parse`s them, so any non-JSON syntax makes that field fall back to undefined (never a crash). Unknown keys are best-effort and ignored.
+- The extractor anchors on the story's `meta` literal (`export const meta = {…}`) and reads `title`/`description`/`props`/`schema`/`code` from inside it — earlier lowercase `title:`/`props:` in the story body never leak into the meta fields. Without a `meta` const, whole-file extraction applies. `title` may be an unquoted key and keeps a 2000-char window (the entire meta slice, else the file's first 2000 chars). Every other key stays quoted and JSON-parseable — the extractor reads balanced `{…}` literals and `JSON.parse`s them, so any non-JSON syntax makes that field fall back to undefined (never a crash). Unknown keys are best-effort and ignored.
 - `props` (default rendered props), `schema` (drives the props controls), `description` (capped at 2000 chars), `code` (capped at 8000 chars).
 - `scenarios` is an optional array of `{ name, props }` overrides; either a JSON array or a JS-literal array. Items whose props are not JSON-parseable are dropped.
 - React `.tsx` stories: `export default` the component and keep the same `meta` / `scenarios` consts.
 
-The shell's Preview tab embeds the story in a sandboxed iframe (`sandbox="allow-scripts"`, opaque origin) loaded from the preview app (`/preview/?story=<file>` in dev, `./preview/` in the build) and drives it over `postMessage` (`setStory` / `setProps` out, `ready` / `error` back). The Props column renders controls from `meta.schema` — `string` and `number` inputs, `enum` as a select with `options` — and pushes merged props (defaults from `meta.props` overlaid with live control values); scenario buttons apply one named override at a time. The preview bundles all three runtimes and picks one from the host `package.json` (`vue` > `react` > `svelte`).
+The shell's Preview tab embeds the story in a sandboxed iframe (`sandbox="allow-scripts"`, opaque origin) loaded from the preview app (`/preview/?story=<file>` in dev, `./preview/` in the build) and drives it over `postMessage` (`setStory` / `setProps` / `setTheme` out, `ready` / `error` back); the preview boots from `?theme=` and applies `setTheme` so the canvas matches the shell's light/dark mode. The Props column renders controls from `meta.schema` — `string` and `number` inputs, `enum` as a select with `options` — and pushes merged props (defaults from `meta.props` overlaid with live control values). `scenarios` are parsed and typed into the design snapshot but not yet rendered as UI — no component displays them in this pass. The preview bundles all three runtimes and picks one from the host `package.json` (`vue` > `react` > `svelte`).
 
 ## Cross-links
 
@@ -119,7 +121,7 @@ deno compile -A --output berrybench packages/cli/main.ts
 
 `init`, `config`, `detect`, `snapshot`, `--version`, and `--help` work from the binary with no checkout. `dev` and `build` additionally load the shell and preview apps from disk, so when run from a compiled binary they need `BERRYBENCH_SHELL_DIR` pointing at a berry-bench checkout's `packages/shell`; when that directory cannot be found the command exits 1 with a message telling you to `set BERRYBENCH_SHELL_DIR to a berry-bench checkout/packages/shell`.
 
-Environment: `BERRYBENCH_WORKSPACES` (comma-separated enable-list), `BERRYBENCH_DATABASE_URL`, `BERRYBENCH_PORT` (default 5173), `BERRYBENCH_PREVIEW_PORT` (default 5174), `BERRYBENCH_SHELL_DIR`.
+Environment: `BERRYBENCH_WORKSPACES` (comma-separated enable-list), `BERRYBENCH_DATABASE_URL`, `BERRYBENCH_PORT` (default 5173), `BERRYBENCH_PREVIEW_PORT` (default 5174), `BERRYBENCH_SHELL_DIR`. Every command also loads the project root's `.env` at startup — real environment variables always win over it.
 
 ## Development
 
