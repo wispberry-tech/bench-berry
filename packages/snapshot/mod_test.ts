@@ -25,7 +25,7 @@ function resolvedWith(enabled: Partial<Record<WorkspaceId, boolean>>): ResolvedC
   for (const id of ["design", "api", "db"] as const) {
     workspaces[id] = { enabled: enabled[id] ?? false, enabledBy: "default" };
   }
-  return { workspaces };
+  return { workspaces, extra: {} };
 }
 
 async function withTempDir(fn: (root: string) => Promise<void>): Promise<void> {
@@ -39,7 +39,18 @@ async function withTempDir(fn: (root: string) => Promise<void>): Promise<void> {
 
 Deno.test("writeSnapshots writes a valid enabled workspace snapshot", async () => {
   await withTempDir(async (root) => {
-    const plugins = [fakePlugin("api", () => ({ endpointCount: 2, ops: [] }))];
+    const plugins = [fakePlugin("api", () => ({
+      server: "https://api.example.test/v1",
+      endpointCount: 1,
+      ops: [{
+        id: "pets-get",
+        method: "GET",
+        path: "/pets",
+        parameters: [{ name: "limit", in: "query", type: "integer", example: 10 }],
+        requestExample: { limit: 10 },
+        responses: [{ status: "200", description: "OK", example: { limit: 10 } }],
+      }],
+    }))];
     const results = await writeSnapshots({ root, plugins, resolved: resolvedWith({ api: true }) });
 
     assertEquals(
@@ -47,11 +58,25 @@ Deno.test("writeSnapshots writes a valid enabled workspace snapshot", async () =
       { ok: true, file: join(SNAPSHOT_DIR, "api.json") },
     );
     const snap = await readSnapshot<{ endpointCount: number }>(root, "api");
-    assertEquals(snap?.endpointCount, 2);
+    assertEquals(snap?.endpointCount, 1);
 
-    // Deterministic content: pretty-printed JSON + trailing newline.
+    // Deterministic content: pretty-printed JSON + trailing newline. The exact
+    // echo proves the new optional fields (server / param type+example /
+    // requestExample / response example) pass through the zod schema intact.
     const raw = await Deno.readTextFile(snapshotPath(root, "api"));
-    assertEquals(raw, `${JSON.stringify({ endpointCount: 2, ops: [] }, null, 2)}\n`);
+    assertEquals(raw.endsWith("\n"), true);
+    assertEquals(JSON.parse(raw), {
+      server: "https://api.example.test/v1",
+      endpointCount: 1,
+      ops: [{
+        id: "pets-get",
+        method: "GET",
+        path: "/pets",
+        parameters: [{ name: "limit", in: "query", type: "integer", example: 10 }],
+        requestExample: { limit: 10 },
+        responses: [{ status: "200", description: "OK", example: { limit: 10 } }],
+      }],
+    });
   });
 });
 
@@ -108,7 +133,14 @@ Deno.test("readSnapshot and listSnapshots reflect disk state", async () => {
         "api",
         () => ({ endpointCount: 1, ops: [{ id: "o", method: "GET", path: "/x" }] }),
       ),
-      fakePlugin("db", () => ({ tables: [{ name: "t", columns: 1 }] })),
+      fakePlugin("db", () => ({
+        tables: [{
+          name: "t",
+          schema: "public",
+          columns: [{ name: "id", type: "integer", nullable: false, primaryKey: true }],
+          foreignKeys: [],
+        }],
+      })),
     ];
     await writeSnapshots({
       root,

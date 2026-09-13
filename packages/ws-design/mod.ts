@@ -52,8 +52,25 @@ export async function designRootOf(root: string): Promise<string | undefined> {
   return undefined;
 }
 
-/** First `title:` literal found in the first 2000 chars of a story file. */
-const TITLE_RE = /title:\s*['"]([^'"]+)['"]/;
+/**
+ * Story meta declarator: `(export )?const meta = {…}`. Matches `meta` alone,
+ * never `meta2`; anchor for all meta-field extraction (see extractStoryMeta).
+ */
+const META_RE = /(?:export\s+)?const\s+meta\s*=\s*\{/;
+
+/** First `title:` literal found in the first 2000 chars of a story file
+ * (the documented title fallback window). Leading boundary + optional
+ * quote-backreference so `subtitle:`/`storyProps`-style keys never match. */
+const TITLE_RE = /(?<![\w$])["']?title["']?\s*:\s*['"]([^'"]+)['"]/;
+
+/**
+ * Metadata key regexes: `key:`, `"key":`, `'key':` — with a leading
+ * word-boundary and a quote-backreference so `subtitle:`/`scenarios2`/a
+ * `storyProps` prefix never match `props`/`scenarios`/`title`.
+ */
+function keyRe(key: string): RegExp {
+  return new RegExp(`(?<![\\w$])(["']?)${key}\\1\\s*:`);
+}
 
 // Extraction caps (contract §4.6): description at 2000 chars, code at 8000. They
 // mirror the title's fixed 2000-char scan window so one huge literal can't
@@ -82,9 +99,9 @@ function tryParseJson(lit: string): unknown {
  * unterminated literal yields undefined.
  */
 function quotedValue(text: string, key: string): string | undefined {
-  const m = new RegExp(`["']?${key}["']?\\s*:\\s*(['"\`])`).exec(text);
+  const m = new RegExp(`(?<![\\w$])(["']?)${key}\\1\\s*:\\s*(['"\`])`).exec(text);
   if (m === null) return undefined;
-  const quote = m[1]!;
+  const quote = m[2]!;
   let out = "";
   for (let i = m.index + m[0].length; i < text.length; i++) {
     const ch = text[i]!;
@@ -215,17 +232,24 @@ function isStoryScenario(v: unknown): v is StoryScenario {
 function extractScenarios(text: string): DesignStory["scenarios"] {
   // Canonical form is `export const scenarios = [...]` (assignment); the
   // in-object `scenarios: [...]` form also occurs, so accept both.
-  const lit = literalAfter(text, /scenarios\s*[:=]\s*/);
+  const lit = literalAfter(text, /(?<![\w$])scenarios\s*[:=]\s*/);
   if (lit === undefined) return undefined;
   const parsed = tryParseJson(lit);
   if (Array.isArray(parsed)) return parsed.filter(isStoryScenario);
   const items: StoryScenario[] = [];
   for (const segment of topLevelSegments(lit)) {
     const name = quotedValue(segment, "name");
-    const props = parseRecordLiteral(segment, /["']?props["']?\s*:\s*/);
+    const props = parseRecordLiteral(segment, keyRe("props"));
     if (name !== undefined && props !== undefined) items.push({ name, props });
   }
   return items;
+}
+
+/** Balanced `{…}` literal of the story's `meta` const, or undefined when the
+ * declarator is absent or the literal never closes. */
+function metaSliceOf(text: string): string | undefined {
+  if (!META_RE.test(text)) return undefined;
+  return literalAfter(text, /(?:export\s+)?const\s+meta\s*=/);
 }
 
 /**
@@ -235,13 +259,24 @@ function extractScenarios(text: string): DesignStory["scenarios"] {
  * at 8000.
  */
 export function extractStoryMeta(fileText: string, file: string): DesignStory {
+  // Anchor title/description/props/schema/code on the meta literal when one
+  // exists: earlier lowercase `title:`/`props:` in the story BODY must never
+  // hijack them. Without a meta const, whole-file extraction (the documented
+  // fallback) stays unchanged. Title keeps its 2000-char window on top of
+  // that: first the slice, then the whole file when the slice lacks one.
+  const meta = metaSliceOf(fileText);
+  const slice = meta ?? fileText;
+  const title = slice.slice(0, 2000).match(TITLE_RE)?.[1] ??
+    (meta === undefined ? undefined : fileText.slice(0, 2000).match(TITLE_RE)?.[1]);
+  // `scenarios` is a sibling const (never a meta member), so it scans the
+  // whole file regardless of the meta anchor.
   return {
     file,
-    title: fileText.slice(0, 2000).match(TITLE_RE)?.[1],
-    description: quotedValue(fileText, "description")?.slice(0, DESCRIPTION_MAX),
-    props: parseRecordLiteral(fileText, /["']?props["']?\s*:\s*/),
-    schema: parseRecordLiteral(fileText, /["']?schema["']?\s*:\s*/),
-    code: quotedValue(fileText, "code")?.slice(0, CODE_MAX),
+    title,
+    description: quotedValue(slice, "description")?.slice(0, DESCRIPTION_MAX),
+    props: parseRecordLiteral(slice, keyRe("props")),
+    schema: parseRecordLiteral(slice, keyRe("schema")),
+    code: quotedValue(slice, "code")?.slice(0, CODE_MAX),
     scenarios: extractScenarios(fileText),
   };
 }

@@ -235,3 +235,54 @@ Deno.test("extractStoryMeta: scenario item with unparseable props is dropped", (
 
   eq(story.scenarios, [], "unparseable scenario props dropped (props required by shape)");
 });
+
+Deno.test("extractStoryMeta: body title:/props: never hijack when a meta const exists", () => {
+  // The feral-audit repro: an earlier lowercase `title:`/`props:` inside the
+  // story BODY (a component call) must not leak into the meta fields.
+  const text = [
+    "<script>",
+    "  import { createComp } from './runtime';",
+    "  const state = createComp({ props: { bogus: true }, title: 'Hijack' });",
+    "</script>",
+    "<script module>",
+    '  export const meta = { title: "Button", "props": { "label": "Click me" } };',
+    "</script>",
+  ].join("\n");
+  const story = extractStoryMeta(text, "src/button.story.svelte");
+
+  assert(story.title === "Button", `title must come from meta, got ${story.title}`);
+  eq(story.props, { label: "Click me" }, "props must come from meta");
+});
+
+Deno.test("extractStoryMeta: meta props wins over an earlier scenarios2 props array", () => {
+  // A `scenarios2` array's `props:` must not become meta.props (`{}`).
+  const text = [
+    "const scenarios2 = [{ name: 'A', props: {} }];",
+    'export const meta = { title: \'Card\', props: { "label": "Hi" } };',
+  ].join("\n");
+  const story = extractStoryMeta(text, "src/card.story.svelte");
+
+  eq(story.props, { label: "Hi" }, "props from meta, not scenarios2");
+});
+
+Deno.test("extractStoryMeta: unquoted subtitle: does not hijack title", () => {
+  const text = [
+    "export const meta = {",
+    "  title: 'Real',",
+    "  subtitle: 'Not a title',",
+    "};",
+  ].join("\n");
+  const story = extractStoryMeta(text, "src/subtitle.story.svelte");
+
+  assert(story.title === "Real", `title must be 'Real', got ${story.title}`);
+});
+
+Deno.test("extractStoryMeta: meta without title falls back to the whole-file window", () => {
+  const text = [
+    "// file-level topic: title: 'Legacy' (documented whole-file fallback)",
+    "export const meta = { props: { 'label': 'x' } };",
+  ].join("\n");
+  const story = extractStoryMeta(text, "src/legacy.story.svelte");
+
+  assert(story.title === "Legacy", `title via whole-file fallback, got ${story.title}`);
+});

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { join } from "@std/path";
+import { WORKSPACE_IDS } from "../core/mod.ts";
 import type { ProjectContext, ResolvedConfig, WorkspaceId, WorkspacePlugin } from "../core/mod.ts";
 
 /** Project-relative directory (under `root`) holding workspace snapshots. */
@@ -29,12 +30,31 @@ const apiOpSchema = z.object({
   summary: z.string().optional(),
   table: z.string().optional(),
   comp: z.string().optional(),
+  operationId: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  parameters: z.array(z.object({
+    name: z.string(),
+    in: z.string(),
+    required: z.boolean().optional(),
+    description: z.string().optional(),
+    type: z.string().optional(),
+    example: z.unknown().optional(),
+  })).optional(),
+  requestSchema: z.unknown().optional(),
+  requestExample: z.unknown().optional(),
+  responses: z.array(z.object({
+    status: z.string(),
+    description: z.string().optional(),
+    schema: z.unknown().optional(),
+    example: z.unknown().optional(),
+  })).optional(),
 });
 
-/** ws-api snapshot shape: `{ title?, version?, endpointCount, ops }`. */
+/** ws-api snapshot shape: `{ title?, version?, server?, endpointCount, ops }`. */
 export const apiSnapshotSchema = z.object({
   title: z.string().optional(),
   version: z.string().optional(),
+  server: z.string().optional(),
   endpointCount: z.number(),
   ops: z.array(apiOpSchema),
 });
@@ -67,7 +87,20 @@ export const dbSnapshotSchema = z.object({
   }).optional(),
   tables: z.array(z.object({
     name: z.string(),
-    columns: z.number(),
+    schema: z.string(),
+    rowCount: z.number().optional(),
+    columns: z.array(z.object({
+      name: z.string(),
+      type: z.string(),
+      nullable: z.boolean(),
+      default: z.string().optional(),
+      primaryKey: z.boolean(),
+    })),
+    foreignKeys: z.array(z.object({
+      column: z.string(),
+      referencesTable: z.string(),
+      referencesColumn: z.string(),
+    })),
   })),
 });
 
@@ -75,8 +108,6 @@ export const dbSnapshotSchema = z.object({
 export const errorSnapshotSchema = z.object({
   error: z.string(),
 });
-
-const WORKSPACE_IDS: readonly WorkspaceId[] = ["design", "api", "db"];
 
 const SNAPSHOT_SCHEMAS: Record<WorkspaceId, z.ZodTypeAny> = {
   api: apiSnapshotSchema,
