@@ -1,14 +1,15 @@
 // packages/preview/protocol.ts
 // PostMessage protocol between the shell and the live preview iframe (§4.6).
-// Direction: shell -> preview is setProps/setStory; preview -> shell is
-// ready/error. Pure TS with no DOM dependency so this file stays
+// Direction: shell -> preview is setProps/setStory/setTheme; preview -> shell
+// is ready/error. Pure TS with no DOM dependency so this file stays
 // deno-checkable anywhere. The shell mirrors the same union in
 // packages/shell/src/lib/types.ts (it must not import from this package).
 export type PreviewMessage =
   | { type: "ready" }
   | { type: "error"; message: string }
   | { type: "setProps"; props: Record<string, unknown> }
-  | { type: "setStory"; storyId: string };
+  | { type: "setStory"; storyId: string }
+  | { type: "setTheme"; theme: "light" | "dark" };
 
 /**
  * Validate unknown postMessage data as a PreviewMessage. Returns null for
@@ -33,6 +34,10 @@ export function parsePreviewMessage(data: unknown): PreviewMessage | null {
     case "setStory":
       return typeof record.storyId === "string"
         ? { type: "setStory", storyId: record.storyId }
+        : null;
+    case "setTheme":
+      return record.theme === "light" || record.theme === "dark"
+        ? { type: "setTheme", theme: record.theme }
         : null;
     default:
       return null;

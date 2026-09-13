@@ -10,10 +10,6 @@ import { type Component as SvelteComponent, mount, unmount } from "svelte";
 
 export type PreviewFramework = "svelte" | "react" | "vue";
 
-interface SvelteComponentLike {
-  new (options: { target: HTMLElement; props: Record<string, unknown> }): unknown;
-}
-
 // React 18+ forbids a second createRoot on the same container (warns and
 // leaks a root), so each container gets one memoized root, cleared once at
 // creation. A per-render key is bumped so props changes remount the component
@@ -27,6 +23,40 @@ const vueApps = new WeakMap<HTMLElement, { unmount(): void }>();
 
 // Svelte 5 has no `new Component()` API: mount()/unmount() pair per render.
 const svelteUnmounts = new WeakMap<HTMLElement, () => void>();
+
+// The most recently mounted instance (framework + container). main.ts's
+// setError tears it down via unmountActive() — framework-correctly — instead
+// of wiping React's committed DOM (breaking its fiber bookkeeping) or leaking
+// live svelte/vue instances.
+let activeHandle: { el: HTMLElement; kind: PreviewFramework } | undefined;
+
+/**
+ * Tear down the most recently mounted story instance (if any) and clear its
+ * container. Each framework has its own teardown so unmounting React goes
+ * through root.unmount() (never manual DOM wiping) and vue/svelte instances
+ * are unmounted rather than leaked.
+ */
+export function unmountActive(): void {
+  const active = activeHandle;
+  activeHandle = undefined;
+  if (active === undefined) return;
+  const { el, kind } = active;
+  switch (kind) {
+    case "svelte":
+      svelteUnmounts.get(el)?.();
+      svelteUnmounts.delete(el);
+      break;
+    case "react":
+      reactRoots.get(el)?.unmount();
+      reactRoots.delete(el);
+      break;
+    case "vue":
+      vueApps.get(el)?.unmount();
+      vueApps.delete(el);
+      break;
+  }
+  el.replaceChildren();
+}
 
 /**
  * Clear `el` and mount the story component with `props` for `framework`.
@@ -72,4 +102,5 @@ export function renderStory(
       vueApp.mount(el);
       break;
   }
+  activeHandle = { el, kind: framework };
 }
