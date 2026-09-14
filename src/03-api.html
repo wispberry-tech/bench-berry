@@ -1,0 +1,756 @@
+<style>
+/* ============================================================
+   Prism — API Explorer view (v-api- prefixed styles only)
+   ============================================================ */
+.v-api-method{font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;min-width:52px;justify-content:center;text-align:center;flex:none}
+.v-api-chip{height:18px;padding:0 6px;font-size:10px}
+.v-api-desc{white-space:normal;line-height:1.5}
+.v-api-detail{display:flex;flex-direction:column;gap:18px}
+.v-api-head{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.v-api-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.v-api-path{font-size:17px;font-weight:600;letter-spacing:-.01em;color:var(--text)}
+.v-api-summary{font-size:12.5px;color:var(--text-2);margin-top:5px;max-width:720px;line-height:1.55}
+.v-api-actions{margin-left:auto;display:flex;gap:8px;flex:none;flex-wrap:wrap}
+.v-api-code{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--text-3);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.v-api-grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:20px;align-items:start}
+.v-api-section-title{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin:0 0 8px}
+.v-api-col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.v-api-hint{margin-top:2px}
+.v-api-resp-row{display:flex;flex-direction:column;gap:6px}
+.v-api-resp-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.v-api-resp-meta .badge{height:18px;font-size:10px}
+.v-api-resp-desc{font-size:12px;color:var(--text-2)}
+.v-api-meta{display:flex;align-items:center;gap:16px;padding:12px 16px;flex-wrap:wrap}
+.v-api-meta .hint{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em}
+.v-api-ref{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.v-api-ref-cell{display:flex;align-items:center;gap:10px;min-width:0}
+.v-api-ref-cell .icon{color:var(--text-3)}
+.v-api-ref-meta{margin-left:auto}
+.v-api-copy-src{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.v-api-filter-empty{display:none;padding:10px 16px 12px;font-size:12px;color:var(--text-3)}
+.v-api-filter-empty.on{display:block}
+.v-api-hide{display:none}
+@media (max-width:1560px){.v-api-grid{grid-template-columns:1fr}}
+</style>
+
+<section class="view" id="view-api" data-view="api">
+  <div class="view-body">
+    <aside class="rail">
+      <div class="rail-head">
+        <div class="rail-title"><svg class="icon"><use href="#i-plug"/></svg>openapi.yaml<span class="badge badge-neutral" style="margin-left:auto">v3.1.0</span></div>
+        <div class="rail-sub">23 endpoints · synced 5m ago</div>
+      </div>
+      <div class="rail-search">
+        <svg class="icon"><use href="#i-search"/></svg>
+        <input type="text" id="v-api-rail-search" placeholder="Filter endpoints…">
+      </div>
+      <div class="rail-group">Issues</div>
+      <button class="rail-item active" data-op="issues"><span class="badge badge-info v-api-method v-api-chip">GET</span><span class="mono">/issues</span><span class="v-api-code">→ 200</span></button>
+      <button class="rail-item" data-op="create_issue"><span class="badge badge-success v-api-method v-api-chip">POST</span><span class="mono">/issues</span><span class="v-api-code">→ 201</span></button>
+      <button class="rail-item" data-op="get_issue"><span class="badge badge-info v-api-method v-api-chip">GET</span><span class="mono">/issues/{id}</span><span class="v-api-code">→ 200</span></button>
+      <button class="rail-item" data-op="update_issue"><span class="badge badge-warning v-api-method v-api-chip">PATCH</span><span class="mono">/issues/{id}</span><span class="v-api-code">→ 200</span></button>
+      <button class="rail-item" data-op="delete_issue"><span class="badge badge-danger v-api-method v-api-chip">DELETE</span><span class="mono">/issues/{id}</span><span class="v-api-code">→ 204</span></button>
+      <button class="rail-item" data-op="add_comment"><span class="badge badge-success v-api-method v-api-chip">POST</span><span class="mono">/issues/{id}/comments</span><span class="v-api-code">→ 201</span></button>
+      <div class="rail-group">Users</div>
+      <button class="rail-item" data-op="users"><span class="badge badge-info v-api-method v-api-chip">GET</span><span class="mono">/users</span><span class="v-api-code">→ 200</span></button>
+      <button class="rail-item" data-op="get_user"><span class="badge badge-info v-api-method v-api-chip">GET</span><span class="mono">/users/{id}</span><span class="v-api-code">→ 200</span></button>
+      <button class="rail-item" data-op="update_user"><span class="badge badge-warning v-api-method v-api-chip">PATCH</span><span class="mono">/users/{id}</span><span class="v-api-code">→ 200</span></button>
+      <div class="rail-group">Teams</div>
+      <button class="rail-item" data-op="teams"><span class="badge badge-info v-api-method v-api-chip">GET</span><span class="mono">/teams</span><span class="v-api-code">→ 200</span></button>
+      <button class="rail-item" data-op="get_team"><span class="badge badge-info v-api-method v-api-chip">GET</span><span class="mono">/teams/{slug}</span><span class="v-api-code">→ 200</span></button>
+      <button class="rail-item" data-op="team_projects"><span class="badge badge-info v-api-method v-api-chip">GET</span><span class="mono">/teams/{slug}/projects</span><span class="v-api-code">→ 200</span></button>
+      <div class="rail-group">Projects</div>
+      <button class="rail-item" data-op="projects"><span class="badge badge-info v-api-method v-api-chip">GET</span><span class="mono">/projects</span><span class="v-api-code">→ 200</span></button>
+      <button class="rail-item" data-op="get_project"><span class="badge badge-info v-api-method v-api-chip">GET</span><span class="mono">/projects/{id}</span><span class="v-api-code">→ 200</span></button>
+      <button class="rail-item" data-op="update_project"><span class="badge badge-warning v-api-method v-api-chip">PATCH</span><span class="mono">/projects/{id}</span><span class="v-api-code">→ 200</span></button>
+      <button class="rail-item" data-op="archive_project"><span class="badge badge-success v-api-method v-api-chip">POST</span><span class="mono">/projects/{id}/archive</span><span class="v-api-code">→ 200</span></button>
+      <div class="rail-group">Comments</div>
+      <button class="rail-item" data-op="comments"><span class="badge badge-info v-api-method v-api-chip">GET</span><span class="mono">/comments</span><span class="v-api-code">→ 200</span></button>
+      <button class="rail-item" data-op="get_comment"><span class="badge badge-info v-api-method v-api-chip">GET</span><span class="mono">/comments/{id}</span><span class="v-api-code">→ 200</span></button>
+      <button class="rail-item" data-op="delete_comment"><span class="badge badge-danger v-api-method v-api-chip">DELETE</span><span class="mono">/comments/{id}</span><span class="v-api-code">→ 204</span></button>
+      <div class="rail-group">Labels</div>
+      <button class="rail-item" data-op="labels"><span class="badge badge-info v-api-method v-api-chip">GET</span><span class="mono">/labels</span><span class="v-api-code">→ 200</span></button>
+      <button class="rail-item" data-op="create_label"><span class="badge badge-success v-api-method v-api-chip">POST</span><span class="mono">/labels</span><span class="v-api-code">→ 201</span></button>
+      <button class="rail-item" data-op="update_label"><span class="badge badge-warning v-api-method v-api-chip">PATCH</span><span class="mono">/labels/{id}</span><span class="v-api-code">→ 200</span></button>
+      <button class="rail-item" data-op="delete_label"><span class="badge badge-danger v-api-method v-api-chip">DELETE</span><span class="mono">/labels/{id}</span><span class="v-api-code">→ 204</span></button>
+      <div class="v-api-filter-empty" id="v-api-filter-empty">No endpoints match your filter</div>
+    </aside>
+    <div class="view-content">
+      <div class="view-head">
+        <div>
+          <div class="vh-title">API Explorer</div>
+          <div class="vh-sub">openapi.yaml v3.1.0 · 23 endpoints. Authenticated with bearer tokens; documented against the local mock — no network egress.</div>
+        </div>
+        <div class="vh-actions">
+          <span class="badge badge-success"><svg class="icon"><use href="#i-shield"/></svg>Bearer · helx_live_…</span>
+        </div>
+      </div>
+      <div class="v-api-detail" id="v-api-detail"></div>
+    </div>
+  </div>
+  <span id="v-api-url" class="v-api-copy-src" data-copy-text="https://api.helix.dev/v1/issues"></span>
+  <span id="v-api-snippet" class="v-api-copy-src" data-copy-text="curl -X GET 'https://api.helix.dev/v1/issues'"></span>
+</section>
+
+<script>
+if (document.getElementById('view-api')) {
+(function () {
+  'use strict';
+
+  /* ---------- shared spans for hand-highlighted JSON samples ---------- */
+  var ISSUE1 = `{
+  <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"iss_9f2c1a"</span><span class="tok-p">,</span>
+  <span class="tok-k">"title"</span><span class="tok-p">:</span> <span class="tok-s">"Redesign empty state for issue list"</span><span class="tok-p">,</span>
+  <span class="tok-k">"status"</span><span class="tok-p">:</span> <span class="tok-s">"in_progress"</span><span class="tok-p">,</span>
+  <span class="tok-k">"priority"</span><span class="tok-p">:</span> <span class="tok-s">"high"</span><span class="tok-p">,</span>
+  <span class="tok-k">"project_id"</span><span class="tok-p">:</span> <span class="tok-s">"prj_42"</span><span class="tok-p">,</span>
+  <span class="tok-k">"assignee_id"</span><span class="tok-p">:</span> <span class="tok-s">"usr_1173"</span><span class="tok-p">,</span>
+  <span class="tok-k">"labels"</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-s">"ui"</span><span class="tok-p">,</span> <span class="tok-s">"p0"</span><span class="tok-p">]</span><span class="tok-p">,</span>
+  <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-09-02T09:41:00Z"</span><span class="tok-p">,</span>
+  <span class="tok-k">"updated_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-09-11T16:03:00Z"</span>
+}`;
+  var ISSUE2 = `{
+  <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"iss_8821f4"</span><span class="tok-p">,</span>
+  <span class="tok-k">"title"</span><span class="tok-p">:</span> <span class="tok-s">"Fix flaky comment sync job"</span><span class="tok-p">,</span>
+  <span class="tok-k">"status"</span><span class="tok-p">:</span> <span class="tok-s">"todo"</span><span class="tok-p">,</span>
+  <span class="tok-k">"priority"</span><span class="tok-p">:</span> <span class="tok-s">"medium"</span><span class="tok-p">,</span>
+  <span class="tok-k">"project_id"</span><span class="tok-p">:</span> <span class="tok-s">"prj_42"</span><span class="tok-p">,</span>
+  <span class="tok-k">"assignee_id"</span><span class="tok-p">:</span> <span class="tok-s">"usr_0411"</span><span class="tok-p">,</span>
+  <span class="tok-k">"labels"</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-s">"backend"</span><span class="tok-p">]</span><span class="tok-p">,</span>
+  <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-09-08T12:10:00Z"</span><span class="tok-p">,</span>
+  <span class="tok-k">"updated_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-09-11T08:22:00Z"</span>
+}`;
+  var ISSUE3 = `{
+  <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"iss_7703be"</span><span class="tok-p">,</span>
+  <span class="tok-k">"title"</span><span class="tok-p">:</span> <span class="tok-s">"Add keyboard shortcut for command palette"</span><span class="tok-p">,</span>
+  <span class="tok-k">"status"</span><span class="tok-p">:</span> <span class="tok-s">"done"</span><span class="tok-p">,</span>
+  <span class="tok-k">"priority"</span><span class="tok-p">:</span> <span class="tok-s">"low"</span><span class="tok-p">,</span>
+  <span class="tok-k">"project_id"</span><span class="tok-p">:</span> <span class="tok-s">"prj_17"</span><span class="tok-p">,</span>
+  <span class="tok-k">"assignee_id"</span><span class="tok-p">:</span> <span class="tok-s">"usr_0902"</span><span class="tok-p">,</span>
+  <span class="tok-k">"labels"</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-s">"ui"</span><span class="tok-p">,</span> <span class="tok-s">"p2"</span><span class="tok-p">]</span><span class="tok-p">,</span>
+  <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-08-21T10:30:00Z"</span><span class="tok-p">,</span>
+  <span class="tok-k">"updated_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-09-10T17:45:00Z"</span>
+}`;
+  var ISSUE_NEW = `{
+  <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"iss_c0319f"</span><span class="tok-p">,</span>
+  <span class="tok-k">"title"</span><span class="tok-p">:</span> <span class="tok-s">"Audit API rate-limit headers"</span><span class="tok-p">,</span>
+  <span class="tok-k">"status"</span><span class="tok-p">:</span> <span class="tok-s">"todo"</span><span class="tok-p">,</span>
+  <span class="tok-k">"priority"</span><span class="tok-p">:</span> <span class="tok-s">"medium"</span><span class="tok-p">,</span>
+  <span class="tok-k">"project_id"</span><span class="tok-p">:</span> <span class="tok-s">"prj_42"</span><span class="tok-p">,</span>
+  <span class="tok-k">"assignee_id"</span><span class="tok-p">:</span> <span class="tok-s">"usr_1173"</span><span class="tok-p">,</span>
+  <span class="tok-k">"labels"</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-s">"backend"</span><span class="tok-p">,</span> <span class="tok-s">"api"</span><span class="tok-p">]</span><span class="tok-p">,</span>
+  <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-09-12T09:02:00Z"</span><span class="tok-p">,</span>
+  <span class="tok-k">"updated_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-09-12T09:02:00Z"</span>
+}`;
+  var ISSUE_UPD = `{
+  <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"iss_9f2c1a"</span><span class="tok-p">,</span>
+  <span class="tok-k">"title"</span><span class="tok-p">:</span> <span class="tok-s">"Redesign empty state for issue list"</span><span class="tok-p">,</span>
+  <span class="tok-k">"status"</span><span class="tok-p">:</span> <span class="tok-s">"in_review"</span><span class="tok-p">,</span>
+  <span class="tok-k">"priority"</span><span class="tok-p">:</span> <span class="tok-s">"high"</span><span class="tok-p">,</span>
+  <span class="tok-k">"project_id"</span><span class="tok-p">:</span> <span class="tok-s">"prj_42"</span><span class="tok-p">,</span>
+  <span class="tok-k">"assignee_id"</span><span class="tok-p">:</span> <span class="tok-s">"usr_1173"</span><span class="tok-p">,</span>
+  <span class="tok-k">"labels"</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-s">"ui"</span><span class="tok-p">,</span> <span class="tok-s">"p0"</span><span class="tok-p">]</span><span class="tok-p">,</span>
+  <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-09-02T09:41:00Z"</span><span class="tok-p">,</span>
+  <span class="tok-k">"updated_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-09-12T10:04:00Z"</span>
+}`;
+  var USER1 = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"usr_1173"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"Aiko Tanaka"</span><span class="tok-p">,</span> <span class="tok-k">"email"</span><span class="tok-p">:</span> <span class="tok-s">"aiko@helix.dev"</span><span class="tok-p">,</span> <span class="tok-k">"avatar_url"</span><span class="tok-p">:</span> <span class="tok-s">"https://cdn.helix.dev/avatars/usr_1173.png"</span><span class="tok-p">,</span> <span class="tok-k">"role"</span><span class="tok-p">:</span> <span class="tok-s">"admin"</span><span class="tok-p">,</span> <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2024-03-18T11:02:00Z"</span> <span class="tok-p">}</span>`;
+  var USER2 = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"usr_0411"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"Marcus Webb"</span><span class="tok-p">,</span> <span class="tok-k">"email"</span><span class="tok-p">:</span> <span class="tok-s">"marcus@helix.dev"</span><span class="tok-p">,</span> <span class="tok-k">"avatar_url"</span><span class="tok-p">:</span> <span class="tok-s">"https://cdn.helix.dev/avatars/usr_0411.png"</span><span class="tok-p">,</span> <span class="tok-k">"role"</span><span class="tok-p">:</span> <span class="tok-s">"editor"</span><span class="tok-p">,</span> <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2024-06-02T09:15:00Z"</span> <span class="tok-p">}</span>`;
+  var USER3 = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"usr_0902"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"Priya Nair"</span><span class="tok-p">,</span> <span class="tok-k">"email"</span><span class="tok-p">:</span> <span class="tok-s">"priya@helix.dev"</span><span class="tok-p">,</span> <span class="tok-k">"avatar_url"</span><span class="tok-p">:</span> <span class="tok-s">"https://cdn.helix.dev/avatars/usr_0902.png"</span><span class="tok-p">,</span> <span class="tok-k">"role"</span><span class="tok-p">:</span> <span class="tok-s">"viewer"</span><span class="tok-p">,</span> <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2024-09-27T13:40:00Z"</span> <span class="tok-p">}</span>`;
+  var USER_UPD = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"usr_0902"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"Priya Nair"</span><span class="tok-p">,</span> <span class="tok-k">"email"</span><span class="tok-p">:</span> <span class="tok-s">"priya@helix.dev"</span><span class="tok-p">,</span> <span class="tok-k">"role"</span><span class="tok-p">:</span> <span class="tok-s">"editor"</span><span class="tok-p">,</span> <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2024-09-27T13:40:00Z"</span> <span class="tok-p">}</span>`;
+  var TEAM1 = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"team_8"</span><span class="tok-p">,</span> <span class="tok-k">"slug"</span><span class="tok-p">:</span> <span class="tok-s">"mobile"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"Mobile Platform"</span><span class="tok-p">,</span> <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2023-11-02T08:00:00Z"</span> <span class="tok-p">}</span>`;
+  var TEAM2 = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"team_3"</span><span class="tok-p">,</span> <span class="tok-k">"slug"</span><span class="tok-p">:</span> <span class="tok-s">"design-systems"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"Design Systems"</span><span class="tok-p">,</span> <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2024-01-12T10:20:00Z"</span> <span class="tok-p">}</span>`;
+  var PROJ1 = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"prj_42"</span><span class="tok-p">,</span> <span class="tok-k">"slug"</span><span class="tok-p">:</span> <span class="tok-s">"prism-dashboard"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"Prism Dashboard"</span><span class="tok-p">,</span> <span class="tok-k">"team_id"</span><span class="tok-p">:</span> <span class="tok-s">"team_3"</span><span class="tok-p">,</span> <span class="tok-k">"status"</span><span class="tok-p">:</span> <span class="tok-s">"active"</span><span class="tok-p">,</span> <span class="tok-k">"color"</span><span class="tok-p">:</span> <span class="tok-s">"#7c5cf0"</span><span class="tok-p">,</span> <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-01-15T14:20:00Z"</span> <span class="tok-p">}</span>`;
+  var PROJ2 = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"prj_17"</span><span class="tok-p">,</span> <span class="tok-k">"slug"</span><span class="tok-p">:</span> <span class="tok-s">"helix-web"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"Core Web App"</span><span class="tok-p">,</span> <span class="tok-k">"team_id"</span><span class="tok-p">:</span> <span class="tok-s">"team_8"</span><span class="tok-p">,</span> <span class="tok-k">"status"</span><span class="tok-p">:</span> <span class="tok-s">"active"</span><span class="tok-p">,</span> <span class="tok-k">"color"</span><span class="tok-p">:</span> <span class="tok-s">"#2970e6"</span><span class="tok-p">,</span> <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2025-10-09T10:00:00Z"</span> <span class="tok-p">}</span>`;
+  var PROJ3 = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"prj_09"</span><span class="tok-p">,</span> <span class="tok-k">"slug"</span><span class="tok-p">:</span> <span class="tok-s">"mobile-app"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"Mobile App"</span><span class="tok-p">,</span> <span class="tok-k">"team_id"</span><span class="tok-p">:</span> <span class="tok-s">"team_8"</span><span class="tok-p">,</span> <span class="tok-k">"status"</span><span class="tok-p">:</span> <span class="tok-s">"on_hold"</span><span class="tok-p">,</span> <span class="tok-k">"color"</span><span class="tok-p">:</span> <span class="tok-s">"#0f9d6e"</span><span class="tok-p">,</span> <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2025-08-30T16:45:00Z"</span> <span class="tok-p">}</span>`;
+  var PROJ_UPD = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"prj_17"</span><span class="tok-p">,</span> <span class="tok-k">"slug"</span><span class="tok-p">:</span> <span class="tok-s">"helix-web"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"Core Web App"</span><span class="tok-p">,</span> <span class="tok-k">"team_id"</span><span class="tok-p">:</span> <span class="tok-s">"team_8"</span><span class="tok-p">,</span> <span class="tok-k">"status"</span><span class="tok-p">:</span> <span class="tok-s">"on_hold"</span><span class="tok-p">,</span> <span class="tok-k">"color"</span><span class="tok-p">:</span> <span class="tok-s">"#2970e6"</span><span class="tok-p">,</span> <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2025-10-09T10:00:00Z"</span> <span class="tok-p">}</span>`;
+  var PROJ_ARC = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"prj_42"</span><span class="tok-p">,</span> <span class="tok-k">"slug"</span><span class="tok-p">:</span> <span class="tok-s">"prism-dashboard"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"Prism Dashboard"</span><span class="tok-p">,</span> <span class="tok-k">"team_id"</span><span class="tok-p">:</span> <span class="tok-s">"team_3"</span><span class="tok-p">,</span> <span class="tok-k">"status"</span><span class="tok-p">:</span> <span class="tok-s">"archived"</span><span class="tok-p">,</span> <span class="tok-k">"color"</span><span class="tok-p">:</span> <span class="tok-s">"#7c5cf0"</span><span class="tok-p">,</span> <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-01-15T14:20:00Z"</span> <span class="tok-p">}</span>`;
+  var CMT1 = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"cmt_5519"</span><span class="tok-p">,</span> <span class="tok-k">"body"</span><span class="tok-p">:</span> <span class="tok-s">"Reproduced on staging — the cursor skips a page when the labels filter is set."</span><span class="tok-p">,</span> <span class="tok-k">"issue_id"</span><span class="tok-p">:</span> <span class="tok-s">"iss_9f2c1a"</span><span class="tok-p">,</span> <span class="tok-k">"author_id"</span><span class="tok-p">:</span> <span class="tok-s">"usr_0411"</span><span class="tok-p">,</span> <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-09-11T15:47:00Z"</span> <span class="tok-p">}</span>`;
+  var CMT2 = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"cmt_5524"</span><span class="tok-p">,</span> <span class="tok-k">"body"</span><span class="tok-p">:</span> <span class="tok-s">"Landing the pagination fix today; will monitor the sync job for 24h."</span><span class="tok-p">,</span> <span class="tok-k">"issue_id"</span><span class="tok-p">:</span> <span class="tok-s">"iss_8821f4"</span><span class="tok-p">,</span> <span class="tok-k">"author_id"</span><span class="tok-p">:</span> <span class="tok-s">"usr_0902"</span><span class="tok-p">,</span> <span class="tok-k">"created_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-09-12T08:31:00Z"</span> <span class="tok-p">}</span>`;
+  var LBL1 = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"lbl_1"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"p0"</span><span class="tok-p">,</span> <span class="tok-k">"color"</span><span class="tok-p">:</span> <span class="tok-s">"#dc2626"</span> <span class="tok-p">}</span>`;
+  var LBL2 = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"lbl_2"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"ui"</span><span class="tok-p">,</span> <span class="tok-k">"color"</span><span class="tok-p">:</span> <span class="tok-s">"#7c5cf0"</span> <span class="tok-p">}</span>`;
+  var LBL3 = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"lbl_3"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"backend"</span><span class="tok-p">,</span> <span class="tok-k">"color"</span><span class="tok-p">:</span> <span class="tok-s">"#0369a1"</span> <span class="tok-p">}</span>`;
+  var LBL4 = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"lbl_4"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"p2"</span><span class="tok-p">,</span> <span class="tok-k">"color"</span><span class="tok-p">:</span> <span class="tok-s">"#b45309"</span> <span class="tok-p">}</span>`;
+  var LBL_NEW = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"lbl_9"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"tech-debt"</span><span class="tok-p">,</span> <span class="tok-k">"color"</span><span class="tok-p">:</span> <span class="tok-s">"#0f9d6e"</span> <span class="tok-p">}</span>`;
+  var LBL_UPD = `{ <span class="tok-k">"id"</span><span class="tok-p">:</span> <span class="tok-s">"lbl_1"</span><span class="tok-p">,</span> <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"p0"</span><span class="tok-p">,</span> <span class="tok-k">"color"</span><span class="tok-p">:</span> <span class="tok-s">"#e5386b"</span> <span class="tok-p">}</span>`;
+
+  var BODY_CREATE = `{
+  <span class="tok-k">"title"</span><span class="tok-p">:</span> <span class="tok-s">"Audit API rate-limit headers"</span><span class="tok-p">,</span>
+  <span class="tok-k">"description"</span><span class="tok-p">:</span> <span class="tok-s">"Verify X-RateLimit-* headers match the advertised 500 req/min on list endpoints."</span><span class="tok-p">,</span>
+  <span class="tok-k">"priority"</span><span class="tok-p">:</span> <span class="tok-s">"medium"</span><span class="tok-p">,</span>
+  <span class="tok-k">"status"</span><span class="tok-p">:</span> <span class="tok-s">"todo"</span><span class="tok-p">,</span>
+  <span class="tok-k">"project_id"</span><span class="tok-p">:</span> <span class="tok-s">"prj_42"</span><span class="tok-p">,</span>
+  <span class="tok-k">"assignee_id"</span><span class="tok-p">:</span> <span class="tok-s">"usr_1173"</span><span class="tok-p">,</span>
+  <span class="tok-k">"labels"</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-s">"backend"</span><span class="tok-p">,</span> <span class="tok-s">"api"</span><span class="tok-p">]</span><span class="tok-p">,</span>
+  <span class="tok-k">"due_at"</span><span class="tok-p">:</span> <span class="tok-s">"2026-09-30T00:00:00Z"</span>
+}`;
+  var NULL204 = '<span class="tok-c">// 204 No Content — the response body is empty</span>';
+
+  /* ---------- param-row + response helpers ---------- */
+  function P(name, in_, type, req, desc) {
+    return '<tr><td class="mono strong">' + name + '</td><td>' + in_ + '</td><td class="mono muted">' + type + '</td><td>' +
+      (req ? '<span class="badge badge-danger" style="height:18px;font-size:10px;padding:0 6px">required</span>' : '<span class="muted">—</span>') +
+      '</td><td class="v-api-desc">' + desc + '</td></tr>';
+  }
+  function AUTH() {
+    return P('Authorization', 'bearer', 'string', 1, 'Bearer token from Workspace settings (<span class="mono">helx_…</span>). Missing or expired tokens return <span class="mono">401</span>.');
+  }
+  function PATH(name, desc) { return P(name, 'path', 'string', 1, desc); }
+  function Q(name, type, desc) { return P(name, 'query', type, 0, desc); }
+  function B(name, type, desc) { return P(name, 'body', type, 0, desc); }
+  function BREQ(name, type, desc) { return P(name, 'body', type, 1, desc); }
+  function HD(name, desc) { return P(name, 'header', 'string', 0, desc); }
+
+  function L(items, count, hasMore, cursor) {
+    var body = items.map(function (s) { return '  ' + s.replace(/\n/g, '\n  '); }).join(',\n');
+    return '{\n  <span class="tok-k">"data"</span><span class="tok-p">:</span> <span class="tok-p">[</span>\n' + body +
+      '\n  <span class="tok-p">]</span><span class="tok-p">,</span>\n  <span class="tok-k">"page"</span><span class="tok-p">:</span> <span class="tok-p">{</span> <span class="tok-k">"count"</span><span class="tok-p">:</span> <span class="tok-n">' + count +
+      '</span><span class="tok-p">,</span> <span class="tok-k">"has_more"</span><span class="tok-p">:</span> <span class="tok-f">' + (hasMore ? 'true' : 'false') +
+      '</span><span class="tok-p">,</span> <span class="tok-k">"next_cursor"</span><span class="tok-p">:</span> ' +
+      (cursor ? '<span class="tok-s">"' + cursor + '"</span>' : '<span class="tok-f">null</span>') + ' <span class="tok-p">}</span>\n}';
+  }
+
+  /* ---------- endpoint catalog (23 ops) ---------- */
+  var OPS = {
+    issues: {
+      m: 'GET', p: '/issues', n: 'List issues', c: '200',
+      d: 'List issues in the workspace, newest first. Supports status, assignee and project filters plus cursor-based pagination.',
+      list: 1, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'issues', rows: '38,954', comp: 'badge', compName: 'Badge',
+      params: [
+        AUTH(),
+        Q('status', 'enum&lt;string&gt;', 'Filter by status: <span class="mono">backlog</span>, <span class="mono">todo</span>, <span class="mono">in_progress</span>, <span class="mono">in_review</span>, <span class="mono">done</span>.'),
+        Q('assignee_id', 'uuid', 'Only issues assigned to this user.'),
+        Q('project_id', 'uuid', 'Scope results to a single project.'),
+        Q('labels', 'string[]', 'Comma-separated label names, e.g. <span class="mono">ui,p0</span>.'),
+        Q('cursor', 'string', 'Opaque cursor from a previous response (<span class="mono">page.next_cursor</span>).'),
+        Q('limit', 'int32', 'Items per page. Default <span class="mono">25</span>, max <span class="mono">100</span>.')
+      ],
+      body: null,
+      resp: [200, '200 OK', 'List of issues with pagination envelope.'],
+      html: L([ISSUE1, ISSUE2, ISSUE3], 3, true, 'eyJpZCI6Imlzc183NzAzYmUifQ'),
+      err: '400 invalid filter value · 401 missing token · 429 rate limited'
+    },
+    create_issue: {
+      m: 'POST', p: '/issues', n: 'Create issue', c: '201',
+      d: 'Create a new issue inside a project. Safe to retry with the same <span class="mono">Idempotency-Key</span> — repeated calls return the original 201.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'issues', rows: '38,954', comp: 'badge', compName: 'Badge',
+      params: [
+        AUTH(),
+        HD('Idempotency-Key', 'UUID that deduplicates retries; the first response is replayed for repeats.'),
+        BREQ('title', 'string', 'One-line summary, max 300 chars.'),
+        B('description', 'text', 'Markdown body of the issue.'),
+        B('status', 'enum&lt;string&gt;', 'Initial status; defaults to <span class="mono">backlog</span>.'),
+        B('priority', 'enum&lt;string&gt;', '<span class="mono">urgent</span> | <span class="mono">high</span> | <span class="mono">medium</span> | <span class="mono">low</span> | <span class="mono">none</span>.'),
+        B('project_id', 'uuid', 'Project the issue belongs to.'),
+        B('assignee_id', 'uuid', 'Assignee; omit for unassigned.'),
+        B('labels', 'string[]', 'Label names to apply on creation.'),
+        B('due_at', 'timestamptz', 'ISO-8601 due date, e.g. <span class="mono">2026-09-30T00:00:00Z</span>.')
+      ],
+      body: BODY_CREATE,
+      resp: [201, '201 Created', 'The created issue with server-assigned id and timestamps.'],
+      html: ISSUE_NEW,
+      err: '400 validation failed · 401 missing token · 409 duplicate within idempotency window'
+    },
+    get_issue: {
+      m: 'GET', p: '/issues/{id}', n: 'Get issue', c: '200',
+      d: 'Fetch a single issue by ID, including its current labels and both timestamps.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'private, max-age=60',
+      table: 'issues', rows: '38,954', comp: 'badge', compName: 'Badge',
+      params: [
+        AUTH(),
+        PATH('id', 'Issue ID, e.g. <span class="mono">iss_9f2c1a</span>.')
+      ],
+      body: null,
+      resp: [200, '200 OK', 'A single issue object.'],
+      html: ISSUE1,
+      err: '400 malformed id · 401 missing token · 404 issue not found'
+    },
+    update_issue: {
+      m: 'PATCH', p: '/issues/{id}', n: 'Update issue', c: '200',
+      d: 'Partial update of an issue — only the provided fields are changed; omitted fields keep their current values.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'issues', rows: '38,954', comp: 'badge', compName: 'Badge',
+      params: [
+        AUTH(),
+        PATH('id', 'Issue ID, e.g. <span class="mono">iss_9f2c1a</span>.'),
+        B('title', 'string', 'New title, max 300 chars.'),
+        B('status', 'enum&lt;string&gt;', 'One of <span class="mono">backlog</span>, <span class="mono">todo</span>, <span class="mono">in_progress</span>, <span class="mono">in_review</span>, <span class="mono">done</span>.'),
+        B('priority', 'enum&lt;string&gt;', '<span class="mono">urgent</span> | <span class="mono">high</span> | <span class="mono">medium</span> | <span class="mono">low</span> | <span class="mono">none</span>.'),
+        B('assignee_id', 'uuid', 'Assignee; pass <span class="mono">null</span> to unassign.'),
+        B('labels', 'string[]', 'Replaces the full label set.')
+      ],
+      body: `{
+  <span class="tok-k">"status"</span><span class="tok-p">:</span> <span class="tok-s">"in_review"</span><span class="tok-p">,</span>
+  <span class="tok-k">"priority"</span><span class="tok-p">:</span> <span class="tok-s">"high"</span>
+}`,
+      resp: [200, '200 OK', 'The updated issue.'],
+      html: ISSUE_UPD,
+      err: '400 validation failed · 401 missing token · 404 issue not found'
+    },
+    delete_issue: {
+      m: 'DELETE', p: '/issues/{id}', n: 'Delete issue', c: '204',
+      d: 'Soft-delete an issue. It disappears from all lists on the API, while comments stay attached and the row is retained in the database.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'issues', rows: '38,954', comp: 'badge', compName: 'Badge',
+      params: [
+        AUTH(),
+        PATH('id', 'Issue ID, e.g. <span class="mono">iss_9f2c1a</span>.'),
+        HD('Idempotency-Key', 'Optional; deduplicates retries.')
+      ],
+      body: null,
+      resp: [204, '204 No Content', 'Empty body — the issue is soft-deleted.'],
+      html: NULL204,
+      err: '401 missing token · 403 forbidden (editor role required) · 404 issue not found'
+    },
+    add_comment: {
+      m: 'POST', p: '/issues/{id}/comments', n: 'Add comment', c: '201',
+      d: 'Append a comment to an issue. The author defaults to the owner of the API key unless <span class="mono">author_id</span> is provided.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'comments', rows: '102,312', comp: 'table', compName: 'Table',
+      params: [
+        AUTH(),
+        PATH('id', 'Issue ID the comment is attached to.'),
+        BREQ('body', 'text', 'Comment text, max 10,000 chars.'),
+        B('author_id', 'uuid', 'Comment author; defaults to the API key owner.'),
+        HD('Idempotency-Key', 'UUID that deduplicates retries.')
+      ],
+      body: `{
+  <span class="tok-k">"body"</span><span class="tok-p">:</span> <span class="tok-s">"Reproduced on staging — the cursor skips a page when the labels filter is set."</span><span class="tok-p">,</span>
+  <span class="tok-k">"author_id"</span><span class="tok-p">:</span> <span class="tok-s">"usr_0411"</span>
+}`,
+      resp: [201, '201 Created', 'The created comment.'],
+      html: CMT1,
+      err: '400 validation failed · 401 missing token · 404 issue not found'
+    },
+    users: {
+      m: 'GET', p: '/users', n: 'List users', c: '200',
+      d: 'List workspace users. Optionally filter by role or exact email address.',
+      list: 1, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'users', rows: '1,284', comp: 'avatar', compName: 'Avatar',
+      params: [
+        AUTH(),
+        Q('role', 'enum&lt;string&gt;', 'Filter by role: <span class="mono">admin</span>, <span class="mono">editor</span> or <span class="mono">viewer</span>.'),
+        Q('email', 'string', 'Exact email match, e.g. <span class="mono">aiko@helix.dev</span>.'),
+        Q('cursor', 'string', 'Opaque cursor from a previous response.'),
+        Q('limit', 'int32', 'Items per page. Default <span class="mono">25</span>, max <span class="mono">100</span>.')
+      ],
+      body: null,
+      resp: [200, '200 OK', 'List of users with pagination envelope.'],
+      html: L([USER1, USER2, USER3], 3, true, 'eyJpZCI6InVzcl8wOTAyIn0'),
+      err: '400 invalid filter value · 401 missing token · 429 rate limited'
+    },
+    get_user: {
+      m: 'GET', p: '/users/{id}', n: 'Get user', c: '200',
+      d: 'Fetch a single user profile, including role and creation date.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'private, max-age=60',
+      table: 'users', rows: '1,284', comp: 'avatar', compName: 'Avatar',
+      params: [
+        AUTH(),
+        PATH('id', 'User ID, e.g. <span class="mono">usr_1173</span>.')
+      ],
+      body: null,
+      resp: [200, '200 OK', 'A single user profile.'],
+      html: USER1,
+      err: '400 malformed id · 401 missing token · 404 user not found'
+    },
+    update_user: {
+      m: 'PATCH', p: '/users/{id}', n: 'Update user', c: '200',
+      d: 'Update a user name or role. Role changes require an <span class="mono">admin</span> token and are audited.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'users', rows: '1,284', comp: 'avatar', compName: 'Avatar',
+      params: [
+        AUTH(),
+        PATH('id', 'User ID, e.g. <span class="mono">usr_0902</span>.'),
+        B('name', 'string', 'Display name, max 120 chars.'),
+        B('role', 'enum&lt;string&gt;', '<span class="mono">admin</span> | <span class="mono">editor</span> | <span class="mono">viewer</span>.')
+      ],
+      body: `{
+  <span class="tok-k">"role"</span><span class="tok-p">:</span> <span class="tok-s">"editor"</span>
+}`,
+      resp: [200, '200 OK', 'The updated user profile.'],
+      html: USER_UPD,
+      err: '400 validation failed · 401 missing token · 403 forbidden (admin role required)'
+    },
+    teams: {
+      m: 'GET', p: '/teams', n: 'List teams', c: '200',
+      d: 'List teams in the workspace, sorted by creation date.',
+      list: 1, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'teams', rows: '36', comp: 'avatar', compName: 'Avatar',
+      params: [
+        AUTH(),
+        Q('cursor', 'string', 'Opaque cursor from a previous response.'),
+        Q('limit', 'int32', 'Items per page. Default <span class="mono">25</span>, max <span class="mono">100</span>.')
+      ],
+      body: null,
+      resp: [200, '200 OK', 'List of teams with pagination envelope.'],
+      html: L([TEAM1, TEAM2], 2, false, null),
+      err: '401 missing token · 429 rate limited'
+    },
+    get_team: {
+      m: 'GET', p: '/teams/{slug}', n: 'Get team', c: '200',
+      d: 'Fetch a team by its unique slug.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'private, max-age=60',
+      table: 'teams', rows: '36', comp: 'avatar', compName: 'Avatar',
+      params: [
+        AUTH(),
+        PATH('slug', 'Team slug, e.g. <span class="mono">mobile</span>.')
+      ],
+      body: null,
+      resp: [200, '200 OK', 'A single team.'],
+      html: TEAM1,
+      err: '400 malformed slug · 401 missing token · 404 team not found'
+    },
+    team_projects: {
+      m: 'GET', p: '/teams/{slug}/projects', n: 'List team projects', c: '200',
+      d: 'List the projects owned by a team, optionally filtered by project status.',
+      list: 1, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'projects', rows: '142', comp: 'badge', compName: 'Badge',
+      params: [
+        AUTH(),
+        PATH('slug', 'Team slug, e.g. <span class="mono">mobile</span>.'),
+        Q('status', 'enum&lt;string&gt;', 'Filter by status: <span class="mono">active</span>, <span class="mono">archived</span>, <span class="mono">on_hold</span>.'),
+        Q('cursor', 'string', 'Opaque cursor from a previous response.'),
+        Q('limit', 'int32', 'Items per page. Default <span class="mono">25</span>, max <span class="mono">100</span>.')
+      ],
+      body: null,
+      resp: [200, '200 OK', 'List of the team projects.'],
+      html: L([PROJ1, PROJ3], 2, false, null),
+      err: '401 missing token · 404 team not found · 429 rate limited'
+    },
+    projects: {
+      m: 'GET', p: '/projects', n: 'List projects', c: '200',
+      d: 'List all projects across teams. Status and team filters are available; results are cursor-paginated.',
+      list: 1, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'projects', rows: '142', comp: 'badge', compName: 'Badge',
+      params: [
+        AUTH(),
+        Q('status', 'enum&lt;string&gt;', 'Filter by status: <span class="mono">active</span>, <span class="mono">archived</span>, <span class="mono">on_hold</span>.'),
+        Q('team_id', 'uuid', 'Only projects owned by this team.'),
+        Q('color', 'string', 'Hex color, e.g. <span class="mono">#7c5cf0</span>.'),
+        Q('cursor', 'string', 'Opaque cursor from a previous response.'),
+        Q('limit', 'int32', 'Items per page. Default <span class="mono">25</span>, max <span class="mono">100</span>.')
+      ],
+      body: null,
+      resp: [200, '200 OK', 'List of projects with pagination envelope.'],
+      html: L([PROJ1, PROJ2, PROJ3], 3, true, 'eyJpZCI6InByal8wOSJ9'),
+      err: '400 invalid filter value · 401 missing token · 429 rate limited'
+    },
+    get_project: {
+      m: 'GET', p: '/projects/{id}', n: 'Get project', c: '200',
+      d: 'Fetch a single project, including its team, status and accent color.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'private, max-age=60',
+      table: 'projects', rows: '142', comp: 'badge', compName: 'Badge',
+      params: [
+        AUTH(),
+        PATH('id', 'Project ID, e.g. <span class="mono">prj_42</span>.')
+      ],
+      body: null,
+      resp: [200, '200 OK', 'A single project.'],
+      html: PROJ1,
+      err: '400 malformed id · 401 missing token · 404 project not found'
+    },
+    update_project: {
+      m: 'PATCH', p: '/projects/{id}', n: 'Update project', c: '200',
+      d: 'Rename a project or change its status and accent color.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'projects', rows: '142', comp: 'badge', compName: 'Badge',
+      params: [
+        AUTH(),
+        PATH('id', 'Project ID, e.g. <span class="mono">prj_17</span>.'),
+        B('name', 'string', 'Display name, max 180 chars.'),
+        B('status', 'enum&lt;string&gt;', '<span class="mono">active</span> | <span class="mono">archived</span> | <span class="mono">on_hold</span>.'),
+        B('color', 'string', 'Accent color, e.g. <span class="mono">#2970e6</span>.')
+      ],
+      body: `{
+  <span class="tok-k">"status"</span><span class="tok-p">:</span> <span class="tok-s">"on_hold"</span>
+}`,
+      resp: [200, '200 OK', 'The updated project.'],
+      html: PROJ_UPD,
+      err: '400 validation failed · 401 missing token · 404 project not found'
+    },
+    archive_project: {
+      m: 'POST', p: '/projects/{id}/archive', n: 'Archive project', c: '200',
+      d: 'Archive a project. With <span class="mono">hard: true</span> the project and its issues are removed from the API entirely.',
+      list: 0, s: 'beta', rate: '500 req/min', cache: 'no-store',
+      table: 'projects', rows: '142', comp: 'badge', compName: 'Badge',
+      params: [
+        AUTH(),
+        PATH('id', 'Project ID, e.g. <span class="mono">prj_42</span>.'),
+        B('hard', 'boolean', 'If <span class="mono">true</span>, the project and its issues are hard-deleted; default <span class="mono">false</span> (soft archive).')
+      ],
+      body: `{
+  <span class="tok-k">"hard"</span><span class="tok-p">:</span> <span class="tok-f">false</span>
+}`,
+      resp: [200, '200 OK', 'The archived project.'],
+      html: PROJ_ARC,
+      err: '400 validation failed · 401 missing token · 404 project not found'
+    },
+    comments: {
+      m: 'GET', p: '/comments', n: 'List comments', c: '200',
+      d: 'List comments across issues, filtered by issue or author. Newest first.',
+      list: 1, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'comments', rows: '102,312', comp: 'table', compName: 'Table',
+      params: [
+        AUTH(),
+        Q('issue_id', 'uuid', 'Only comments on this issue.'),
+        Q('author_id', 'uuid', 'Only comments by this author.'),
+        Q('cursor', 'string', 'Opaque cursor from a previous response.'),
+        Q('limit', 'int32', 'Items per page. Default <span class="mono">25</span>, max <span class="mono">100</span>.')
+      ],
+      body: null,
+      resp: [200, '200 OK', 'List of comments with pagination envelope.'],
+      html: L([CMT1, CMT2], 2, true, 'eyJpZCI6ImNtdF81NTE5In0'),
+      err: '400 invalid filter value · 401 missing token · 429 rate limited'
+    },
+    get_comment: {
+      m: 'GET', p: '/comments/{id}', n: 'Get comment', c: '200',
+      d: 'Fetch a single comment by ID.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'private, max-age=60',
+      table: 'comments', rows: '102,312', comp: 'table', compName: 'Table',
+      params: [
+        AUTH(),
+        PATH('id', 'Comment ID, e.g. <span class="mono">cmt_5519</span>.')
+      ],
+      body: null,
+      resp: [200, '200 OK', 'A single comment.'],
+      html: CMT1,
+      err: '400 malformed id · 401 missing token · 404 comment not found'
+    },
+    delete_comment: {
+      m: 'DELETE', p: '/comments/{id}', n: 'Delete comment', c: '204',
+      d: 'Delete a comment. Allowed for the comment author or any token with <span class="mono">editor</span> role or above.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'comments', rows: '102,312', comp: 'table', compName: 'Table',
+      params: [
+        AUTH(),
+        PATH('id', 'Comment ID, e.g. <span class="mono">cmt_5524</span>.')
+      ],
+      body: null,
+      resp: [204, '204 No Content', 'Empty body — the comment is deleted.'],
+      html: NULL204,
+      err: '401 missing token · 403 forbidden (author or editor role required) · 404 comment not found'
+    },
+    labels: {
+      m: 'GET', p: '/labels', n: 'List labels', c: '200',
+      d: 'List all issue labels. The full set is small enough to fetch without pagination.',
+      list: 1, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'labels', rows: '18', comp: 'badge', compName: 'Badge',
+      params: [
+        AUTH(),
+        Q('cursor', 'string', 'Opaque cursor from a previous response.'),
+        Q('limit', 'int32', 'Items per page. Default <span class="mono">25</span>, max <span class="mono">100</span>.')
+      ],
+      body: null,
+      resp: [200, '200 OK', 'List of labels with pagination envelope.'],
+      html: L([LBL1, LBL2, LBL3, LBL4], 4, false, null),
+      err: '401 missing token · 429 rate limited'
+    },
+    create_label: {
+      m: 'POST', p: '/labels', n: 'Create label', c: '201',
+      d: 'Create a workspace label. Name and color are required; duplicate names return 409.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'labels', rows: '18', comp: 'badge', compName: 'Badge',
+      params: [
+        AUTH(),
+        BREQ('name', 'string', 'Unique label name, e.g. <span class="mono">tech-debt</span>.'),
+        BREQ('color', 'string', 'Hex color, e.g. <span class="mono">#0f9d6e</span>.')
+      ],
+      body: `{
+  <span class="tok-k">"name"</span><span class="tok-p">:</span> <span class="tok-s">"tech-debt"</span><span class="tok-p">,</span>
+  <span class="tok-k">"color"</span><span class="tok-p">:</span> <span class="tok-s">"#0f9d6e"</span>
+}`,
+      resp: [201, '201 Created', 'The created label.'],
+      html: LBL_NEW,
+      err: '400 validation failed · 401 missing token · 409 label name already exists'
+    },
+    update_label: {
+      m: 'PATCH', p: '/labels/{id}', n: 'Update label', c: '200',
+      d: 'Rename or recolor a label. Renaming re-tags every issue that carries it.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'labels', rows: '18', comp: 'badge', compName: 'Badge',
+      params: [
+        AUTH(),
+        PATH('id', 'Label ID, e.g. <span class="mono">lbl_1</span>.'),
+        B('name', 'string', 'New unique label name.'),
+        B('color', 'string', 'New hex color, e.g. <span class="mono">#e5386b</span>.')
+      ],
+      body: `{
+  <span class="tok-k">"color"</span><span class="tok-p">:</span> <span class="tok-s">"#e5386b"</span>
+}`,
+      resp: [200, '200 OK', 'The updated label.'],
+      html: LBL_UPD,
+      err: '400 validation failed · 401 missing token · 404 label not found · 409 name in use'
+    },
+    delete_label: {
+      m: 'DELETE', p: '/labels/{id}', n: 'Delete label', c: '204',
+      d: 'Delete a label. Fails with 409 while the label is still attached to issues.',
+      list: 0, s: 'stable', rate: '500 req/min', cache: 'no-store',
+      table: 'labels', rows: '18', comp: 'badge', compName: 'Badge',
+      params: [
+        AUTH(),
+        PATH('id', 'Label ID, e.g. <span class="mono">lbl_4</span>.')
+      ],
+      body: null,
+      resp: [204, '204 No Content', 'Empty body — the label is deleted.'],
+      html: NULL204,
+      err: '401 missing token · 403 forbidden · 404 label not found · 409 label in use'
+    }
+  };
+
+  /* ---------- rendering ---------- */
+  var curEnv = document.documentElement.getAttribute('data-env') || 'local';
+  function envKey() { return curEnv === 'prod' ? 'production' : curEnv; }
+  function apiBase() {
+    var k = envKey();
+    if (window.Prism && Prism.envBase && Prism.envBase[k]) return Prism.envBase[k] + '/v1';
+    return 'https://api.helix.dev/v1';
+  }
+  function apiHost() { return apiBase().replace(/\/v1$/, ''); }
+  var MCLASS = { GET: 'badge-info', POST: 'badge-success', PATCH: 'badge-warning', DELETE: 'badge-danger' };
+  var DETAIL = document.getElementById('v-api-detail');
+  var URL_SRC = document.getElementById('v-api-url');
+  var SNIP_SRC = document.getElementById('v-api-snippet');
+  var cur = 'issues';
+
+  function methodBadge(m) { return '<span class="badge ' + MCLASS[m] + ' v-api-method">' + m + '</span>'; }
+  function stabBadge(s) { return '<span class="badge ' + (s === 'beta' ? 'badge-warning' : 'badge-success') + '">' + s + '</span>'; }
+
+  function buildDetail(o) {
+    var h = '';
+    h += '<div class="v-api-head">' +
+      '<div>' +
+        '<div class="v-api-title">' + methodBadge(o.m) + '<span class="mono v-api-path">' + o.p + '</span></div>' +
+        '<div class="v-api-summary">' + o.d + '</div>' +
+      '</div>' +
+      '<div class="v-api-actions">' +
+        '<button class="btn btn-ghost" data-copy="#v-api-url"><svg class="icon"><use href="#i-copy"/></svg>Copy URL</button>' +
+        '<button class="btn btn-ghost" data-copy="#v-api-snippet"><svg class="icon"><use href="#i-code"/></svg>Export snippet</button>' +
+      '</div>' +
+    '</div>';
+
+    h += '<div class="v-api-grid">';
+    h += '<div class="v-api-col">' +
+      '<div class="v-api-section-title">Parameters</div>' +
+      '<div class="table-wrap"><table class="tbl">' +
+        '<thead><tr><th>Param</th><th>In</th><th>Type</th><th>Req</th><th>Description</th></tr></thead>' +
+        '<tbody>' + o.params.join('') + '</tbody>' +
+      '</table></div>' +
+    '</div>';
+    h += '<div class="v-api-col">';
+    if (o.body) {
+      h += '<div><div class="v-api-section-title">Request body · application/json</div>' +
+        '<div class="code-block"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span>request.json<span class="hint" style="margin-left:auto">example</span></div>' +
+        '<div class="code-body">' + o.body + '</div></div></div>';
+    }
+    h += '<div><div class="v-api-section-title">Responses</div>' +
+      '<div class="v-api-resp-row">' +
+        '<div class="v-api-resp-meta">' + (o.resp[0] === 204
+          ? '<span class="badge badge-neutral">204 No Content</span>'
+          : '<span class="badge badge-success">' + o.resp[1] + '</span>') +
+          '<span class="v-api-resp-desc">' + o.resp[2] + '</span></div>' +
+        '<div class="code-block"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span>response.json<span class="hint" style="margin-left:auto">schema v3.1</span></div>' +
+        '<div class="code-body">' + o.html + '</div></div>' +
+      '</div>' +
+      '<div class="v-api-hint hint">Errors: ' + o.err + ' — envelope: <span class="mono">{"error":{"code","message"}}</span></div>' +
+      (o.list ? '<div class="v-api-hint hint">Cursor-based pagination: pass <span class="mono">page.next_cursor</span> from the previous page as <span class="mono">cursor</span>. Every response carries <span class="mono">X-RateLimit-Remaining</span>.</div>' : '') +
+      '<div class="v-api-hint hint" id="v-api-note">Simulated against ' + apiHost() + ' — no network egress.</div>' +
+    '</div>';
+    h += '</div></div>';
+
+    h += '<div class="card v-api-meta">' +
+      '<div><div class="hint">Rate limit</div><div class="strong mono" style="font-size:12px">' + o.rate + '</div></div>' +
+      '<div class="divider-v"></div>' +
+      '<div><div class="hint">Caching</div><div class="strong mono" style="font-size:12px">' + o.cache + '</div></div>' +
+      '<div class="divider-v"></div>' +
+      '<div><div class="hint">Stability</div>' + stabBadge(o.s) + '</div>' +
+      '<div class="divider-v"></div>' +
+      '<div><div class="hint">Auth</div><div class="strong mono" style="font-size:12px">Bearer token</div></div>' +
+      '<span style="flex:1"></span>' +
+      '<span class="hint">' + o.m + ' <span class="mono">' + o.p + '</span></span>' +
+    '</div>';
+
+    h += '<div class="card card-pad v-api-ref">' +
+      '<div class="v-api-ref-cell"><svg class="icon"><use href="#i-db"/></svg>' +
+        '<div><div class="hint">Backed by table</div>' +
+        '<a href="#db?table=' + o.table + '" class="mono strong">' + o.table + '</a><span class="hint"> · ' + o.rows + ' rows</span></div></div>' +
+      '<div class="divider-v" style="height:34px"></div>' +
+      '<div class="v-api-ref-cell"><svg class="icon"><use href="#i-cube"/></svg>' +
+        '<div><div class="hint">Rendered by</div>' +
+        '<a href="#design?comp=' + o.comp + '" class="mono strong">' + o.compName + '</a></div></div>' +
+      '<div class="v-api-ref-cell v-api-ref-meta"><span class="hint">Sample rows in the database view mirror these response shapes.</span></div>' +
+    '</div>';
+
+    return h;
+  }
+
+  function render(id) {
+    var o = OPS[id];
+    DETAIL.innerHTML = buildDetail(o);
+    URL_SRC.setAttribute('data-copy-text', apiBase() + o.p);
+    SNIP_SRC.setAttribute('data-copy-text',
+      "curl -X " + o.m + " '" + apiBase() + o.p + "' \\\n  -H 'Authorization: Bearer helx_live_9f3a…' \\\n  -H 'Accept: application/json'");
+  }
+
+  /* ---------- rail filter ---------- */
+  var rail = document.getElementById('view-api').querySelector('.rail');
+  var items = Array.prototype.slice.call(rail.querySelectorAll('.rail-item'));
+  var groupDefs = [];
+  var gLabels = rail.querySelectorAll('.rail-group');
+  for (var gi = 0; gi < gLabels.length; gi++) {
+    var list = [];
+    var n = gLabels[gi].nextElementSibling;
+    while (n && !n.classList.contains('rail-group')) {
+      if (n.classList.contains('rail-item')) list.push(n);
+      n = n.nextElementSibling;
+    }
+    groupDefs.push({ label: gLabels[gi], items: list });
+  }
+  var searchInput = document.getElementById('v-api-rail-search');
+  var emptyEl = document.getElementById('v-api-filter-empty');
+  searchInput.addEventListener('input', function () {
+    var q = searchInput.value.trim().toLowerCase();
+    var total = 0;
+    groupDefs.forEach(function (gd) {
+      var vis = 0;
+      gd.items.forEach(function (it) {
+        var match = !q || it.textContent.toLowerCase().indexOf(q) >= 0;
+        it.classList.toggle('v-api-hide', !match);
+        if (match) vis++;
+      });
+      gd.label.classList.toggle('v-api-hide', vis === 0);
+      total += vis;
+    });
+    emptyEl.classList.toggle('on', total === 0);
+  });
+
+  /* ---------- endpoint switching ---------- */
+  function selectOp(id, push) {
+    cur = id;
+    items.forEach(function (it) {
+      it.classList.toggle('active', it.getAttribute('data-op') === id);
+    });
+    render(id);
+    if (push) location.hash = 'api?op=' + id;
+  }
+  rail.addEventListener('click', function (e) {
+    var it = e.target.closest('.rail-item');
+    if (!it) return;
+    var id = it.getAttribute('data-op');
+    if (id && OPS[id] && id !== cur) selectOp(id, true);
+  });
+
+  /* ---------- deep link + env sync ---------- */
+  window.addEventListener('hashchange', function () {
+    if (!document.getElementById('view-api')) return;
+    var view = (location.hash || '').replace(/^#\/?/, '').split('?')[0];
+    if (view !== 'api') return;
+    var op = new URLSearchParams((location.hash.split('?')[1] || '')).get('op');
+    if (op && OPS[op] && op !== cur) selectOp(op, false);
+  });
+  var initOp = new URLSearchParams((location.hash.split('?')[1] || '')).get('op');
+  if (!initOp || !OPS[initOp]) initOp = 'issues';
+  selectOp(initOp, false);
+})();
+}
+</script>
