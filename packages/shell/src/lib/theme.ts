@@ -2,8 +2,8 @@
 /// <reference lib="dom" />
 // Theme + accent application. Dark mode follows the OS via
 // prefers-color-scheme; the accent comes from the resolved config.
-// `applyTheme` writes data-theme / data-accent on <html> only — nothing is
-// persisted (theme is OS-managed, accent is config-managed).
+// `applyTheme` toggles the .dark class and data-accent on <html> only — nothing
+// is persisted (theme is OS-managed, accent is config-managed).
 export type ThemeName = "light" | "dark";
 
 export const ACCENTS = ["violet", "blue", "green", "rose"] as const;
@@ -13,7 +13,7 @@ export const DEFAULT_ACCENT = "violet";
 
 /** Apply theme/accent to <html>. No persistence: OS owns the theme, config owns the accent. */
 export function applyTheme(theme: ThemeName, accent: string): void {
-  document.documentElement.setAttribute("data-theme", theme);
+  document.documentElement.classList.toggle("dark", theme === "dark");
   document.documentElement.setAttribute("data-accent", accent);
 }
 

@@ -212,8 +212,21 @@ Deno.test(
       }
 
       await t.step("deno compile produces the binary", async () => {
+        // --exclude packages/shell: nodeModulesDir auto links the shell's
+        // package.json into node_modules (berry-bench-shell), and deno compile
+        // embeds the full npm snapshot — sweeping shell sources into the
+        // binary and defeating the missing-shell error below. Excluding it
+        // keeps the binary lean and makes dev fail with the actionable hint.
         const res = await new Deno.Command(DENO, {
-          args: ["compile", "-A", "--output", binPath, join(REPO_ROOT, "packages/cli/main.ts")],
+          args: [
+            "compile",
+            "-A",
+            "--exclude",
+            "packages/shell",
+            "--output",
+            binPath,
+            join(REPO_ROOT, "packages/cli/main.ts"),
+          ],
           cwd: REPO_ROOT,
           stdout: "piped",
           stderr: "piped",

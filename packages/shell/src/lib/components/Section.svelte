@@ -1,7 +1,7 @@
 <script lang="ts">
 	// Section — the ONE uppercase micro-label + optional Card wrapper.
 	// Replaces the seven copy-pasted section-title flavors.
-	import Card from "./ui/card.svelte";
+	import { Card } from "$lib/components/ui/card";
 	import type { Snippet } from "svelte";
 
 	let {

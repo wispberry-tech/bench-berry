@@ -6,7 +6,7 @@
   // protocol: setStory on rail/deep-link changes, setProps from the schema
   // controls column; ready/error messages flip the loading/error state.
   import { snapshots, env } from '../lib/store.svelte.ts';
-  import { isDesignSnapshot, isSnapshotError, type PreviewMessage } from '../lib/types.ts';
+  import { isDesignSnapshot, isSnapshotError, type PreviewMessage, type StoryMeta } from '../lib/types.ts';
   import { highlightJson, highlightCode } from '../lib/highlight.ts';
   import { basename, errorPanel } from '../lib/markup.ts';
   import { hashFor, type Route } from '../lib/router.ts';
@@ -14,19 +14,17 @@
 
   import PageHeader from '../lib/components/PageHeader.svelte';
   import EmptyState from '../lib/components/EmptyState.svelte';
-  import Card from '../lib/components/ui/card.svelte';
-  import Alert from '../lib/components/ui/alert.svelte';
-  import Badge from '../lib/components/ui/badge.svelte';
-  import Button from '../lib/components/ui/button.svelte';
-  import Input from '../lib/components/ui/input.svelte';
-  import Select from '../lib/components/ui/select.svelte';
+  import { Card } from '$lib/components/ui/card';
+  import { Alert } from '$lib/components/ui/alert';
+  import { Badge } from '$lib/components/ui/badge';
+  import { Button } from '$lib/components/ui/button';
+  import { Input } from '$lib/components/ui/input';
+  import * as Select from '$lib/components/ui/select';
   import Rail from '../lib/components/rail/Rail.svelte';
   import RailGroup from '../lib/components/rail/RailGroup.svelte';
   import RailItem from '../lib/components/rail/RailItem.svelte';
-  import Tabs from '../lib/components/ui/tabs.svelte';
-  import TabsList from '../lib/components/ui/tabs-list.svelte';
-  import TabsTrigger from '../lib/components/ui/tabs-trigger.svelte';
-  import TabsContent from '../lib/components/ui/tabs-content.svelte';
+  import * as Tabs from '$lib/components/ui/tabs';
+  import * as Table from '$lib/components/ui/table';
 
   let { route, navigate, theme = 'light' } = $props<{
     route: Route;
@@ -49,11 +47,38 @@
   const packageName = $derived(snap?.packageName ?? 'Design System');
   const version = $derived(snap?.version);
 
+  // ---------- story rail grouping ----------
+  // Group by the story's directory (parent dir name). Stories nested directly
+  // under a `stories` dir — or the srcRoot itself — are "flat": their path
+  // already says 'stories', so a group header would just repeat it.
+  function storyGroup(file: string): string | null {
+    const name = file.split('/').slice(0, -1).at(-1);
+    return name === undefined || name === 'stories' ? null : name;
+  }
+
+  // Sections keep snapshot order; adjacent same-group stories merge (the
+  // palette convention). A section with group === null renders headerless.
+  const railSections = $derived.by(() => {
+    const sections: { group: string | null; stories: StoryMeta[] }[] = [];
+    for (const story of snap?.stories ?? []) {
+      const group = storyGroup(story.file);
+      const last = sections[sections.length - 1];
+      if (last && last.group === group) last.stories.push(story);
+      else sections.push({ group, stories: [story] });
+    }
+    return sections;
+  });
+
+  // Group of each story for auto-expansion (null = flat, nothing to expand).
+  const groupOfStory = $derived(
+    new Map((snap?.stories ?? []).map((s) => [s.file, storyGroup(s.file)] as const)),
+  );
+
   // ---------- rail collapse state (persisted) ----------
   let railState = $state(readRailState());
 
-  // Auto-expand the Stories group when the ACTIVE STORY switches (deep link,
-  // palette navigation or first load) so the current selection is always
+  // Auto-expand the active story's group when the ACTIVE STORY switches (deep
+  // link, palette navigation or first load) so the current selection is always
   // visible. Deliberately keyed to the id so a user collapsing the group is
   // not undone by the effect re-running on railState changes.
   let lastActiveFile = $state<string | null>(activeFile ?? null);
@@ -62,8 +87,9 @@
     if (!file) return;
     if (file === lastActiveFile) return;
     lastActiveFile = file;
-    if (isCollapsed(railState, 'design', 'Stories')) {
-      railState = setGroupCollapsed(railState, 'design', 'Stories', false);
+    const g = groupOfStory.get(file);
+    if (g && isCollapsed(railState, 'design', g)) {
+      railState = setGroupCollapsed(railState, 'design', g, false);
     }
   });
 
@@ -191,31 +217,47 @@
 <div class="view-body flex min-h-full">
   <Rail title={packageName} sub={version ? `v${version}` : undefined}>
     {#if snap}
-      <RailGroup
-        ws="design"
-        group="Stories"
-        count={snap.stories.length}
-        collapsed={isCollapsed(railState, 'design', 'Stories')}
-onToggle={() =>
-          (railState = setGroupCollapsed(
-            railState,
-            'design',
-            'Stories',
-            !isCollapsed(railState, 'design', 'Stories'),
-          ))}
-      >
-        {#each snap.stories as story (story.file)}
-          <RailItem
-            active={story.file === activeFile}
-            mono
-            data-ws="design"
-            data-id={story.file}
-            onclick={() => navigate(hashFor({ kind: 'workspace', ws: 'design', key: 'comp', id: story.file }))}
+      {#each railSections as section (section.group ?? section.stories[0].file)}
+        {#if section.group === null}
+          {#each section.stories as story (story.file)}
+            <RailItem
+              active={story.file === activeFile}
+              mono
+              data-ws="design"
+              data-id={story.file}
+              onclick={() => navigate(hashFor({ kind: 'workspace', ws: 'design', key: 'comp', id: story.file }))}
+            >
+              {story.title ?? basename(story.file)}
+            </RailItem>
+          {/each}
+        {:else}
+          <RailGroup
+            ws="design"
+            group={section.group}
+            count={section.stories.length}
+            collapsed={isCollapsed(railState, 'design', section.group)}
+            onToggle={() =>
+              (railState = setGroupCollapsed(
+                railState,
+                'design',
+                section.group,
+                !isCollapsed(railState, 'design', section.group),
+              ))}
           >
-            {story.title ?? basename(story.file)}
-          </RailItem>
-        {/each}
-      </RailGroup>
+            {#each section.stories as story (story.file)}
+              <RailItem
+                active={story.file === activeFile}
+                mono
+                data-ws="design"
+                data-id={story.file}
+                onclick={() => navigate(hashFor({ kind: 'workspace', ws: 'design', key: 'comp', id: story.file }))}
+              >
+                {story.title ?? basename(story.file)}
+              </RailItem>
+            {/each}
+          </RailGroup>
+        {/if}
+      {/each}
     {/if}
   </Rail>
 
@@ -234,19 +276,19 @@ onToggle={() =>
           </h2>
           <p class="mt-0.5 font-mono text-[12.5px] text-muted-foreground">{activeStory.file}</p>
 
-          <Tabs value={tab} onValueChange={(v) => (tab = v as TabId)} class="mt-4">
-            <TabsList>
-              <TabsTrigger value="preview">Preview</TabsTrigger>
-              <TabsTrigger value="docs">Docs</TabsTrigger>
-              <TabsTrigger value="code">Code</TabsTrigger>
-            </TabsList>
-            <TabsContent value="preview" class="mt-4">
+          <Tabs.Root value={tab} onValueChange={(v) => (tab = v as TabId)} class="mt-4">
+            <Tabs.List>
+              <Tabs.Trigger value="preview">Preview</Tabs.Trigger>
+              <Tabs.Trigger value="docs">Docs</Tabs.Trigger>
+              <Tabs.Trigger value="code">Code</Tabs.Trigger>
+            </Tabs.List>
+            <Tabs.Content value="preview" class="mt-4">
               <div class="flex items-start gap-4">
                 <Card class="min-w-0 flex-1 p-0 overflow-hidden">
                   {#if frameSrc}
                     <iframe
                       bind:this={frame}
-                      class="block h-[clamp(380px,60vh,720px)] w-full border-0 bg-white dark:bg-secondary"
+                      class="block h-[clamp(380px,60vh,720px)] w-full border-0 bg-canvas"
                       sandbox="allow-scripts"
                       title={activeStory.title ? `${activeStory.title} preview` : 'Story preview'}
                       src={frameSrc}
@@ -271,17 +313,23 @@ onToggle={() =>
                         <label class="flex flex-col gap-1.5">
                           <span class="text-[11.5px] font-medium text-secondary-foreground">{c.key}</span>
                           {#if c.type === 'enum'}
-                            <Select
+                            <Select.Root
+                              type="single"
                               value={String(values[c.key] ?? '')}
-                              onchange={(e) => {
-                                values[c.key] = (e.currentTarget as HTMLSelectElement).value;
+                              onValueChange={(v) => {
+                                values[c.key] = v;
                                 onControlChange();
                               }}
                             >
-                              {#each c.options as opt (opt)}
-                                <option value={opt}>{opt}</option>
-                              {/each}
-                            </Select>
+                              <Select.Trigger class="w-full" aria-label={c.key}><Select.Value /></Select.Trigger>
+                              <Select.Content>
+                                <Select.Group>
+                                  {#each c.options as opt (opt)}
+                                    <Select.Item value={opt}>{opt}</Select.Item>
+                                  {/each}
+                                </Select.Group>
+                              </Select.Content>
+                            </Select.Root>
                           {:else if c.type === 'string'}
                             <Input
                               value={typeof values[c.key] === 'string' ? values[c.key] : ''}
@@ -309,40 +357,40 @@ onToggle={() =>
                   </div>
                 </div>
               </div>
-            </TabsContent>
-            <TabsContent value="docs" class="mt-4">
+            </Tabs.Content>
+            <Tabs.Content value="docs" class="mt-4">
               <div class="flex max-w-[720px] flex-col gap-3.5">
                 <p class="text-[12.5px] leading-snug text-muted-foreground">
                   {activeStory.description ?? 'No description.'}
                 </p>
                 {#if activeStory.schema !== undefined}
-                  <div class="overflow-hidden rounded-lg border border-border">
-                    <table class="w-full border-collapse bg-card text-left text-[11.5px]">
-                      <thead>
-                        <tr class="border-b border-border bg-muted/50">
-                          <th class="h-8 px-3.5 font-semibold uppercase tracking-[0.06em] text-muted-foreground">Name</th>
-                          <th class="h-8 px-3.5 font-semibold uppercase tracking-[0.06em] text-muted-foreground">Type</th>
-                          <th class="h-8 px-3.5 font-semibold uppercase tracking-[0.06em] text-muted-foreground">Default</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                  <div class="overflow-hidden rounded-lg border border-border bg-card">
+                    <Table.Root>
+                      <Table.Header>
+                        <Table.Row>
+                          <Table.Head class="font-semibold uppercase tracking-[0.06em] text-muted-foreground">Name</Table.Head>
+                          <Table.Head class="font-semibold uppercase tracking-[0.06em] text-muted-foreground">Type</Table.Head>
+                          <Table.Head class="font-semibold uppercase tracking-[0.06em] text-muted-foreground">Default</Table.Head>
+                        </Table.Row>
+                      </Table.Header>
+                      <Table.Body>
                         {#each Object.entries(activeStory.schema) as [key, spec] (key)}
-                          <tr class="border-b border-border last:border-b-0">
-                            <td class="px-3.5 py-2 font-mono text-[11px] text-foreground">{key}</td>
-                            <td class="px-3.5 py-2">
+                          <Table.Row>
+                            <Table.Cell class="font-mono text-[11px]">{key}</Table.Cell>
+                            <Table.Cell>
                               <code class="rounded bg-muted/60 px-1.5 py-0.5 font-mono text-[10.5px] text-secondary-foreground">
                                 {typeof spec === 'object' && spec !== null && 'type' in spec
                                   ? String((spec as { type: unknown }).type)
                                   : 'any'}
                               </code>
-                            </td>
-                            <td class="px-3.5 py-2 font-mono text-[11px] text-muted-foreground">
+                            </Table.Cell>
+                            <Table.Cell class="font-mono text-[11px] text-muted-foreground">
                               {activeStory.props?.[key] !== undefined ? String(activeStory.props[key]) : '—'}
-                            </td>
-                          </tr>
+                            </Table.Cell>
+                          </Table.Row>
                         {/each}
-                      </tbody>
-                    </table>
+                      </Table.Body>
+                    </Table.Root>
                   </div>
                 {/if}
                 {#if activeStory.props !== undefined || activeStory.schema !== undefined}
@@ -362,8 +410,8 @@ onToggle={() =>
                   </div>
                 {/if}
               </div>
-            </TabsContent>
-            <TabsContent value="code" class="mt-4">
+            </Tabs.Content>
+            <Tabs.Content value="code" class="mt-4">
               <div class="flex flex-col gap-2">
                 <div class="flex items-center justify-between gap-2.5">
                   <span class="text-[10.5px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">code</span>
@@ -382,8 +430,8 @@ onToggle={() =>
                   <p class="text-[11px] text-muted-foreground">No code sample for this story.</p>
                 {/if}
               </div>
-            </TabsContent>
-          </Tabs>
+            </Tabs.Content>
+          </Tabs.Root>
         </div>
       {:else}
         <EmptyState message="No stories in this snapshot yet." />

@@ -13,7 +13,7 @@
   import RailItem from '../lib/components/rail/RailItem.svelte';
   import PageHeader from '../lib/components/PageHeader.svelte';
   import EmptyState from '../lib/components/EmptyState.svelte';
-  import Badge from '../lib/components/ui/badge.svelte';
+  import { Badge } from '$lib/components/ui/badge';
 
   let { route, navigate } = $props<{
     route: Route;

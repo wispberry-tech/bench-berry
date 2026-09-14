@@ -2,12 +2,13 @@
    BerryBench shell — Tailwind v4 theme layer (replaces tokens.css).
    Semantic tokens adopt shadcn names; values are the approved
    warm-paper hexes from the dark-mode overhaul (tokens.css:8-125).
-   Data-theme/data-accent live on <html>, applied by lib/theme.ts.
+   Dark mode via the .dark class (OS-managed), accents via html[data-accent],
+   both applied by lib/theme.ts.
    ============================================================ */
 @import "tailwindcss";
 
-/* OS theme via the existing data-theme attribute (not .dark class). */
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+/* OS theme via the .dark class on <html> (shadcn convention). */
+@custom-variant dark (&:is(.dark *));
 
 :root {
   /* light theme — warm paper */
@@ -25,13 +26,14 @@
   --secondary-foreground: #6d675a;
   --muted: #f7f5ee;
   --muted-foreground: #6d675a;
-  --accent-soft: rgba(60, 54, 38, 0.05);
-  --accent-soft-foreground: #262419;
+  --accent: rgba(60, 54, 38, 0.05);
+  --accent-foreground: #262419;
   --destructive: #c23d3d;
   --destructive-foreground: #ffffff;
   --border: #e3dfd3;
   --input: #d2cdbd;
   --ring: #7c5cf0;
+  --canvas: #fcfbf7;
   --radius: 0.625rem;
 
   /* status triplets (badges, tables) */
@@ -54,10 +56,8 @@
   color-scheme: light;
 }
 
-/* Dark theme tokens: plain attribute selector — the @variant dark wrapper
-   compiles to a :scope … :root descendant selector that never matches the
-   root element itself. */
-:root[data-theme="dark"] {
+/* Dark theme tokens: the .dark class on <html> (shadcn convention). */
+.dark {
   --background: #1b1a17;
     --foreground: #ece9df;
     --card: #23221e;
@@ -68,12 +68,13 @@
     --secondary-foreground: #b3ada0;
     --muted: #282621;
     --muted-foreground: #b3ada0;
-    --accent-soft: rgba(255, 250, 235, 0.06);
-    --accent-soft-foreground: #ece9df;
+    --accent: rgba(255, 250, 235, 0.06);
+    --accent-foreground: #ece9df;
     --destructive: #e07a72;
     --destructive-foreground: #ffffff;
     --border: #37342c;
     --input: #474337;
+    --canvas: #1b1a17;
 
     --success: #6cc08b;
     --success-bg: #1d2e22;
@@ -108,13 +109,14 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent-soft: var(--accent-soft);
-  --color-accent-soft-foreground: var(--accent-soft-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-canvas: var(--canvas);
   --color-success: var(--success);
   --color-success-bg: var(--success-bg);
   --color-success-border: var(--success-border);
@@ -235,31 +237,31 @@ html[data-accent="violet"] {
 .hljs-punctuation {
   color: var(--muted-foreground);
 }
-html[data-theme="dark"] .hljs-comment {
+.dark .hljs-comment {
   color: var(--muted-foreground);
 }
-html[data-theme="dark"] .hljs-keyword {
+.dark .hljs-keyword {
   color: var(--primary-400);
 }
-html[data-theme="dark"] .hljs-string {
+.dark .hljs-string {
   color: var(--success);
 }
-html[data-theme="dark"] .hljs-number {
+.dark .hljs-number {
   color: var(--warning);
 }
-html[data-theme="dark"] .hljs-attr,
-html[data-theme="dark"] .hljs-attribute {
+.dark .hljs-attr,
+.dark .hljs-attribute {
   color: var(--info);
 }
-html[data-theme="dark"] .hljs-literal {
+.dark .hljs-literal {
   color: var(--primary-300);
 }
-html[data-theme="dark"] .hljs-tag {
+.dark .hljs-tag {
   color: var(--primary-400);
 }
-html[data-theme="dark"] .hljs-name {
+.dark .hljs-name {
   color: var(--primary-400);
 }
-html[data-theme="dark"] .hljs-punctuation {
+.dark .hljs-punctuation {
   color: var(--muted-foreground);
 }

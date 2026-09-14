@@ -67,7 +67,7 @@ interface StoryScenario {
  * Per-story metadata carried in the design snapshot (§4.6). `file` is the
  * project-relative story path ('src/...'); every other field is optional.
  */
-interface StoryMeta {
+export interface StoryMeta {
   file: string;
   title?: string;
   description?: string;

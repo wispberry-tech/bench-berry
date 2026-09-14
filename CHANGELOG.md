@@ -17,6 +17,7 @@ Feral-audit remediation (11 proven bugs + 6 risky findings):
 - Workspace ids have a single source of truth (`core/workspace.ts` `WORKSPACE_IDS`); the registry, config schema, snapshot writer, and vite plugin all derive from it.
 - README corrected: `scenarios` are parsed and typed but not yet rendered as UI.
 - CLI loads the project root's `.env` at startup (real env vars win), so `BERRYBENCH_DATABASE_URL` and friends work from `.env` without exporting.
+- Design rail groups stories by their directory instead of a hardcoded `Stories` bucket; stories nested directly in a `stories` dir render headerless (their path already says it), and a multi-story page shows a bare preview hint instead of a spurious `unknown story ` error.
 
 ## 0.1.1 — 2026-09-12
 

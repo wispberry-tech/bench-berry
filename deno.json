@@ -1,14 +1,11 @@
 {
   "name": "berry-bench",
   "version": "0.1.0",
-  "workspace": [
-    "./packages/*"
-  ],
   "exports": {
     ".": "./packages/core/mod.ts"
   },
   "tasks": {
-    "check": "deno check $(find packages -name '*.ts' -not -path '*/fixtures/*')",
+    "check": "deno check $(find packages -name '*.ts' -not -path '*/fixtures/*' -not -path '*/components/ui/*')",
     "test": "deno test -A packages/",
     "smoke": "deno test -A packages/cli/smoke_test.ts",
     "cli": "deno run -A packages/cli/main.ts"
@@ -34,7 +31,10 @@
     "bits-ui": "npm:bits-ui@^2",
     "clsx": "npm:clsx@^2",
     "tailwind-merge": "npm:tailwind-merge@^3",
-    "tailwind-variants": "npm:tailwind-variants@^1"
+    "@internationalized/date": "npm:@internationalized/date@^3.10.0",
+    "@lucide/svelte": "npm:@lucide/svelte@^0.561.0",
+    "tailwind-variants": "npm:tailwind-variants@^3.2.2",
+    "$lib/": "./packages/shell/src/lib/"
   },
   "fmt": {
     "useTabs": false,

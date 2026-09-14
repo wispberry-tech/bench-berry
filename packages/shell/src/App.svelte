@@ -21,8 +21,8 @@
     handleCopyClick,
     type PaletteController,
   } from './lib/keyboard.ts';
-  import Button from './lib/components/ui/button.svelte';
-  import Select from './lib/components/ui/select.svelte';
+  import { Button } from '$lib/components/ui/button';
+  import * as Select from '$lib/components/ui/select';
   import EmptyState from './lib/components/EmptyState.svelte';
   import Palette from './Palette.svelte';
   import Settings from './Settings.svelte';
@@ -115,22 +115,22 @@
       class="flex flex-none items-center gap-3 border-b border-border bg-background px-3.5"
       style="height: var(--topbar-h)"
     >
-      <Select
-        class="w-[220px]"
-        title="Workspace"
+      <Select.Root
+        type="single"
         value={currentWs ?? ''}
-        onchange={(e) => {
-          const v = (e.currentTarget as HTMLSelectElement).value;
-          if (v) navigate(hashFor({ kind: 'workspace', ws: v as 'design' | 'api' | 'db' }));
-        }}
+        onValueChange={(v) => v && go(`#/${v}`)}
       >
-        {#if currentWs === null}
-          <option value="" disabled>—</option>
-        {/if}
-        {#each enabledWorkspaces as id (id)}
-          <option value={id}>{WORKSPACE_LABELS[id]}</option>
-        {/each}
-      </Select>
+        <Select.Trigger class="w-[220px]" aria-label="Workspace" title="Workspace">
+          <Select.Value placeholder="Select workspace" />
+        </Select.Trigger>
+        <Select.Content>
+          <Select.Group>
+            {#each enabledWorkspaces as id (id)}
+              <Select.Item value={id}>{WORKSPACE_LABELS[id]}</Select.Item>
+            {/each}
+          </Select.Group>
+        </Select.Content>
+      </Select.Root>
       <div class="ml-auto flex items-center gap-1.5">
         <Button variant="ghost" size="sm" onclick={() => navigate('#/settings')}>
           <svg class="size-4"><use href="#i-settings"/></svg>

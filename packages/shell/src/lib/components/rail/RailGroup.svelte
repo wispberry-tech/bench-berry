@@ -4,7 +4,7 @@
 	// workspace via railState (persisted, auto-expanded for the active item).
 	// A plain button + conditional render: when collapsed the items simply
 	// unmount, so hidden rail items never receive keyboard focus.
-	import { cn } from "../../utils.ts";
+	import { cn } from "$lib/utils";
 	import type { Snippet } from "svelte";
 
 	let {

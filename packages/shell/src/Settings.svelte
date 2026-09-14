@@ -9,13 +9,13 @@
 
   import PageHeader from './lib/components/PageHeader.svelte';
   import Section from './lib/components/Section.svelte';
-  import Card from './lib/components/ui/card.svelte';
-  import Badge from './lib/components/ui/badge.svelte';
-  import Switch from './lib/components/ui/switch.svelte';
-  import Label from './lib/components/ui/label.svelte';
-  import Select from './lib/components/ui/select.svelte';
-  import Alert from './lib/components/ui/alert.svelte';
-  import Button from './lib/components/ui/button.svelte';
+  import { Card } from '$lib/components/ui/card';
+  import { Badge } from '$lib/components/ui/badge';
+  import { Switch } from '$lib/components/ui/switch';
+  import { Label } from '$lib/components/ui/label';
+  import * as Select from '$lib/components/ui/select';
+  import { Alert } from '$lib/components/ui/alert';
+  import { Button } from '$lib/components/ui/button';
 
   interface SaveResponse {
     ok: boolean;
@@ -139,11 +139,16 @@
           >
         </div>
         {#if dev}
-          <Select class="w-36" bind:value={accent}>
-            {#each ACCENTS as a (a)}
-              <option value={a}>{a}</option>
-            {/each}
-          </Select>
+          <Select.Root type="single" bind:value={accent}>
+            <Select.Trigger class="w-36" aria-label="Accent"><Select.Value /></Select.Trigger>
+            <Select.Content>
+              <Select.Group>
+                {#each ACCENTS as a (a)}
+                  <Select.Item value={a}>{a}</Select.Item>
+                {/each}
+              </Select.Group>
+            </Select.Content>
+          </Select.Root>
         {:else}
           <Badge variant="default">{isKnownAccent(accent) ? accent : DEFAULT_ACCENT}</Badge>
         {/if}
