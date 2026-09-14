@@ -5,6 +5,14 @@
 // glob, renders it with the framework detected from the host package.json and
 // talks to the shell over the §4.6 protocol. Only ever speaks to window.parent.
 /// <reference lib="dom" />
+// Side-effect first: installs safe storage getters so sandboxed story imports
+// that touch localStorage do not abort the module graph. The ONLY ordering
+// guarantee is the index.html classic script (external in dev, inlined in
+// build) — vite hoists eager-glob imports above this import in both modes. It
+// stays here so the shim is also part of the module graph for any entry that
+// bypasses index.html (and re-running it is idempotent: the getters are
+// configurable and replaced with the same values).
+import "./dom-shims.ts";
 import { parsePreviewMessage, type PreviewMessage } from "../protocol.ts";
 import { type PreviewFramework, renderStory, unmountActive } from "./renderers.ts";
 
@@ -12,6 +20,12 @@ import { type PreviewFramework, renderStory, unmountActive } from "./renderers.t
 // the framework is detected from its dependencies ('vue' > 'react' > 'svelte').
 // @ts-ignore — resolved by the berrybench vite plugin
 import pkg from "@pkg";
+
+// Host global stylesheets (preview.css config / auto-detected tailwind css),
+// compiled into this bundle by the preview vite config's berrybench-host-css
+// virtual module; empty when the host declares none.
+// @ts-ignore — resolved by the preview vite config
+import "virtual:berrybench-host-css";
 
 // Minimal local typing for vite's import.meta.glob so this file stays
 // deno-checkable; vite provides the real implementation at build time.
@@ -54,7 +68,7 @@ const params = new URLSearchParams(location.search);
 // shell keeps it in sync afterwards via setTheme messages (no re-render).
 const bootTheme = params.get("theme");
 if (bootTheme === "light" || bootTheme === "dark") {
-  document.documentElement.dataset.theme = bootTheme;
+  document.documentElement.classList.toggle("dark", bootTheme === "dark");
 }
 let storyId = params.get("story") ?? "";
 let currentProps: Record<string, unknown> = {};
@@ -94,6 +108,19 @@ function setError(message: string): void {
 
 async function render(): Promise<void> {
   const seq = ++renderSeq;
+  // Standalone visit with no ?story=: the preview only means something inside
+  // the shell's iframe, so show a hint instead of a spurious "unknown story "
+  // error. setStory arriving later re-renders and replaces the hint.
+  if (storyId === "") {
+    unmountActive();
+    infoTitle.textContent = "BerryBench preview";
+    mount.textContent = "";
+    const hint = document.createElement("div");
+    hint.className = "preview-empty";
+    hint.textContent = "No story selected \u2014 open this page from the BerryBench shell.";
+    mount.append(hint);
+    return;
+  }
   // Glob keys can be root-relative ('/src/...') or absolute ('/tmp/p4fixture/src/...')
   // depending on alias expansion; match by exact or '/'-anchored suffix.
   const key = Object.keys(mods).find(
@@ -147,7 +174,7 @@ window.addEventListener("message", (e) => {
     currentProps = {};
   } else if (msg.type === "setTheme") {
     // Theme-only message: update the canvas and return without re-rendering.
-    document.documentElement.dataset.theme = msg.theme;
+    document.documentElement.classList.toggle("dark", msg.theme === "dark");
     return;
   } else {
     return; // ready/error are preview->shell; never expected here

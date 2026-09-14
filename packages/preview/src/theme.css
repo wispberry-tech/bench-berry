@@ -7,7 +7,7 @@
   --bb-bg: #fcfbf7;
   --bb-text: #262419;
 }
-:root[data-theme="dark"] {
+.dark {
   color-scheme: dark;
   --bb-bg: #1b1a17;
   --bb-text: #ece9df;
@@ -56,5 +56,11 @@ body {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  opacity: 0.6;
+}
+/* Standalone hint shown when the canvas is opened with no ?story= (i.e. not
+   embedded by the shell): muted, centered by #preview-mount's flex layout. */
+.preview-empty {
+  font-size: 13px;
   opacity: 0.6;
 }

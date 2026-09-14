@@ -4,7 +4,7 @@
 // detection happens at runtime inside the frame from the project's
 // package.json, so every plugin is registered unconditionally here.
 import { join } from "@std/path";
-import type { Plugin, UserConfig } from "vite";
+import { type Plugin, type PluginOption, transformWithEsbuild, type UserConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import react from "@vitejs/plugin-react";
 import vue from "@vitejs/plugin-vue";
@@ -68,6 +68,33 @@ function inlinePreviewBundlePlugin(outDir: string): Plugin {
           return content === undefined ? all : `<style>${content}</style>`;
         },
       );
+      // The dev-mode storage shim rides as a classic script (runs before the
+      // module graph, which vite's eager-glob hoisting makes impossible via
+      // imports). The build inlines that same source here: a classic script
+      // executes during HTML parsing, before the deferred module script, so
+      // sandboxed hosts never evaluate a story module before the shims exist.
+      // transformWithEsbuild strips the TS annotations (the file stays the
+      // single source of truth — dev serves it via the src tag, build embeds
+      // the compiled form).
+      const shimHtml = await (async () => {
+        try {
+          const source = await Deno.readTextFile(join(APP_ROOT, "src", "dom-shims.ts"));
+          const { code } = await transformWithEsbuild(source, "dom-shims.ts", {
+            loader: "ts",
+            minify: true,
+          });
+          return `<script>${code}</script>`;
+        } catch {
+          // Source unavailable (compiled CLI without the checkout): fall back
+          // to dropping the tag. The preview then needs a non-sandboxed frame
+          // for localStorage, same as before the shim existed.
+          return "";
+        }
+      })();
+      html = html.replace(
+        /<script[^>]*src="\.\/src\/dom-shims\.ts"[^>]*><\/script>/,
+        shimHtml,
+      );
       await Deno.writeTextFile(join(outDir, "index.html"), html);
       for (const file of removed) {
         try {
@@ -76,6 +103,32 @@ function inlinePreviewBundlePlugin(outDir: string): Plugin {
           // Already absent (write:false scenarios): nothing to clean.
         }
       }
+    },
+  };
+}
+
+/**
+ * Expose the host's global stylesheets to the canvas bundle as a virtual CSS
+ * module (src/main.ts imports `virtual:berrybench-host-css`). The generated
+ * module references each host stylesheet by absolute path, so vite's css
+ * pipeline inlines and compiles them (postcss/tailwind). When the design
+ * package uses tailwind v4, an `@source` directive points the scanner at the
+ * design package dir — the preview app's own root would otherwise contain no
+ * components and leave the generated stylesheet with zero utility classes.
+ * No `apply` restriction: the module must exist in dev AND build; with an
+ * empty css list it resolves to an empty module.
+ */
+function hostCssPlugin(hostCss: string[], hostCssBase?: string): Plugin {
+  const ID = "\0virtual:berrybench-host-css.css";
+  return {
+    name: "berrybench-host-css",
+    resolveId(id) {
+      if (id === "virtual:berrybench-host-css") return ID;
+    },
+    load(id) {
+      if (id !== ID) return;
+      const source = hostCssBase !== undefined ? `@source ${JSON.stringify(hostCssBase)};\n` : "";
+      return source + hostCss.map((file) => `@import ${JSON.stringify(file)};`).join("\n");
     },
   };
 }
@@ -99,7 +152,17 @@ export function previewViteConfig(
     emptyOutDir?: boolean;
     storiesRoot?: string;
     packageJsonPath?: string;
+    /** Host design package's src/lib — the `$lib` alias target (shadcn-style imports). */
+    libRoot?: string;
     root?: string;
+    /** Absolute paths of host global stylesheets (detected or preview.css). */
+    hostCss?: string[];
+    /** Host-authored tooling plugins, applied after the built-in runtime plugins. */
+    hostPlugins?: PluginOption[];
+    /** tailwind v3: host postcss config file to force. */
+    cssPostcss?: string;
+    /** tailwind v4 scan base for @source: the design package dir. */
+    hostCssBase?: string;
   } = {},
 ): UserConfig {
   return {
@@ -125,14 +188,21 @@ export function previewViteConfig(
           });
         },
       },
+      // Host tooling (tailwind, preprocessors) after the built-in runtimes, so
+      // host plugins see already-registered framework plugins while berry-bench
+      // keeps ownership of the runtime lifecycle.
+      ...(opts.hostPlugins ?? []),
+      hostCssPlugin(opts.hostCss ?? [], opts.hostCssBase),
       inlinePreviewBundlePlugin(outDir),
     ],
     resolve: {
-      alias: {
-        "@stories": opts.storiesRoot ?? join(root, "src"),
-        "@pkg": opts.packageJsonPath ?? join(root, "package.json"),
-      },
+      alias: [
+        { find: "@stories", replacement: opts.storiesRoot ?? join(root, "src") },
+        { find: "@pkg", replacement: opts.packageJsonPath ?? join(root, "package.json") },
+        { find: "$lib", replacement: opts.libRoot ?? join(root, "src/lib") },
+      ],
     },
+    css: opts.cssPostcss !== undefined ? { postcss: opts.cssPostcss } : undefined,
     build: {
       outDir,
       emptyOutDir: opts.emptyOutDir ?? true,

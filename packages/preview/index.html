@@ -14,6 +14,14 @@
   </head>
   <body>
     <div id="preview-root"></div>
+    <!--
+      Storage shims must run BEFORE the module graph: the shell embeds this
+      page sandboxed (no allow-same-origin), so any localStorage touch in a
+      host story module would otherwise abort the whole graph. A classic
+      script executes before module evaluation, which import order inside
+      main.ts cannot guarantee (vite hoists eager-glob imports to the top).
+    -->
+    <script src="./src/dom-shims.ts"></script>
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

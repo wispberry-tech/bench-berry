@@ -1,9 +1,10 @@
 import { dirname, join } from "@std/path";
-import { build as viteBuild } from "vite";
+import { build as viteBuild, type PluginOption } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { ConfigError } from "../../core/mod.ts";
+import { ConfigError, previewOptions } from "../../core/mod.ts";
 import { berrybench } from "../../vite-plugin/mod.ts";
+import { detectHostPreviewEnv, loadHostVitePlugins } from "../../preview/host.ts";
 import { previewViteConfig } from "../../preview/config.ts";
 import type { CliContext } from "../main.ts";
 import {
@@ -82,6 +83,7 @@ export async function cmdBuild(
         outDir,
         emptyOutDir: true,
       },
+      resolve: { alias: [{ find: "$lib", replacement: join(shellDir, "src/lib") }] },
       plugins: [tailwindcss(), svelte(), berrybench({ root })],
     });
   } catch (error) {
@@ -102,12 +104,31 @@ export async function cmdBuild(
   const previewAppRoot = Deno.env.get("BERRYBENCH_SHELL_DIR") !== undefined
     ? join(dirname(shellDir), "preview")
     : undefined;
+  // Host-project preview integration (mirrors dev.ts): tailwind
+  // auto-detection, global css, framework-runtime aliasing, and an optional
+  // host vite config's plugins — read-only, degrade to warnings on failure.
+  const aliases = designPreviewAliases(root);
+  const previewOpts = previewOptions(written.resolved);
+  const hostEnv = await detectHostPreviewEnv(root, aliases.packageJsonPath, previewOpts);
+  const hostViteConfigPath = previewOpts.viteConfig !== undefined
+    ? join(root, previewOpts.viteConfig)
+    : join(dirname(aliases.packageJsonPath), "berrybench.vite.config.ts");
+  const hostConfig = await loadHostVitePlugins(hostViteConfigPath, root, "build");
+  const hostPlugins: PluginOption[] = [
+    ...(hostEnv.useTailwind && previewOpts.viteConfig === undefined ? [tailwindcss()] : []),
+    ...hostConfig.plugins,
+  ];
+  for (const warning of [...hostEnv.warnings, ...hostConfig.warnings]) err(warning);
   try {
     await viteBuild(
       previewViteConfig(root, previewOutDir, {
         base: "./",
         emptyOutDir: true,
-        ...designPreviewAliases(root),
+        ...aliases,
+        hostCss: hostEnv.cssFiles,
+        hostPlugins,
+        cssPostcss: hostEnv.cssPostcss,
+        hostCssBase: hostEnv.tailwindBase,
         ...(previewAppRoot !== undefined ? { root: previewAppRoot } : {}),
       }),
     );

@@ -188,7 +188,9 @@ export function formatConfigFile(
   // settings survive a write-back untouched.
   const extraKeys = Object.keys(resolved.extra ?? {}).sort((a, b) => a.localeCompare(b));
   for (const key of extraKeys) {
-    lines.push(`  ${isIdentifier(key) ? key : quote(key)}: ${serializeValue(resolved.extra[key])},`);
+    lines.push(
+      `  ${isIdentifier(key) ? key : quote(key)}: ${serializeValue(resolved.extra[key])},`,
+    );
   }
   lines.push("};");
   return `${lines.join("\n")}\n`;
@@ -263,6 +265,52 @@ export async function readFileConfig(root: string): Promise<unknown | undefined>
     throw new ConfigError(`config file ${filePath} must default-export a plain object`);
   }
   return value;
+}
+
+/**
+ * The design-package preview integration knobs, from the config file's
+ * `preview` section (an unknown top-level key preserved in `extra` so edits
+ * round-trip through formatConfigFile):
+ *   preview: { css: ['src/app.css'], viteConfig: 'berrybench.vite.config.ts' }
+ * - `css` global stylesheets for the preview canvas, relative to the design
+ *   package dir (absolute paths allowed); empty when absent.
+ * - `viteConfig` a vite config file whose plugins join the preview server
+ *   (tailwind/mdsvex-style tooling); suppresses the built-in auto-tailwind.
+ * Malformed shapes throw ConfigError naming the offending key.
+ */
+export function previewOptions(resolved: ResolvedConfig): {
+  css: string[];
+  viteConfig?: string;
+} {
+  const preview = resolved.extra["preview"];
+  if (preview === undefined) return { css: [] };
+  if (typeof preview !== "object" || preview === null || Array.isArray(preview)) {
+    throw new ConfigError("invalid berrybench.config.ts: `preview` must be an object");
+  }
+  const { css, viteConfig } = preview as Record<string, unknown>;
+  const result: { css: string[]; viteConfig?: string } = {
+    css: css === undefined ? [] : previewStringList(css, "preview.css"),
+  };
+  if (viteConfig !== undefined) {
+    if (typeof viteConfig !== "string" || viteConfig.trim() === "") {
+      throw new ConfigError(
+        "invalid berrybench.config.ts: `preview.viteConfig` must be a non-empty string",
+      );
+    }
+    result.viteConfig = viteConfig;
+  }
+  return result;
+}
+
+// `preview.css` accepts a single path or a list; anything else is malformed.
+function previewStringList(value: unknown, key: string): string[] {
+  const list = typeof value === "string" ? [value] : Array.isArray(value) ? value : null;
+  if (list === null || list.some((v) => typeof v !== "string" || v.trim() === "")) {
+    throw new ConfigError(
+      `invalid berrybench.config.ts: ${key} must be a string or an array of non-empty strings`,
+    );
+  }
+  return list;
 }
 
 /**

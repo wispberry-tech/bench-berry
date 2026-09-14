@@ -21,15 +21,17 @@ export const CONFIG_FILE = "berrybench.config.ts";
 export const RESOLVED_CONFIG_FILE = ".berrybench/resolved-config.json";
 
 /**
- * True when the shell app is unreachable: the resolved shell dir does not
- * exist and BERRYBENCH_SHELL_DIR was not set to point elsewhere. In compiled
- * binaries import.meta.dirname points at the executable's extract dir, so the
- * default repo-relative path is the compiled-binary failure case.
+ * True when the shell app is unreachable: the resolved shell dir has no
+ * index.html and BERRYBENCH_SHELL_DIR was not set to point elsewhere. In
+ * compiled binaries import.meta.dirname points at the executable's extract
+ * dir, so the default repo-relative path is the compiled-binary failure case.
+ * (The extract may still contain a packages/shell/package.json when the shell
+ * is a deno workspace member; index.html is the required shell artifact.)
  */
 export async function missingShellDir(shellDir: string): Promise<boolean> {
   if (Deno.env.get("BERRYBENCH_SHELL_DIR") !== undefined) return false;
   try {
-    await Deno.stat(shellDir);
+    await Deno.stat(join(shellDir, "index.html"));
     return false;
   } catch (error) {
     if (error instanceof Deno.errors.NotFound) return true;
@@ -59,15 +61,23 @@ export function output(ctx: CliContext): { out: Out; err: Out } {
  */
 export function designPreviewAliases(
   root: string,
-): { storiesRoot: string; packageJsonPath: string } {
+): { storiesRoot: string; packageJsonPath: string; libRoot: string } {
   try {
     const snap = JSON.parse(
       Deno.readTextFileSync(join(root, SNAPSHOT_DIR, "design.json")),
     ) as { srcRoot?: string };
     const base = snap.srcRoot && snap.srcRoot !== "." ? join(root, snap.srcRoot) : root;
-    return { storiesRoot: join(base, "src"), packageJsonPath: join(base, "package.json") };
+    return {
+      storiesRoot: join(base, "src"),
+      packageJsonPath: join(base, "package.json"),
+      libRoot: join(base, "src/lib"),
+    };
   } catch {
-    return { storiesRoot: join(root, "src"), packageJsonPath: join(root, "package.json") };
+    return {
+      storiesRoot: join(root, "src"),
+      packageJsonPath: join(root, "package.json"),
+      libRoot: join(root, "src/lib"),
+    };
   }
 }
 
