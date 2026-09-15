@@ -35,7 +35,9 @@ export function handleRailNavKeydown(e: KeyboardEvent): void {
   const tag = (e.target as Element | null)?.tagName ?? "";
   if (FORM_TAG[tag] || e.metaKey || e.ctrlKey || e.altKey) return;
   const items = Array.from(
-    document.querySelectorAll<HTMLElement>('.view-body [data-sidebar="menu-button"]'),
+    document.querySelectorAll<HTMLElement>(
+      '.view-body [data-sidebar="menu-button"], .view-body [data-sidebar="menu-sub-button"]',
+    ),
   );
   if (items.length === 0) return;
 

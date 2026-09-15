@@ -18,7 +18,7 @@
   import { Badge } from '$lib/components/ui/badge';
   import { Button } from '$lib/components/ui/button';
   import { Card } from '$lib/components/ui/card';
-  import ChevronDown from '@lucide/svelte/icons/chevron-down';
+  import ChevronRight from '@lucide/svelte/icons/chevron-right';
   import Copy from '@lucide/svelte/icons/copy';
   import Check from '@lucide/svelte/icons/check';
   import Database from '@lucide/svelte/icons/database';
@@ -197,61 +197,61 @@
   <Sidebar.Provider class="min-h-full">
     <Sidebar.Root collapsible="none" class="flex-none border-r border-sidebar-border">
       <Sidebar.Header class="gap-0.5 border-b border-sidebar-border px-4 pb-3 pt-4.5">
-        <div class="text-sm font-semibold tracking-[-0.01em]">{title}</div>
+        <div class="text-sm font-medium tracking-[-0.01em]">{title}</div>
         <div class="text-xs text-muted-foreground">{endpointCount} endpoints</div>
       </Sidebar.Header>
       <Sidebar.Content>
-        {#each opGroups as [group, groupOps] (group)}
-          <Collapsible.Root
-            open={!isCollapsed(railState, 'api', group)}
-            onOpenChange={(open) => {
-              railState = setGroupCollapsed(railState, 'api', group, !open);
-            }}
-          >
-            <Sidebar.Group data-ws="api">
-              <Sidebar.GroupLabel class="p-0">
-                <Collapsible.Trigger class="group/label flex h-8 w-full cursor-pointer items-center gap-1.5 rounded-md px-2 text-left text-xs font-semibold uppercase tracking-[0.08em] text-sidebar-foreground/70 outline-none hover:text-sidebar-foreground focus-visible:text-sidebar-foreground">
-                  <ChevronDown
-                    class="size-3 flex-none text-sidebar-foreground/70 transition-transform duration-150 group-data-[state=closed]/label:-rotate-90"
-                    aria-hidden="true"
-                  />
-                  <span class="min-w-0 flex-1 truncate">{group}</span>
-                  <span class="flex-none tabular-nums">{groupOps.length}</span>
-                </Collapsible.Trigger>
-              </Sidebar.GroupLabel>
-              <Collapsible.Content>
-                <Sidebar.GroupContent>
-                  <Sidebar.Menu>
-                    {#each groupOps as op (op.id)}
-                      <Sidebar.MenuItem>
-                        <Sidebar.MenuButton
-                          class="h-auto min-h-8 py-1.5"
-                          isActive={op.id === activeOp?.id}
-                          data-ws="api"
-                          data-id={op.id}
-                          onclick={() => navigate(hashFor({ kind: 'workspace', ws: 'api', key: 'op', id: op.id }))}
-                        >
-                          <Badge
-                            variant={methodVariant(op.method)}
-                            class="min-w-[52px] flex-none justify-center px-1.5 font-mono text-xs tracking-[0.03em]"
-                          >
-                            {op.method.toUpperCase()}
-                          </Badge>
-                          <span class="flex min-w-0 flex-col">
-                            <span class="truncate font-mono text-xs">{op.path}</span>
-                            {#if op.summary ?? op.operationId}
-                              <span class="truncate text-xs text-muted-foreground">{op.summary ?? op.operationId}</span>
-                            {/if}
-                          </span>
+        <Sidebar.Group data-ws="api">
+          <Sidebar.GroupLabel>Endpoints</Sidebar.GroupLabel>
+          <Sidebar.GroupContent>
+            <Sidebar.Menu>
+              {#each opGroups as [group, groupOps] (group)}
+                <Collapsible.Root
+                  class="group/collapsible"
+                  open={!isCollapsed(railState, 'api', group)}
+                  onOpenChange={(open) => {
+                    railState = setGroupCollapsed(railState, 'api', group, !open);
+                  }}
+                >
+                  <Sidebar.MenuItem>
+                    <Collapsible.Trigger class="w-full">
+                      {#snippet child({ props })}
+                        <Sidebar.MenuButton {...props}>
+                          <span class="flex-1 truncate">{group}</span>
+                          <span class="flex-none text-xs tabular-nums text-sidebar-foreground/50">{groupOps.length}</span>
+                          <ChevronRight class="flex-none text-sidebar-foreground/50 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                         </Sidebar.MenuButton>
-                      </Sidebar.MenuItem>
-                    {/each}
-                  </Sidebar.Menu>
-                </Sidebar.GroupContent>
-              </Collapsible.Content>
-            </Sidebar.Group>
-          </Collapsible.Root>
-        {/each}
+                      {/snippet}
+                    </Collapsible.Trigger>
+                  </Sidebar.MenuItem>
+                  <Collapsible.Content>
+                    <Sidebar.MenuSub>
+                      {#each groupOps as op (op.id)}
+                        <Sidebar.MenuSubItem>
+                          <Sidebar.MenuSubButton
+                            size="sm"
+                            href={hashFor({ kind: 'workspace', ws: 'api', key: 'op', id: op.id })}
+                            isActive={op.id === activeOp?.id}
+                            data-ws="api"
+                            data-id={op.id}
+                          >
+                            <Badge
+                              variant={methodVariant(op.method)}
+                              class="min-w-[52px] flex-none justify-center px-1.5 font-mono text-xs tracking-[0.03em]"
+                            >
+                              {op.method.toUpperCase()}
+                            </Badge>
+                            <span class="truncate">{op.path}</span>
+                          </Sidebar.MenuSubButton>
+                        </Sidebar.MenuSubItem>
+                      {/each}
+                    </Sidebar.MenuSub>
+                  </Collapsible.Content>
+                </Collapsible.Root>
+              {/each}
+            </Sidebar.Menu>
+          </Sidebar.GroupContent>
+        </Sidebar.Group>
       </Sidebar.Content>
     </Sidebar.Root>
 

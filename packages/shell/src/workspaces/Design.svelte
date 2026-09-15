@@ -23,7 +23,7 @@
   import * as Select from '$lib/components/ui/select';
   import * as Sidebar from '$lib/components/ui/sidebar';
   import * as Collapsible from '$lib/components/ui/collapsible';
-  import ChevronDown from '@lucide/svelte/icons/chevron-down';
+  import ChevronRight from '@lucide/svelte/icons/chevron-right';
   import Copy from '@lucide/svelte/icons/copy';
   import Check from '@lucide/svelte/icons/check';
   import * as Tabs from '$lib/components/ui/tabs';
@@ -161,6 +161,23 @@
     if (frame?.contentWindow) frame.contentWindow.postMessage(msg, '*');
   }
 
+  // Last props payload sent to the frame, JSON-keyed. The frame replies
+  // `ready` after EVERY commit, so an unconditional setProps reply would
+  // bounce forever (setProps → render → ready → setProps → …). Only re-send
+  // when the merged props changed since the last send; the key is cleared
+  // whenever the frame document (re)starts so boot, tab-switch remounts and
+  // error recovery always re-sync.
+  let lastSentPropsKey = '';
+
+  /** Push the current merged props to the frame, unless it already has them. */
+  function sendProps(): void {
+    const props = mergedProps();
+    const key = JSON.stringify(props);
+    if (key === lastSentPropsKey) return;
+    lastSentPropsKey = key;
+    postToFrame({ type: 'setProps', props });
+  }
+
   // Keep the iframe pointed at the active story: first mount sets the src once
   // (the URL carries ?story=), later changes go through the setStory message so
   // the iframe document and its state stay alive.
@@ -171,13 +188,22 @@
     if (frame?.contentWindow) {
       postToFrame({ type: 'setStory', storyId: file });
       frameStory = file;
-      postToFrame({ type: 'setProps', props: mergedProps() });
+      // setStory resets the frame's currentProps; force a fresh props push.
+      lastSentPropsKey = '';
+      sendProps();
     } else {
       frameSrc = `${env.preview.base}?story=${encodeURIComponent(file)}&theme=${theme}`;
       frameStory = file;
       previewStatus = 'loading';
       previewMessage = '';
+      lastSentPropsKey = '';
     }
+  });
+
+  // A (re)bound iframe is a fresh document with empty props (first mount, or
+  // tab switches recreate the element); the next ready must re-sync props.
+  $effect(() => {
+    if (frame) lastSentPropsKey = '';
   });
 
   // Preview <-> shell protocol. The iframe is sandboxed (opaque origin), so its
@@ -194,7 +220,7 @@
       if (msg.type === 'ready') {
         previewStatus = 'ready';
         previewMessage = '';
-        postToFrame({ type: 'setProps', props: mergedProps() });
+        sendProps();
         postToFrame({ type: 'setTheme', theme });
       } else if (msg.type === 'error') {
         previewStatus = 'error';
@@ -213,7 +239,7 @@
 
   /** Any control change pushes the current merged props to the preview. */
   function onControlChange(): void {
-    postToFrame({ type: 'setProps', props: mergedProps() });
+    sendProps();
   }
 </script>
 
@@ -222,7 +248,7 @@
     <Sidebar.Root collapsible="none">
       <Sidebar.Header>
         <div class="flex flex-col gap-0.5 px-2">
-          <span class="truncate text-sm font-semibold text-sidebar-foreground">{packageName}</span>
+          <span class="truncate text-sm font-medium text-sidebar-foreground">{packageName}</span>
           {#if version}
             <span class="truncate font-mono text-xs text-muted-foreground">v{version}</span>
           {/if}
@@ -230,11 +256,12 @@
       </Sidebar.Header>
       <Sidebar.Content>
         {#if snap}
-          {#each railSections as section (section.group ?? section.stories[0].file)}
-            {#if section.group === null}
-              <Sidebar.Group data-ws="design">
-                <Sidebar.GroupContent>
-                  <Sidebar.Menu>
+          <Sidebar.Group data-ws="design">
+            <Sidebar.GroupLabel>Stories</Sidebar.GroupLabel>
+            <Sidebar.GroupContent>
+              <Sidebar.Menu>
+                {#each railSections as section (section.group ?? section.stories[0].file)}
+                  {#if section.group === null}
                     {#each section.stories as story (story.file)}
                       <Sidebar.MenuItem>
                         <Sidebar.MenuButton
@@ -242,52 +269,52 @@
                           data-id={story.file}
                           onclick={() => navigate(hashFor({ kind: 'workspace', ws: 'design', key: 'comp', id: story.file }))}
                         >
-                          <span class="font-mono">{story.title ?? basename(story.file)}</span>
+                          <span class="truncate">{story.title ?? basename(story.file)}</span>
                         </Sidebar.MenuButton>
                       </Sidebar.MenuItem>
                     {/each}
-                  </Sidebar.Menu>
-                </Sidebar.GroupContent>
-              </Sidebar.Group>
-            {:else}
-              <Collapsible.Root
-                class="group/collapsible"
-                open={!isCollapsed(railState, 'design', section.group)}
-                onOpenChange={(o) => {
-                  railState = setGroupCollapsed(railState, 'design', section.group, !o);
-                }}
-              >
-                <Sidebar.Group data-ws="design">
-                  <Sidebar.GroupLabel>
-                    {#snippet child({ props })}
-                      <Collapsible.Trigger {...props}>
-                        <span class="min-w-0 flex-1 truncate">{section.group}</span>
-                        <span class="flex-none tabular-nums">{section.stories.length}</span>
-                        <ChevronDown class="transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                      </Collapsible.Trigger>
-                    {/snippet}
-                  </Sidebar.GroupLabel>
-                  <Collapsible.Content>
-                    <Sidebar.GroupContent>
-                      <Sidebar.Menu>
-                        {#each section.stories as story (story.file)}
-                          <Sidebar.MenuItem>
-                            <Sidebar.MenuButton
-                              isActive={story.file === activeFile}
-                              data-id={story.file}
-                              onclick={() => navigate(hashFor({ kind: 'workspace', ws: 'design', key: 'comp', id: story.file }))}
-                            >
-                              <span class="font-mono">{story.title ?? basename(story.file)}</span>
+                  {:else}
+                    <Collapsible.Root
+                      class="group/collapsible"
+                      open={!isCollapsed(railState, 'design', section.group)}
+                      onOpenChange={(o) => {
+                        railState = setGroupCollapsed(railState, 'design', section.group, !o);
+                      }}
+                    >
+                      <Sidebar.MenuItem>
+                        <Collapsible.Trigger class="w-full">
+                          {#snippet child({ props })}
+                            <Sidebar.MenuButton {...props}>
+                              <span class="flex-1 truncate">{section.group}</span>
+                              <span class="flex-none text-xs tabular-nums text-sidebar-foreground/50">{section.stories.length}</span>
+                              <ChevronRight class="flex-none text-sidebar-foreground/50 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                             </Sidebar.MenuButton>
-                          </Sidebar.MenuItem>
-                        {/each}
-                      </Sidebar.Menu>
-                    </Sidebar.GroupContent>
-                  </Collapsible.Content>
-                </Sidebar.Group>
-              </Collapsible.Root>
-            {/if}
-          {/each}
+                          {/snippet}
+                        </Collapsible.Trigger>
+                      </Sidebar.MenuItem>
+                      <Collapsible.Content>
+                        <Sidebar.MenuSub>
+                          {#each section.stories as story (story.file)}
+                            <Sidebar.MenuSubItem>
+                              <Sidebar.MenuSubButton
+                                size="sm"
+                                href={hashFor({ kind: 'workspace', ws: 'design', key: 'comp', id: story.file })}
+                                isActive={story.file === activeFile}
+                                data-id={story.file}
+                                data-ws="design"
+                              >
+                                <span class="truncate">{story.title ?? basename(story.file)}</span>
+                              </Sidebar.MenuSubButton>
+                            </Sidebar.MenuSubItem>
+                          {/each}
+                        </Sidebar.MenuSub>
+                      </Collapsible.Content>
+                    </Collapsible.Root>
+                  {/if}
+                {/each}
+              </Sidebar.Menu>
+            </Sidebar.GroupContent>
+          </Sidebar.Group>
         {/if}
       </Sidebar.Content>
     </Sidebar.Root>

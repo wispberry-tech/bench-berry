@@ -17,7 +17,7 @@
   import { Badge } from '$lib/components/ui/badge';
   import { Button } from '$lib/components/ui/button';
   import { Card } from '$lib/components/ui/card';
-  import ChevronDown from '@lucide/svelte/icons/chevron-down';
+  import ChevronRight from '@lucide/svelte/icons/chevron-right';
   import Copy from '@lucide/svelte/icons/copy';
   import Check from '@lucide/svelte/icons/check';
   import TableIcon from '@lucide/svelte/icons/table-2';
@@ -95,51 +95,57 @@
   <Sidebar.Provider class="min-h-full">
     <Sidebar.Root collapsible="none" class="flex-none border-r border-sidebar-border">
       <Sidebar.Header class="gap-0.5 border-b border-sidebar-border px-4 pb-3 pt-4.5">
-        <div class="text-sm font-semibold tracking-[-0.01em]">{database ?? 'Database'}</div>
+        <div class="text-sm font-medium tracking-[-0.01em]">{database ?? 'Database'}</div>
         <div class="text-xs text-muted-foreground">{tables.length} tables</div>
       </Sidebar.Header>
       <Sidebar.Content>
-        {#each schemaGroups as [schema, schemaTables] (schema)}
-          <Collapsible.Root
-            open={!isCollapsed(railState, 'db', schema)}
-            onOpenChange={(open) => {
-              railState = setGroupCollapsed(railState, 'db', schema, !open);
-            }}
-          >
-            <Sidebar.Group data-ws="db">
-              <Sidebar.GroupLabel class="p-0">
-                <Collapsible.Trigger class="group/label flex h-8 w-full cursor-pointer items-center gap-1.5 rounded-md px-2 text-left text-xs font-semibold uppercase tracking-[0.08em] text-sidebar-foreground/70 outline-none hover:text-sidebar-foreground focus-visible:text-sidebar-foreground">
-                  <ChevronDown
-                    class="size-3 flex-none text-sidebar-foreground/70 transition-transform duration-150 group-data-[state=closed]/label:-rotate-90"
-                    aria-hidden="true"
-                  />
-                  <span class="min-w-0 flex-1 truncate">{schema}</span>
-                  <span class="flex-none tabular-nums">{schemaTables.length}</span>
-                </Collapsible.Trigger>
-              </Sidebar.GroupLabel>
-              <Collapsible.Content>
-                <Sidebar.GroupContent>
-                  <Sidebar.Menu>
-                    {#each schemaTables as table (table.name)}
-                      <Sidebar.MenuItem>
-                        <Sidebar.MenuButton
-                          isActive={table.name === activeTable?.name}
-                          data-ws="db"
-                          data-id={table.name}
-                          onclick={() => navigate(hashFor({ kind: 'workspace', ws: 'db', key: 'table', id: table.name }))}
-                        >
-                          <TableIcon class="flex-none text-muted-foreground" />
-                          <span class="min-w-0 flex-1 truncate font-mono text-xs">{table.name}</span>
-                          <span class="flex-none text-xs tabular-nums text-muted-foreground/70">{table.columns.length}</span>
+        <Sidebar.Group data-ws="db">
+          <Sidebar.GroupLabel>Tables</Sidebar.GroupLabel>
+          <Sidebar.GroupContent>
+            <Sidebar.Menu>
+              {#each schemaGroups as [schema, schemaTables] (schema)}
+                <Collapsible.Root
+                  class="group/collapsible"
+                  open={!isCollapsed(railState, 'db', schema)}
+                  onOpenChange={(open) => {
+                    railState = setGroupCollapsed(railState, 'db', schema, !open);
+                  }}
+                >
+                  <Sidebar.MenuItem>
+                    <Collapsible.Trigger class="w-full">
+                      {#snippet child({ props })}
+                        <Sidebar.MenuButton {...props}>
+                          <span class="flex-1 truncate">{schema}</span>
+                          <span class="flex-none text-xs tabular-nums text-sidebar-foreground/50">{schemaTables.length}</span>
+                          <ChevronRight class="flex-none text-sidebar-foreground/50 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                         </Sidebar.MenuButton>
-                      </Sidebar.MenuItem>
-                    {/each}
-                  </Sidebar.Menu>
-                </Sidebar.GroupContent>
-              </Collapsible.Content>
-            </Sidebar.Group>
-          </Collapsible.Root>
-        {/each}
+                      {/snippet}
+                    </Collapsible.Trigger>
+                  </Sidebar.MenuItem>
+                  <Collapsible.Content>
+                    <Sidebar.MenuSub>
+                      {#each schemaTables as table (table.name)}
+                        <Sidebar.MenuSubItem>
+                          <Sidebar.MenuSubButton
+                            size="sm"
+                            href={hashFor({ kind: 'workspace', ws: 'db', key: 'table', id: table.name })}
+                            isActive={table.name === activeTable?.name}
+                            data-ws="db"
+                            data-id={table.name}
+                          >
+                            <TableIcon class="flex-none text-muted-foreground" />
+                            <span class="min-w-0 flex-1 truncate">{table.name}</span>
+                            <span class="flex-none text-xs tabular-nums text-muted-foreground/70">{table.columns.length}</span>
+                          </Sidebar.MenuSubButton>
+                        </Sidebar.MenuSubItem>
+                      {/each}
+                    </Sidebar.MenuSub>
+                  </Collapsible.Content>
+                </Collapsible.Root>
+              {/each}
+            </Sidebar.Menu>
+          </Sidebar.GroupContent>
+        </Sidebar.Group>
       </Sidebar.Content>
     </Sidebar.Root>
 
