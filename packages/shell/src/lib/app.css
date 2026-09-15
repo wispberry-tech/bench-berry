@@ -1,9 +1,9 @@
 /* ============================================================
-   BerryBench shell — Tailwind v4 theme layer (replaces tokens.css).
-   Semantic tokens adopt shadcn names; values are the approved
-   warm-paper hexes from the dark-mode overhaul (tokens.css:8-125).
-   Dark mode via the .dark class (OS-managed), accents via html[data-accent],
-   both applied by lib/theme.ts.
+   BerryBench shell — Tailwind v4 theme layer.
+   Semantic tokens are the shadcn-svelte DEFAULT oklch palette
+   (baseColor: neutral) plus the sidebar tokens, per
+   shadcn-svelte.com/docs/theming and /docs/components/sidebar.
+   Dark mode via the .dark class (OS-managed), applied by lib/theme.ts.
    ============================================================ */
 @import "tailwindcss";
 
@@ -11,43 +11,40 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* light theme — warm paper */
-  --background: #f4f2ec;
-  --foreground: #262419;
-  --card: #fcfbf7;
-  --card-foreground: #262419;
-  --popover: #fcfbf7;
-  --popover-foreground: #262419;
-  --primary: #7c5cf0;
-  --primary-foreground: #ffffff;
-  --primary-300: #ab94f7;
-  --primary-400: #8d72f2;
-  --secondary: #f7f5ee;
-  --secondary-foreground: #6d675a;
-  --muted: #f7f5ee;
-  --muted-foreground: #6d675a;
-  --accent: rgba(60, 54, 38, 0.05);
-  --accent-foreground: #262419;
-  --destructive: #c23d3d;
-  --destructive-foreground: #ffffff;
-  --border: #e3dfd3;
-  --input: #d2cdbd;
-  --ring: #7c5cf0;
-  --canvas: #fcfbf7;
   --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 
-  /* status triplets (badges, tables) */
-  --success: #35855c;
-  --success-bg: #ecf6ee;
-  --success-border: #cde5d4;
-  --warning: #a16207;
-  --warning-bg: #faf3e2;
-  --warning-border: #ecdcb4;
-  --info: #2f6d9e;
-  --info-bg: #ecf3f8;
-  --info-border: #c8e0ef;
-
-  /* layout + type */
+  /* layout + type (theme-invariant) */
   --topbar-h: 52px;
   --font: "Inter", "Inter Variable", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Helvetica, Arial, sans-serif;
@@ -58,39 +55,39 @@
 
 /* Dark theme tokens: the .dark class on <html> (shadcn convention). */
 .dark {
-  --background: #1b1a17;
-    --foreground: #ece9df;
-    --card: #23221e;
-    --card-foreground: #ece9df;
-    --popover: #23221e;
-    --popover-foreground: #ece9df;
-    --secondary: #282621;
-    --secondary-foreground: #b3ada0;
-    --muted: #282621;
-    --muted-foreground: #b3ada0;
-    --accent: rgba(255, 250, 235, 0.06);
-    --accent-foreground: #ece9df;
-    --destructive: #e07a72;
-    --destructive-foreground: #ffffff;
-    --border: #37342c;
-    --input: #474337;
-    --canvas: #1b1a17;
-
-    --success: #6cc08b;
-    --success-bg: #1d2e22;
-    --success-border: #2e4a36;
-    --warning: #d9a45c;
-    --warning-bg: #2f2513;
-    --warning-border: #4d3d1f;
-    --info: #7ab3d6;
-    --info-bg: #17262f;
-    --info-border: #27424f;
-    color-scheme: dark;
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.269 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.371 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.439 0 0);
+  color-scheme: dark;
 }
-
-/* Fonts are theme-invariant; the color tokens must stay inline so the dark
-   variant re-resolves them (the old tokens.css --shadow / --r-* vars are
-   gone; use Tailwind shadow-* and rounded-* utilities instead). */
 @theme {
   --font-sans: var(--font);
   --font-mono: var(--mono);
@@ -112,55 +109,27 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-canvas: var(--canvas);
-  --color-success: var(--success);
-  --color-success-bg: var(--success-bg);
-  --color-success-border: var(--success-border);
-  --color-warning: var(--warning);
-  --color-warning-bg: var(--warning-bg);
-  --color-warning-border: var(--warning-border);
-  --color-info: var(--info);
-  --color-info-bg: var(--info-bg);
-  --color-info-border: var(--info-border);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 }
 
-/* Accent system: the four html[data-accent=…] blocks (ported from
-   tokens.css:126-190) now drive --primary/--ring + the hljs ramp vars. */
-html[data-accent="blue"] {
-  --primary: #2970e6;
-  --primary-foreground: #ffffff;
-  --ring: #2970e6;
-  --primary-300: #85acf5;
-  --primary-400: #4f8aee;
-}
-html[data-accent="green"] {
-  --primary: #0f9d6e;
-  --primary-foreground: #ffffff;
-  --ring: #0f9d6e;
-  --primary-300: #72caa4;
-  --primary-400: #3ab183;
-}
-html[data-accent="rose"] {
-  --primary: #e5386b;
-  --primary-foreground: #ffffff;
-  --ring: #e5386b;
-  --primary-300: #f18fae;
-  --primary-400: #eb5f8c;
-}
-html[data-accent="violet"] {
-  --primary: #7c5cf0;
-  --primary-foreground: #ffffff;
-  --ring: #7c5cf0;
-  --primary-300: #ab94f7;
-  --primary-400: #8d72f2;
-}
 
 @layer base {
   body {
@@ -200,68 +169,9 @@ html[data-accent="violet"] {
 
 /* ---------- tiny helper utilities (used by components and markup.ts strings) ---------- */
 @utility kbd {
-  @apply inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-input border-b-2 bg-card px-1 font-mono text-[10.5px] leading-none text-muted-foreground;
+  @apply inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-md border border-input border-b-2 bg-muted px-1 font-mono text-xs leading-none text-muted-foreground;
 }
 
 @utility codeblock {
-  @apply m-0 max-w-[760px] overflow-auto whitespace-pre rounded-lg border border-border bg-secondary p-3 font-mono text-xs leading-[1.55] text-foreground;
-}
-
-/* ---------- syntax highlighting (runtime classes from highlight.js) ---------- */
-.hljs-comment {
-  color: var(--muted-foreground);
-  font-style: italic;
-}
-.hljs-keyword {
-  color: var(--primary);
-}
-.hljs-string {
-  color: var(--success);
-}
-.hljs-number {
-  color: var(--warning);
-}
-.hljs-attr,
-.hljs-attribute {
-  color: var(--info);
-}
-.hljs-literal {
-  color: var(--primary);
-}
-.hljs-tag {
-  color: var(--primary);
-}
-.hljs-name {
-  color: var(--primary);
-}
-.hljs-punctuation {
-  color: var(--muted-foreground);
-}
-.dark .hljs-comment {
-  color: var(--muted-foreground);
-}
-.dark .hljs-keyword {
-  color: var(--primary-400);
-}
-.dark .hljs-string {
-  color: var(--success);
-}
-.dark .hljs-number {
-  color: var(--warning);
-}
-.dark .hljs-attr,
-.dark .hljs-attribute {
-  color: var(--info);
-}
-.dark .hljs-literal {
-  color: var(--primary-300);
-}
-.dark .hljs-tag {
-  color: var(--primary-400);
-}
-.dark .hljs-name {
-  color: var(--primary-400);
-}
-.dark .hljs-punctuation {
-  color: var(--muted-foreground);
+  @apply m-0 max-w-[760px] overflow-auto whitespace-pre rounded-lg border border-border bg-muted p-3 font-mono text-xs leading-[1.55] text-foreground;
 }

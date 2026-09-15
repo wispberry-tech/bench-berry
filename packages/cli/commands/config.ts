@@ -47,11 +47,6 @@ export async function cmdConfig(
     const r = resolved.workspaces[id as WorkspaceId];
     out(`${id}: ${r.enabled ? "on" : "off"} (${r.enabledBy})`);
   }
-  if (resolved.theme !== undefined) {
-    const parts: string[] = [];
-    if (resolved.theme.accent !== undefined) parts.push(`accent=${resolved.theme.accent}`);
-    if (parts.length > 0) out(`theme: ${parts.join(" ")}`);
-  }
   return 0;
 }
 

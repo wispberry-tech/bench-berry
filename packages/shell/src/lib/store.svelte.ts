@@ -66,7 +66,6 @@ function applyConfig(raw: unknown): void {
         "workspaces"
       ][WorkspaceId];
   }
-  config.theme = next.theme;
 }
 
 /** Sync snapshot values; disabled workspaces (absent keys) are removed. */

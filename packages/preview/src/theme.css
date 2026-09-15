@@ -1,16 +1,16 @@
 /* packages/preview/src/theme.css - canvas theming for the preview iframe.
-   Mirrors the shell's --bg/text tokens (tokens.css) so the canvas and the
+   Mirrors the shell's background/foreground tokens (app.css) so the canvas and the
    shell chrome agree in both themes; bare values, this page imports no
    component CSS. */
 :root {
   color-scheme: light;
-  --bb-bg: #fcfbf7;
-  --bb-text: #262419;
+  --bb-bg: oklch(1 0 0);
+  --bb-text: oklch(0.145 0 0);
 }
 .dark {
   color-scheme: dark;
-  --bb-bg: #1b1a17;
-  --bb-text: #ece9df;
+  --bb-bg: oklch(0.145 0 0);
+  --bb-text: oklch(0.985 0 0);
 }
 html,
 body {

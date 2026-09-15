@@ -283,7 +283,6 @@ Deno.test("POST /__berrybench/config merges the delta and persists the config fi
         api: { enabled: true, enabledBy: "auto" },
         db: { enabled: false, enabledBy: "default" },
       },
-      theme: { accent: "#4f46e5" },
       extra: {},
     };
     await Deno.writeTextFile(
@@ -308,7 +307,6 @@ Deno.test("POST /__berrybench/config merges the delta and persists the config fi
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           workspaces: { db: { enabled: true } },
-          theme: { accent: "#c026d3" },
         }),
       });
       assert(res.status === 200, `expected 200, got ${res.status}`);
@@ -326,7 +324,6 @@ Deno.test("POST /__berrybench/config merges the delta and persists the config fi
         text.includes("source: { storyGlob: 'src/**/*.svelte' }"),
         `design source not preserved: ${text}`,
       );
-      assert(text.includes("accent: '#c026d3'"), `theme delta missing: ${text}`);
       assert(!text.includes("defaultTheme"), `defaultTheme must not be written: ${text}`);
     } finally {
       await server.close();

@@ -35,7 +35,6 @@ Deno.test("defaults: no file, no env -> design/api on default, db off default", 
   assertEquals(resolved.workspaces.design, { enabled: true, enabledBy: "default" });
   assertEquals(resolved.workspaces.api, { enabled: true, enabledBy: "default" });
   assertEquals(resolved.workspaces.db, { enabled: false, enabledBy: "default" });
-  assertEquals(resolved.theme, undefined);
 });
 
 Deno.test("detect veto: defaultEnabled true but detect false -> off via auto", async () => {
@@ -117,13 +116,6 @@ Deno.test("unknown workspace id in env -> ConfigError", async () => {
   );
 });
 
-Deno.test("file theme flows through to resolved config", async () => {
-  const resolved = await resolveConfig(ctx(), allPlugins(), {
-    theme: { accent: "violet" },
-  });
-  assertEquals(resolved.theme, { accent: "violet" });
-});
-
 Deno.test("unknown top-level keys survive resolve -> format -> re-read", async () => {
   const fileConfig = {
     mySetting: 123,
@@ -188,7 +180,6 @@ Deno.test("formatConfigFile: header, sorted keys, source block, notes", async ()
     workspaces: {
       db: { enabled: true, source: { connectionString: "postgres://localhost/x" } },
     },
-    theme: { accent: "violet" },
   });
   const out = formatConfigFile(resolved, { db: "DATABASE_URL present" });
   assertStringIncludes(
@@ -201,7 +192,6 @@ Deno.test("formatConfigFile: header, sorted keys, source block, notes", async ()
   assert(designIdx >= 0 && designIdx < apiIdx && apiIdx < dbIdx);
   assertStringIncludes(out, "source: { connectionString: 'postgres://localhost/x' }");
   assertStringIncludes(out, "// db: DATABASE_URL present");
-  assertStringIncludes(out, "theme: { accent: 'violet' }");
   const apiLine = out.split("\n").find((line) => line.includes("api: {"));
   assert(apiLine !== undefined && !apiLine.includes("source:"));
 });

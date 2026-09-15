@@ -14,7 +14,6 @@ export interface WorkspaceResolution {
 
 export interface ResolvedConfig {
   workspaces: Record<WorkspaceId, WorkspaceResolution>;
-  theme?: { accent?: string };
   /** Unknown top-level keys from the config file, preserved for round-trip fidelity. */
   extra: Record<string, unknown>;
 }
@@ -41,9 +40,6 @@ const WorkspaceConfigSchema = z.object({
 // rewrite, but the workspaces record rejects unknown workspace ids.
 const FileConfigSchema = z.object({
   workspaces: z.record(WorkspaceIdSchema, WorkspaceConfigSchema).optional(),
-  theme: z.object({
-    accent: z.string().optional(),
-  }).optional(),
 }).passthrough();
 
 /**
@@ -70,7 +66,6 @@ export async function resolveConfig(
     }
   }
 
-  let theme: ResolvedConfig["theme"];
   let extra: Record<string, unknown> = {};
   let file = fileConfig;
   if (file === undefined) {
@@ -86,7 +81,7 @@ export async function resolveConfig(
     // round-trips them instead of silently dropping user settings.
     extra = {};
     for (const [key, value] of Object.entries(parsed.data)) {
-      if (key === "workspaces" || key === "theme") continue;
+      if (key === "workspaces") continue;
       try {
         extra[key] = structuredClone(value);
       } catch {
@@ -109,7 +104,6 @@ export async function resolveConfig(
         ...(source !== undefined ? { source } : {}),
       });
     }
-    theme = parsed.data.theme;
   }
 
   const envValue = ctx.env["BERRYBENCH_WORKSPACES"];
@@ -132,7 +126,7 @@ export async function resolveConfig(
   if (!anyEnabled) {
     throw new ConfigError(ALL_DISABLED_MESSAGE);
   }
-  return { workspaces, ...(theme !== undefined ? { theme } : {}), extra };
+  return { workspaces, extra };
 }
 
 function assertKnownWorkspaceIds(file: unknown): void {
@@ -177,13 +171,6 @@ export function formatConfigFile(
     lines.push(`${entry} },`);
   }
   lines.push("  },");
-  if (resolved.theme !== undefined) {
-    const parts: string[] = [];
-    if (resolved.theme.accent !== undefined) {
-      parts.push(`accent: ${serializeValue(resolved.theme.accent)}`);
-    }
-    lines.push(`  theme: { ${parts.join(", ")} },`);
-  }
   // Unknown top-level keys from the file, re-emitted key-sorted so user
   // settings survive a write-back untouched.
   const extraKeys = Object.keys(resolved.extra ?? {}).sort((a, b) => a.localeCompare(b));

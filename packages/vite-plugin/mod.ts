@@ -47,7 +47,6 @@ function snapshotIdOf(id: string): string | undefined {
 /** Validated delta body for POST /__berrybench/config (absent keys are unchanged). */
 interface ConfigDelta {
   workspaces?: Record<string, { enabled: boolean }>;
-  theme?: { accent?: string };
 }
 
 /** Parse + validate the settings write-back body; throws Error with a user-facing message. */
@@ -87,17 +86,6 @@ function parseConfigDelta(raw: string): ConfigDelta {
     }
   }
 
-  if (delta.theme !== undefined) {
-    if (typeof delta.theme !== "object" || delta.theme === null || Array.isArray(delta.theme)) {
-      throw new Error("theme must be an object");
-    }
-    const theme = delta.theme as Record<string, unknown>;
-    parsed.theme = {};
-    if (theme.accent !== undefined) {
-      if (typeof theme.accent !== "string") throw new Error("theme.accent must be a string");
-      parsed.theme.accent = theme.accent;
-    }
-  }
   return parsed;
 }
 
@@ -130,11 +118,6 @@ function mergeConfigDelta(current: ResolvedConfig, delta: ConfigDelta): Resolved
       enabled: cfg.enabled,
       enabledBy: "ui",
     };
-  }
-  if (delta.theme !== undefined) {
-    const theme = { ...(merged.theme ?? {}) as NonNullable<ResolvedConfig["theme"]> };
-    if (delta.theme.accent !== undefined) theme.accent = delta.theme.accent;
-    merged.theme = theme;
   }
   return merged;
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { cn, type WithElementRef } from "$lib/utils";
 	import type { HTMLAttributes } from "svelte/elements";
+	import { cn, type WithElementRef } from "$lib/utils";
 
 	let {
 		ref = $bindable(null),
@@ -13,10 +13,7 @@
 <div
 	bind:this={ref}
 	data-slot="alert-title"
-	class={cn(
-		"font-medium group-has-[>svg]/alert:col-start-2 [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground",
-		className
-	)}
+	class={cn("col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight", className)}
 	{...restProps}
 >
 	{@render children?.()}

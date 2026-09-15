@@ -1,20 +1,13 @@
 // packages/shell/src/lib/theme.ts
 /// <reference lib="dom" />
-// Theme + accent application. Dark mode follows the OS via
-// prefers-color-scheme; the accent comes from the resolved config.
-// `applyTheme` toggles the .dark class and data-accent on <html> only — nothing
-// is persisted (theme is OS-managed, accent is config-managed).
+// Theme application. Dark mode follows the OS via prefers-color-scheme.
+// `applyTheme` toggles the .dark class on <html> only — nothing is persisted
+// (the OS owns the theme).
 export type ThemeName = "light" | "dark";
 
-export const ACCENTS = ["violet", "blue", "green", "rose"] as const;
-type Accent = (typeof ACCENTS)[number];
-
-export const DEFAULT_ACCENT = "violet";
-
-/** Apply theme/accent to <html>. No persistence: OS owns the theme, config owns the accent. */
-export function applyTheme(theme: ThemeName, accent: string): void {
+/** Apply theme to <html>. No persistence: the OS owns the theme. */
+export function applyTheme(theme: ThemeName): void {
   document.documentElement.classList.toggle("dark", theme === "dark");
-  document.documentElement.setAttribute("data-accent", accent);
 }
 
 /** Current theme from the OS preference. */
@@ -28,9 +21,4 @@ export function watchSystemTheme(onChange: (t: ThemeName) => void): () => void {
   const handler = (e: MediaQueryListEvent): void => onChange(e.matches ? "dark" : "light");
   mq.addEventListener("change", handler);
   return () => mq.removeEventListener("change", handler);
-}
-
-/** True when the accent is one of the token-defined values. */
-export function isKnownAccent(accent: string): accent is Accent {
-  return (ACCENTS as readonly string[]).includes(accent);
 }

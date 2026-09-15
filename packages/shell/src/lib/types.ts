@@ -16,13 +16,8 @@ interface WorkspaceResolution {
   source?: Record<string, unknown>;
 }
 
-export interface ThemeConfig {
-  accent?: string;
-}
-
 export interface ResolvedConfig {
   workspaces: Record<WorkspaceId, WorkspaceResolution>;
-  theme?: ThemeConfig;
 }
 
 // ---------- snapshot shapes (Contract verbatim) ----------
