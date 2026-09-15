@@ -5,7 +5,6 @@
   // read-only note explains the config is compiled in.
   import { config } from './lib/store.svelte.ts';
   import { WORKSPACE_IDS, type WorkspaceId } from './lib/types.ts';
-  import { ACCENTS, DEFAULT_ACCENT, isKnownAccent } from './lib/theme.ts';
 
   import PageHeader from './lib/components/PageHeader.svelte';
   import Section from './lib/components/Section.svelte';
@@ -13,9 +12,9 @@
   import { Badge } from '$lib/components/ui/badge';
   import { Switch } from '$lib/components/ui/switch';
   import { Label } from '$lib/components/ui/label';
-  import * as Select from '$lib/components/ui/select';
   import { Alert } from '$lib/components/ui/alert';
   import { Button } from '$lib/components/ui/button';
+  import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
 
   interface SaveResponse {
     ok: boolean;
@@ -28,7 +27,6 @@
     api: false,
     db: false,
   });
-  let accent = $state<string>(DEFAULT_ACCENT);
   let saving = $state(false);
   let status = $state<{ ok: boolean; message: string } | null>(null);
 
@@ -39,18 +37,14 @@
     for (const id of WORKSPACE_IDS) {
       draft[id] = config.workspaces[id]?.enabled ?? false;
     }
-    const cfgAccent = config.theme?.accent ?? DEFAULT_ACCENT;
-    accent = isKnownAccent(cfgAccent) ? cfgAccent : DEFAULT_ACCENT;
     status = null;
   });
 
   function buildDelta(): {
     workspaces?: Record<string, { enabled: boolean }>;
-    theme?: { accent?: string };
   } {
     const delta: {
       workspaces?: Record<string, { enabled: boolean }>;
-      theme?: { accent?: string };
     } = {};
     const workspaces: Record<string, { enabled: boolean }> = {};
     for (const id of WORKSPACE_IDS) {
@@ -58,9 +52,6 @@
       if (draft[id] !== orig) workspaces[id] = { enabled: draft[id] };
     }
     if (Object.keys(workspaces).length > 0) delta.workspaces = workspaces;
-    const theme: { accent?: string } = {};
-    if (accent !== (config.theme?.accent ?? DEFAULT_ACCENT)) theme.accent = accent;
-    if (Object.keys(theme).length > 0) delta.theme = theme;
     return delta;
   }
 
@@ -95,9 +86,7 @@
 
   {#if !dev}
     <Alert class="mb-4 flex items-start gap-2">
-      <svg class="size-4 flex-none" style="stroke-width: 1.2" aria-hidden="true">
-        <use href="#i-warn" />
-      </svg>
+      <TriangleAlert class="size-4 flex-none" aria-hidden="true" />
       <span class="text-xs leading-relaxed"
         >Settings are compiled into this build — edit
         <code class="font-mono">berrybench.config.ts</code> in the project root and restart the dev
@@ -111,7 +100,7 @@
       {#each WORKSPACE_IDS as id (id)}
         <div class="flex items-center gap-3 px-4 py-3">
           <div class="min-w-0 flex-1">
-            <code class="font-mono text-[12.5px] font-semibold text-foreground">{id}</code>
+            <code class="font-mono text-sm font-semibold text-foreground">{id}</code>
             <Badge variant="secondary" class="ml-2">{config.workspaces[id]?.enabledBy ?? 'default'}</Badge>
           </div>
           <div class="flex flex-none items-center gap-3">
@@ -133,25 +122,12 @@
     <Card>
       <div class="flex items-center justify-between gap-3 px-4 py-3">
         <div class="flex flex-col gap-1">
-          <Label class="text-secondary-foreground">Accent</Label>
-          <span class="text-[11px] text-muted-foreground"
-            >Applied as <code class="font-mono">data-accent</code> on the shell.</span
+          <Label class="text-secondary-foreground">Theme</Label>
+          <span class="text-xs text-muted-foreground"
+            >Follows the operating system's light/dark preference.</span
           >
         </div>
-        {#if dev}
-          <Select.Root type="single" bind:value={accent}>
-            <Select.Trigger class="w-36" aria-label="Accent"><Select.Value /></Select.Trigger>
-            <Select.Content>
-              <Select.Group>
-                {#each ACCENTS as a (a)}
-                  <Select.Item value={a}>{a}</Select.Item>
-                {/each}
-              </Select.Group>
-            </Select.Content>
-          </Select.Root>
-        {:else}
-          <Badge variant="default">{isKnownAccent(accent) ? accent : DEFAULT_ACCENT}</Badge>
-        {/if}
+        <Badge variant="secondary">System</Badge>
       </div>
     </Card>
   </Section>
@@ -160,7 +136,7 @@
     <div class="mt-6 flex items-center gap-3">
       <Button disabled={saving} onclick={save}>{saving ? 'Saving…' : 'Save'}</Button>
       {#if status}
-        <span class="text-xs {status.ok ? 'text-success' : 'text-destructive'}">{status.message}</span>
+        <span class="text-xs {status.ok ? 'text-muted-foreground' : 'text-destructive'}">{status.message}</span>
       {/if}
     </div>
   {/if}

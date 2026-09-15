@@ -8,21 +8,24 @@
   import { snapshots, env } from '../lib/store.svelte.ts';
   import { isDesignSnapshot, isSnapshotError, type PreviewMessage, type StoryMeta } from '../lib/types.ts';
   import { highlightJson, highlightCode } from '../lib/highlight.ts';
-  import { basename, errorPanel } from '../lib/markup.ts';
+  import { basename } from '../lib/markup.ts';
   import { hashFor, type Route } from '../lib/router.ts';
   import { readRailState, isCollapsed, setGroupCollapsed } from '../lib/railState.ts';
 
   import PageHeader from '../lib/components/PageHeader.svelte';
   import EmptyState from '../lib/components/EmptyState.svelte';
+  import ErrorPanel from '../lib/components/error-panel.svelte';
   import { Card } from '$lib/components/ui/card';
   import { Alert } from '$lib/components/ui/alert';
   import { Badge } from '$lib/components/ui/badge';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import * as Select from '$lib/components/ui/select';
-  import Rail from '../lib/components/rail/Rail.svelte';
-  import RailGroup from '../lib/components/rail/RailGroup.svelte';
-  import RailItem from '../lib/components/rail/RailItem.svelte';
+  import * as Sidebar from '$lib/components/ui/sidebar';
+  import * as Collapsible from '$lib/components/ui/collapsible';
+  import ChevronDown from '@lucide/svelte/icons/chevron-down';
+  import Copy from '@lucide/svelte/icons/copy';
+  import Check from '@lucide/svelte/icons/check';
   import * as Tabs from '$lib/components/ui/tabs';
   import * as Table from '$lib/components/ui/table';
 
@@ -215,66 +218,95 @@
 </script>
 
 <div class="view-body flex min-h-full">
-  <Rail title={packageName} sub={version ? `v${version}` : undefined}>
-    {#if snap}
-      {#each railSections as section (section.group ?? section.stories[0].file)}
-        {#if section.group === null}
-          {#each section.stories as story (story.file)}
-            <RailItem
-              active={story.file === activeFile}
-              mono
-              data-ws="design"
-              data-id={story.file}
-              onclick={() => navigate(hashFor({ kind: 'workspace', ws: 'design', key: 'comp', id: story.file }))}
-            >
-              {story.title ?? basename(story.file)}
-            </RailItem>
-          {/each}
-        {:else}
-          <RailGroup
-            ws="design"
-            group={section.group}
-            count={section.stories.length}
-            collapsed={isCollapsed(railState, 'design', section.group)}
-            onToggle={() =>
-              (railState = setGroupCollapsed(
-                railState,
-                'design',
-                section.group,
-                !isCollapsed(railState, 'design', section.group),
-              ))}
-          >
-            {#each section.stories as story (story.file)}
-              <RailItem
-                active={story.file === activeFile}
-                mono
-                data-ws="design"
-                data-id={story.file}
-                onclick={() => navigate(hashFor({ kind: 'workspace', ws: 'design', key: 'comp', id: story.file }))}
+  <Sidebar.Provider class="min-h-full">
+    <Sidebar.Root collapsible="none">
+      <Sidebar.Header>
+        <div class="flex flex-col gap-0.5 px-2">
+          <span class="truncate text-sm font-semibold text-sidebar-foreground">{packageName}</span>
+          {#if version}
+            <span class="truncate font-mono text-xs text-muted-foreground">v{version}</span>
+          {/if}
+        </div>
+      </Sidebar.Header>
+      <Sidebar.Content>
+        {#if snap}
+          {#each railSections as section (section.group ?? section.stories[0].file)}
+            {#if section.group === null}
+              <Sidebar.Group data-ws="design">
+                <Sidebar.GroupContent>
+                  <Sidebar.Menu>
+                    {#each section.stories as story (story.file)}
+                      <Sidebar.MenuItem>
+                        <Sidebar.MenuButton
+                          isActive={story.file === activeFile}
+                          data-id={story.file}
+                          onclick={() => navigate(hashFor({ kind: 'workspace', ws: 'design', key: 'comp', id: story.file }))}
+                        >
+                          <span class="font-mono">{story.title ?? basename(story.file)}</span>
+                        </Sidebar.MenuButton>
+                      </Sidebar.MenuItem>
+                    {/each}
+                  </Sidebar.Menu>
+                </Sidebar.GroupContent>
+              </Sidebar.Group>
+            {:else}
+              <Collapsible.Root
+                class="group/collapsible"
+                open={!isCollapsed(railState, 'design', section.group)}
+                onOpenChange={(o) => {
+                  railState = setGroupCollapsed(railState, 'design', section.group, !o);
+                }}
               >
-                {story.title ?? basename(story.file)}
-              </RailItem>
-            {/each}
-          </RailGroup>
+                <Sidebar.Group data-ws="design">
+                  <Sidebar.GroupLabel>
+                    {#snippet child({ props })}
+                      <Collapsible.Trigger {...props}>
+                        <span class="min-w-0 flex-1 truncate">{section.group}</span>
+                        <span class="flex-none tabular-nums">{section.stories.length}</span>
+                        <ChevronDown class="transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      </Collapsible.Trigger>
+                    {/snippet}
+                  </Sidebar.GroupLabel>
+                  <Collapsible.Content>
+                    <Sidebar.GroupContent>
+                      <Sidebar.Menu>
+                        {#each section.stories as story (story.file)}
+                          <Sidebar.MenuItem>
+                            <Sidebar.MenuButton
+                              isActive={story.file === activeFile}
+                              data-id={story.file}
+                              onclick={() => navigate(hashFor({ kind: 'workspace', ws: 'design', key: 'comp', id: story.file }))}
+                            >
+                              <span class="font-mono">{story.title ?? basename(story.file)}</span>
+                            </Sidebar.MenuButton>
+                          </Sidebar.MenuItem>
+                        {/each}
+                      </Sidebar.Menu>
+                    </Sidebar.GroupContent>
+                  </Collapsible.Content>
+                </Sidebar.Group>
+              </Collapsible.Root>
+            {/if}
+          {/each}
         {/if}
-      {/each}
-    {/if}
-  </Rail>
+      </Sidebar.Content>
+    </Sidebar.Root>
 
-  <div class="min-w-0 flex-1">
+    <div class="min-w-0 flex-1">
+
     <div class="mx-auto w-full max-w-[1200px] px-8 pb-16 pt-6">
       <PageHeader
         title="Design System"
         meta={[packageName, version ? `v${version}` : undefined, `${snap?.stories.length ?? 0} stories`]}
       />
       {#if error}
-        {@html errorPanel(error)}
+        <ErrorPanel message={error} />
       {:else if snap && activeStory}
         <div data-ws="design" data-id={activeStory.file}>
-          <h2 class="text-[16px] font-semibold tracking-[-0.015em] text-foreground">
+          <h2 class="text-base font-semibold tracking-[-0.015em] text-foreground">
             {activeStory.title ?? basename(activeStory.file)}
           </h2>
-          <p class="mt-0.5 font-mono text-[12.5px] text-muted-foreground">{activeStory.file}</p>
+          <p class="mt-0.5 font-mono text-sm text-muted-foreground">{activeStory.file}</p>
 
           <Tabs.Root value={tab} onValueChange={(v) => (tab = v as TabId)} class="mt-4">
             <Tabs.List>
@@ -284,34 +316,34 @@
             </Tabs.List>
             <Tabs.Content value="preview" class="mt-4">
               <div class="flex items-start gap-4">
-                <Card class="min-w-0 flex-1 p-0 overflow-hidden">
+                <Card class="min-w-[320px] flex-1 p-0 overflow-hidden">
                   {#if frameSrc}
                     <iframe
                       bind:this={frame}
-                      class="block h-[clamp(380px,60vh,720px)] w-full border-0 bg-canvas"
+                      class="block h-[clamp(380px,60vh,720px)] w-full border-0 bg-card"
                       sandbox="allow-scripts"
                       title={activeStory.title ? `${activeStory.title} preview` : 'Story preview'}
                       src={frameSrc}
                     ></iframe>
                     {#if previewStatus === 'loading'}
-                      <p class="px-4 py-2 text-[11px] text-muted-foreground">Loading preview…</p>
+                      <p class="px-4 py-2 text-xs text-muted-foreground">Loading preview…</p>
                     {:else if previewStatus === 'error'}
                       <Alert variant="destructive" class="m-4 flex items-start gap-2">
                         <Badge variant="destructive">Preview error</Badge>
-                        <p class="text-[11px] leading-snug">{previewMessage}</p>
+                        <p class="text-xs leading-snug">{previewMessage}</p>
                       </Alert>
                     {/if}
                   {/if}
                 </Card>
-                <div class="w-[240px] flex-none">
+                <div class="w-60 flex-none">
                   <div class="flex flex-col gap-3 rounded-lg border border-border bg-card p-3.5 shadow-sm">
-                    <div class="text-[10.5px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">
+                    <div class="text-xs font-semibold uppercase tracking-[0.07em] text-muted-foreground">
                       Props
                     </div>
                     {#if controls.length > 0}
                       {#each controls as c (c.key)}
                         <label class="flex flex-col gap-1.5">
-                          <span class="text-[11.5px] font-medium text-secondary-foreground">{c.key}</span>
+                          <span class="text-xs font-medium text-secondary-foreground">{c.key}</span>
                           {#if c.type === 'enum'}
                             <Select.Root
                               type="single"
@@ -352,7 +384,7 @@
                         </label>
                       {/each}
                     {:else}
-                      <p class="text-[11px] text-muted-foreground">No props schema for this story.</p>
+                      <p class="text-xs text-muted-foreground">No props schema for this story.</p>
                     {/if}
                   </div>
                 </div>
@@ -360,7 +392,7 @@
             </Tabs.Content>
             <Tabs.Content value="docs" class="mt-4">
               <div class="flex max-w-[720px] flex-col gap-3.5">
-                <p class="text-[12.5px] leading-snug text-muted-foreground">
+                <p class="text-sm leading-snug text-muted-foreground">
                   {activeStory.description ?? 'No description.'}
                 </p>
                 {#if activeStory.schema !== undefined}
@@ -376,15 +408,15 @@
                       <Table.Body>
                         {#each Object.entries(activeStory.schema) as [key, spec] (key)}
                           <Table.Row>
-                            <Table.Cell class="font-mono text-[11px]">{key}</Table.Cell>
+                            <Table.Cell class="font-mono text-xs">{key}</Table.Cell>
                             <Table.Cell>
-                              <code class="rounded bg-muted/60 px-1.5 py-0.5 font-mono text-[10.5px] text-secondary-foreground">
+                              <code class="rounded bg-muted/60 px-1.5 py-0.5 font-mono text-xs text-secondary-foreground">
                                 {typeof spec === 'object' && spec !== null && 'type' in spec
                                   ? String((spec as { type: unknown }).type)
                                   : 'any'}
                               </code>
                             </Table.Cell>
-                            <Table.Cell class="font-mono text-[11px] text-muted-foreground">
+                            <Table.Cell class="font-mono text-xs text-muted-foreground">
                               {activeStory.props?.[key] !== undefined ? String(activeStory.props[key]) : '—'}
                             </Table.Cell>
                           </Table.Row>
@@ -397,13 +429,13 @@
                   <div class="flex flex-col gap-3">
                     {#if activeStory.props !== undefined}
                       <div>
-                        <div class="mb-1 text-[10.5px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">props</div>
+                        <div class="mb-1 text-xs font-semibold uppercase tracking-[0.07em] text-muted-foreground">props</div>
                         <pre class="codeblock">{@html highlightJson(activeStory.props)}</pre>
                       </div>
                     {/if}
                     {#if activeStory.schema !== undefined}
                       <div>
-                        <div class="mb-1 text-[10.5px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">schema</div>
+                        <div class="mb-1 text-xs font-semibold uppercase tracking-[0.07em] text-muted-foreground">schema</div>
                         <pre class="codeblock">{@html highlightJson(activeStory.schema)}</pre>
                       </div>
                     {/if}
@@ -414,20 +446,22 @@
             <Tabs.Content value="code" class="mt-4">
               <div class="flex flex-col gap-2">
                 <div class="flex items-center justify-between gap-2.5">
-                  <span class="text-[10.5px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">code</span>
+                  <span class="text-xs font-semibold uppercase tracking-[0.07em] text-muted-foreground">code</span>
                   <Button
                     variant="ghost"
-                    size="sm"
+                    class="size-6 p-0"
                     data-copy
                     data-copy-text={activeStory.code ?? ''}
+                    aria-label="Copy"
                     disabled={!activeStory.code}
                   >
-                    Copy
+                    <Copy data-copy-btn-icon class="size-3.5" />
+                    <Check data-copy-btn-check class="hidden size-3.5" />
                   </Button>
                 </div>
                 <pre class="codeblock">{@html highlightCode(activeStory.code ?? '')}</pre>
                 {#if !activeStory.code}
-                  <p class="text-[11px] text-muted-foreground">No code sample for this story.</p>
+                  <p class="text-xs text-muted-foreground">No code sample for this story.</p>
                 {/if}
               </div>
             </Tabs.Content>
@@ -438,4 +472,5 @@
       {/if}
     </div>
   </div>
+  </Sidebar.Provider>
 </div>

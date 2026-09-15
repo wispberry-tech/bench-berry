@@ -3,7 +3,6 @@
 // clipboard with a transient 'copied' state. The palette's arrow/enter/esc
 // behaviour is owned by bits-ui Command/Dialog (src/Palette.svelte), so the
 // only palette keys handled here are the open triggers.
-import { CHECK_ICON } from "./markup.ts";
 
 export interface PaletteController {
   open(): void;
@@ -30,14 +29,14 @@ export function handleGlobalKeydown(e: KeyboardEvent, palette: PaletteController
     }
   }
 }
-
-/** ArrowUp/Down/Home/End focus movement over the active view's rail items. */
+/** ArrowUp/Down/Home/End focus movement over the active view's sidebar menu buttons. */
 export function handleRailNavKeydown(e: KeyboardEvent): void {
   if (e.key !== "ArrowDown" && e.key !== "ArrowUp" && e.key !== "Home" && e.key !== "End") return;
   const tag = (e.target as Element | null)?.tagName ?? "";
   if (FORM_TAG[tag] || e.metaKey || e.ctrlKey || e.altKey) return;
-
-  const items = Array.from(document.querySelectorAll<HTMLElement>(".view-body .rail .rail-item"));
+  const items = Array.from(
+    document.querySelectorAll<HTMLElement>('.view-body [data-sidebar="menu-button"]'),
+  );
   if (items.length === 0) return;
 
   const idx = items.indexOf(document.activeElement as HTMLElement);
@@ -80,7 +79,8 @@ function copyText(text: string): Promise<void> {
 /**
  * Click handler for [data-copy] buttons. Copy text comes from `data-copy-text`
  * when present, else from the element referenced by `data-copy` (or the button
- * itself); the button shows a check icon for COPIED_MS.
+ * itself); the button's two icons toggle for COPIED_MS: [data-copy-btn-icon]
+ * hides and [data-copy-btn-check] shows, then reverts.
  */
 export function handleCopyClick(e: MouseEvent): void {
   const target = e.target as Element | null;
@@ -94,12 +94,15 @@ export function handleCopyClick(e: MouseEvent): void {
     src = sel && sel !== "self" ? document.querySelector<HTMLElement>(sel) : btn;
   }
   const text = explicit ?? src?.getAttribute("data-copy-text") ?? src?.textContent?.trim() ?? "";
-
-  const original = btn.innerHTML;
+  const icon = btn.querySelector<HTMLElement>("[data-copy-btn-icon]");
+  const check = btn.querySelector<HTMLElement>("[data-copy-btn-check]");
   const flash = (): void => {
-    btn.innerHTML = CHECK_ICON;
+    if (!icon || !check) return;
+    icon.classList.add("hidden");
+    check.classList.remove("hidden");
     setTimeout(() => {
-      btn.innerHTML = original;
+      icon.classList.remove("hidden");
+      check.classList.add("hidden");
     }, COPIED_MS);
   };
   copyText(text).then(flash, flash);

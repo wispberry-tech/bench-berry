@@ -8,6 +8,10 @@
   import * as Command from '$lib/components/ui/command';
   import * as Dialog from '$lib/components/ui/dialog';
   import { Separator } from '$lib/components/ui/separator';
+  import type { Component } from 'svelte';
+  import Box from '@lucide/svelte/icons/box';
+  import Plug from '@lucide/svelte/icons/plug';
+  import Database from '@lucide/svelte/icons/database';
   import { config } from './lib/store.svelte.ts';
   import { paletteItems, type PaletteItem } from './lib/palette.ts';
 
@@ -17,6 +21,13 @@
     onclose: () => void;
     navigate: (hash: string) => void;
   }>();
+
+  // Sprite ids from lib/palette.ts mapped to lucide components.
+  const ITEM_ICONS: Record<string, Component> = {
+    'i-cube': Box,
+    'i-plug': Plug,
+    'i-db': Database,
+  };
 
   // Reset the search box each time the palette re-opens.
   let query = $state('');
@@ -60,27 +71,30 @@
           <Command.Group
             value={group.group}
             heading={group.group}
-            class="mb-1 **:[[cmdk-group-heading]]:px-2.5 **:[[cmdk-group-heading]]:pb-1 **:[[cmdk-group-heading]]:pt-2 **:[[cmdk-group-heading]]:text-[10.5px] **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:tracking-[0.08em] **:[[cmdk-group-heading]]:text-muted-foreground/70"
+            class="mb-1 **:[[cmdk-group-heading]]:px-2.5 **:[[cmdk-group-heading]]:pb-1 **:[[cmdk-group-heading]]:pt-2 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:tracking-[0.08em] **:[[cmdk-group-heading]]:text-muted-foreground/70"
           >
             {#each group.items as item (item.label)}
               <Command.Item
                 value={item.label}
                 onSelect={() => run(item)}
-                class="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] text-muted-foreground outline-none hover:bg-accent hover:text-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground"
+                class="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground outline-none hover:bg-accent hover:text-foreground data-[selected=true]:bg-accent data-[selected=true]:text-foreground"
               >
-                <svg class="size-3.5 flex-none text-muted-foreground" aria-hidden="true"><use href={'#' + item.icon} /></svg>
+                {#if ITEM_ICONS[item.icon]}
+                  {@const Icon = ITEM_ICONS[item.icon]}
+                  <Icon class="size-3.5 flex-none text-muted-foreground" aria-hidden="true" />
+                {/if}
                 <span class="min-w-0 flex-1 truncate">{item.label}</span>
               </Command.Item>
             {/each}
           </Command.Group>
         {/each}
-        <Command.Empty class="px-7 py-7 text-center text-[12.5px] text-muted-foreground">
+        <Command.Empty class="px-7 py-7 text-center text-sm text-muted-foreground">
           No results for “{query}”
         </Command.Empty>
       </Command.List>
     </Command.Root>
     <Separator />
-    <div class="flex items-center gap-3.5 px-4 py-2 text-[11px] text-muted-foreground">
+    <div class="flex items-center gap-3.5 px-4 py-2 text-xs text-muted-foreground">
       <span><span class="kbd">↑↓</span> navigate</span>
       <span><span class="kbd">↵</span> open</span>
       <span><span class="kbd">esc</span> close</span>

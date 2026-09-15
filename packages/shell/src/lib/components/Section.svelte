@@ -21,7 +21,7 @@
 
 <section class={["flex flex-col gap-2.5", className].filter(Boolean).join(" ")}>
 	<div class="flex items-center justify-between gap-2">
-		<h2 class="text-[10.5px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">
+		<h2 class="text-xs font-semibold uppercase tracking-[0.07em] text-muted-foreground">
 			{title}
 		</h2>
 		{#if actions}

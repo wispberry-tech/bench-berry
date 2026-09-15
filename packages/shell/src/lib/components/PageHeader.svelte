@@ -25,7 +25,7 @@
 	<div class="min-w-0">
 		<h1 class="text-xl font-semibold tracking-tight text-foreground">{title}</h1>
 		{#if meta.length > 0 || sub}
-			<p class="mt-1 max-w-[640px] text-[12.5px] leading-snug text-muted-foreground">
+			<p class="mt-1 max-w-[640px] text-sm leading-snug text-muted-foreground">
 				{joinMeta(meta)}{sub ? sub : ""}
 			</p>
 		{/if}
