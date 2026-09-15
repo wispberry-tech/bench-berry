@@ -10,6 +10,18 @@
   <head>
     <meta charset="utf-8" />
     <title>BerryBench Preview</title>
+    <script>
+      // Apply the embedding theme before first paint. The boot theme currently
+      // rides in main.ts (a deferred module, loaded asynchronously in dev), so
+      // a dark-mode embed would otherwise paint the light :root canvas white
+      // until the module graph arrives. This classic script runs during parse,
+      // ahead of any paint; main.ts re-applies it later (idempotent).
+      // Deno check keeps out of this HTML, but keep the guard anyway.
+      try {
+        var t = new URLSearchParams(location.search).get("theme");
+        if (t === "dark") document.documentElement.classList.add("dark");
+      } catch (err) {}
+    </script>
     <link rel="stylesheet" href="./src/theme.css" />
   </head>
   <body>

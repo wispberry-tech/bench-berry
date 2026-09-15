@@ -6,11 +6,13 @@
   color-scheme: light;
   --bb-bg: oklch(1 0 0);
   --bb-text: oklch(0.145 0 0);
+  --bb-dot: oklch(0.145 0 0 / 0.07);
 }
 .dark {
   color-scheme: dark;
   --bb-bg: oklch(0.145 0 0);
   --bb-text: oklch(0.985 0 0);
+  --bb-dot: oklch(0.985 0 0 / 0.09);
 }
 html,
 body {
@@ -27,11 +29,16 @@ body {
   color: var(--bb-text);
 }
 /* Canvas layout: the story renders centered like Storybook; the info bar
-   overlays top-left. --bb-* values above stay the source of truth. */
+   overlays top-left. --bb-* values above stay the source of truth. The dot
+   grid (Storybook-style) textures the container so the mounted component —
+   which usually carries its own background — reads as a distinct surface. */
 #preview-root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-color: var(--bb-bg);
+  background-image: radial-gradient(circle, var(--bb-dot) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 #preview-mount {
   flex: 1;
